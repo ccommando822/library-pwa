@@ -8,19 +8,19 @@
   <style>
     body { margin: 0; font-family: sans-serif; background: #f4f6f8; color: #333; }
     header { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 100; }
-    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 52px; z-index: 99; }
+    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 50px; z-index: 99; }
     nav button { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-size: 13px; }
     nav button.active { border-bottom: 3px solid #1976d2; color: #1976d2; font-weight: bold; }
     section { padding: 15px; display: none; }
     section.active { display: block; }
     .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .hidden { display: none; }
-    button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 4px; margin-top: 10px; font-weight: bold; }
-    button.danger { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; margin-top: 10px; }
+    .hidden { display: none !important; }
+    button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 4px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+    button.danger { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
     input, select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
     label { font-size: 12px; color: #666; font-weight: bold; display: block; margin-top: 10px; }
     .center { text-align: center; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 5px; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 5px; border: 1px solid transparent; }
   </style>
 </head>
 <body>
@@ -54,52 +54,44 @@
   <div id="publicView" class="card center">
     <h3>Sign In</h3>
     <p>Please log in with Google to continue.</p>
-    <button class="primary" onclick="login()" style="background: #4285F4;">Sign in with Google</button>
+    <button class="primary" onclick="window.login()" style="background: #4285F4;">Sign in with Google</button>
   </div>
 
   <div id="userView" class="hidden">
     <div class="card center">
       <img id="userImg" src="" style="width: 70px; border-radius: 50%;">
-      <div id="displayUserStatus" class="status-badge" style="background: #e3f2fd; color: #1976d2;">Visitor</div>
+      <div id="displayUserStatus" class="status-badge">Visitor</div>
       <p id="userEmailLabel" style="font-size: 12px; color: #666;"></p>
     </div>
 
     <div class="card">
       <h3>Your Details</h3>
-      <label>Full Name</label>
-      <input type="text" id="profName" placeholder="Enter your full name">
-      <label>Father's Name</label>
-      <input type="text" id="profFather" placeholder="Enter father's name">
-      <label>Mobile Number (Mandatory)</label>
-      <input type="tel" id="profPhone" placeholder="Enter 10-digit mobile">
-      <label>Full Address</label>
-      <input type="text" id="profAddr" placeholder="Street, City, Pincode">
-      <button class="primary" style="background: #4caf50;" onclick="saveProfile()">Save Profile Details</button>
+      <label>Full Name</label><input type="text" id="profName">
+      <label>Father's Name</label><input type="text" id="profFather">
+      <label>Mobile Number (Mandatory)</label><input type="tel" id="profPhone">
+      <label>Full Address</label><input type="text" id="profAddr">
+      <button class="primary" style="background: #4caf50;" onclick="window.saveProfile()">Save Profile</button>
     </div>
 
     <div id="joinSection" class="card">
       <h3>Library Membership</h3>
-      <label>Select Shift Plan</label>
-      <select id="shift" onchange="calculate()">
+      <label>Select Shift</label>
+      <select id="shift" onchange="window.calculate()">
         <option value="500">Day (₹500 / 28 days)</option>
         <option value="400">Night (₹400 / 28 days)</option>
         <option value="700">Both (₹700 / 28 days)</option>
       </select>
-      <label>Number of Days</label>
-      <input type="number" id="days" value="28" oninput="calculate()">
+      <label>Number of Days</label><input type="number" id="days" value="28" oninput="window.calculate()">
       <p><b>Total Amount: ₹<span id="total">500</span></b></p>
-      <button class="primary" onclick="payAndRequest()">Pay with UPI & Join</button>
+      <button class="primary" onclick="window.payAndRequest()">Pay with UPI & Join</button>
     </div>
 
-    <div id="memberSection" class="hidden">
-       <div class="card" style="border-top: 4px solid #4caf50;">
-         <h3 style="color: #2e7d32;">Active Membership ✅</h3>
-         <p>You have an active slot. You can renew early or request to leave.</p>
-         <button class="danger" onclick="requestLeave()">Request to Leave Library</button>
-       </div>
+    <div id="memberSection" class="hidden card" style="border-top: 4px solid #4caf50;">
+       <h3 style="color: #2e7d32;">Active Membership ✅</h3>
+       <button class="danger" onclick="window.requestLeave()">Request to Leave Library</button>
     </div>
 
-    <button onclick="logout()" style="margin-top: 15px; color: gray; background: none; border: none; width: 100%;">Logout</button>
+    <button onclick="window.logout()" style="margin-top: 15px; color: gray; background: none; border: none; width: 100%;">Logout</button>
   </div>
 </section>
 
@@ -113,7 +105,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
@@ -131,9 +123,24 @@
 
   let currentUser = null;
 
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = () => signOut(auth).then(() => location.reload());
+  // GLOBAL FUNCTIONS
+  window.login = () => signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
+  window.logout = () => signOut(auth);
+  
+  window.openTab = (t) => {
+    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.getElementById(t).classList.add("active");
+    document.getElementById("tab-" + t).classList.add("active");
+  };
 
+  window.calculate = () => {
+    const rate = document.getElementById("shift").value;
+    const days = document.getElementById("days").value || 0;
+    document.getElementById("total").innerText = Math.round((rate/28) * days);
+  };
+
+  // AUTH STATE
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
@@ -144,15 +151,111 @@
 
       if (user.email === 'c.commando822@gmail.com') {
         document.getElementById("displayUserStatus").innerText = "OWNER 👑";
-        document.getElementById("displayUserStatus").style.color = "#d32f2f";
+        document.getElementById("displayUserStatus").style.borderColor = "red";
         document.getElementById("tab-admin").classList.remove("hidden");
         listenToRequests();
       }
       
       loadProfile(user.uid);
       listenToUserStatus(user.uid);
+    } else {
+      document.getElementById("publicView").classList.remove("hidden");
+      document.getElementById("userView").classList.add("hidden");
+      document.getElementById("tab-admin").classList.add("hidden");
     }
   });
 
-  // PROFILE MANAGEMENT
-  window.
+  // PROFILE
+  window.saveProfile = async () => {
+    const data = {
+      name: document.getElementById("profName").value,
+      father: document.getElementById("profFather").value,
+      phone: document.getElementById("profPhone").value,
+      address: document.getElementById("profAddr").value
+    };
+    if(!data.name || !data.phone) return alert("Name and Phone are mandatory!");
+    await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
+    alert("Profile Updated!");
+  };
+
+  async function loadProfile(uid) {
+    const d = await getDoc(doc(db, "users", uid));
+    if(d.exists()) {
+      const data = d.data();
+      document.getElementById("profName").value = data.name || "";
+      document.getElementById("profFather").value = data.father || "";
+      document.getElementById("profPhone").value = data.phone || "";
+      document.getElementById("profAddr").value = data.address || "";
+    }
+  }
+
+  // SIGNALS & PAYMENTS
+  window.payAndRequest = () => {
+    const amount = document.getElementById("total").innerText;
+    const upiUrl = `upi://pay?pa=7500159996@ybl&pn=Rakshapal%20Singh&am=${amount}&cu=INR`;
+    window.location.href = upiUrl;
+    setTimeout(() => {
+      const txn = prompt("Enter UPI Transaction ID (UTR):");
+      if(txn) sendSignal("JOIN", amount, txn);
+    }, 2000);
+  };
+
+  window.requestLeave = () => {
+    if(confirm("Send leave signal to owner?")) sendSignal("LEAVE", 0, "N/A");
+  };
+
+  async function sendSignal(type, amount, txn) {
+    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    const userData = userDoc.data() || {};
+    await addDoc(collection(db, "requests"), {
+      userId: currentUser.uid,
+      userName: userData.name || currentUser.displayName,
+      userPhone: userData.phone || "Not Set",
+      type, amount, txnId: txn,
+      status: "PENDING",
+      time: Date.now()
+    });
+    alert("Signal Sent to Owner!");
+  }
+
+  // ADMIN LOGIC
+  function listenToRequests() {
+    onSnapshot(query(collection(db, "requests"), where("status", "==", "PENDING")), (snap) => {
+      let html = "";
+      snap.forEach(d => {
+        const r = d.data();
+        html += `<div class="card" style="border-left: 5px solid gold;">
+          <p><b>${r.userName}</b> (${r.userPhone})</p>
+          <p><b>${r.type}</b> | ₹${r.amount} | ID: ${r.txnId}</p>
+          <button class="primary" onclick="window.approve('${d.id}', '${r.userId}', '${r.type}')">Approve</button>
+        </div>`;
+      });
+      document.getElementById("requestList").innerHTML = html || "No pending signals.";
+    });
+  }
+
+  window.approve = async (rid, uid, type) => {
+    await updateDoc(doc(db, "requests", rid), { status: "APPROVED" });
+    await setDoc(doc(db, "users", uid), { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') }, { merge: true });
+    alert("Approved!");
+  };
+
+  function listenToUserStatus(uid) {
+    onSnapshot(doc(db, "users", uid), (d) => {
+      const status = d.exists() ? d.data().status : "VISITOR";
+      if(currentUser.email !== 'c.commando822@gmail.com') {
+        document.getElementById("displayUserStatus").innerText = status;
+        document.getElementById("displayUserStatus").style.color = status === 'MEMBER' ? 'green' : '#1976d2';
+      }
+      if(status === "MEMBER") {
+        document.getElementById("joinSection").classList.add("hidden");
+        document.getElementById("memberSection").classList.remove("hidden");
+      } else {
+        document.getElementById("joinSection").classList.remove("hidden");
+        document.getElementById("memberSection").classList.add("hidden");
+      }
+    });
+  }
+</script>
+</body>
+</html>
