@@ -20,7 +20,6 @@
     input, select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
     label { font-size: 11px; color: #1976d2; font-weight: bold; display: block; margin-top: 10px; text-transform: uppercase; }
     .otp-box { background: #fffde7; padding: 10px; border: 1px dashed #fbc02d; text-align: center; margin-top: 10px; }
-    .history-item { font-size: 12px; padding: 8px; border-bottom: 1px solid #eee; }
     .admin-subnav { display: flex; gap: 10px; margin-bottom: 15px; }
     .admin-subnav button { flex: 1; padding: 8px; font-size: 12px; background: #eee; border: 1px solid #ddd; border-radius: 4px; }
     .admin-subnav button.active { background: #1976d2; color: white; }
@@ -38,59 +37,64 @@
 </nav>
 
 <section id="home" class="active">
-  <div class="card"><h3>Digital Library System</h3><p>Secure OTP-based entry and automated history tracking.</p></div>
+  <div class="card"><h3>Welcome</h3><p>Sign in to manage your library membership and view your history.</p></div>
 </section>
 
 <section id="owner">
-  <div class="card"><h3>Contact Rakshapal Singh</h3><a href="tel:7500159996" style="color: #1976d2; text-decoration: none; font-weight: bold;">📞 7500159996</a></div>
+  <div class="card"><h3>Owner</h3><a href="tel:7500159996" style="color: #1976d2; text-decoration: none; font-weight: bold;">📞 7500159996</a></div>
 </section>
 
 <section id="account">
-  <div id="publicView" class="card" style="text-align:center">
-    <button class="primary" onclick="window.login()">Sign in with Google</button>
+  <div id="publicView" class="card center">
+    <button class="primary" onclick="window.login()" style="background: #4285F4;">Sign in with Google</button>
   </div>
 
   <div id="userView" class="hidden">
     <div class="card center">
       <img id="userImg" src="" style="width: 60px; border-radius: 50%;">
       <p id="displayUserStatus" style="font-weight:bold; color:#1976d2"></p>
+      <p id="joinDateDisplay" style="font-size: 12px; color: gray;"></p>
     </div>
 
     <div class="card">
+      <h3>Student Profile</h3>
       <label>Full Name</label><input type="text" id="profName">
       <label>Father's Name</label><input type="text" id="profFather">
       <label>Mobile Number</label><input type="tel" id="profPhone">
+      <label>Date of Birth</label><input type="date" id="profDob">
       <button class="primary" style="background: #4caf50;" onclick="window.saveProfile()">Update Details</button>
     </div>
 
-    <div id="historyCard" class="card hidden">
-      <h3>Your Payment History</h3>
-      <div id="userHistoryList"></div>
-    </div>
-
     <div id="joinSection" class="card">
-      <h3>Request Membership</h3>
-      <select id="shift" onchange="window.calculate()"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
-      <input type="number" id="days" value="28" oninput="window.calculate()">
-      <p><b>Total: ₹<span id="total">500</span></b></p>
-      <button class="primary" onclick="window.payAndRequest()">Pay & Get Code</button>
-      
+      <h3>Join the Library</h3>
+      <p>Click below to request membership. You will need to call the owner for an OTP.</p>
+      <button class="primary" onclick="window.initiateJoin()">Request to Join</button>
       <div id="joinOtpArea" class="hidden otp-box">
-        <p>Call Owner for OTP</p>
+        <p>Call Owner for Join OTP</p>
         <input type="number" id="joinOtpInput" placeholder="6-digit Code">
-        <button class="primary" onclick="window.verifyOtp('JOIN')">Verify & Join</button>
+        <button class="primary" onclick="window.verifyOtp('JOIN')">Verify & Enter Library</button>
       </div>
     </div>
 
-    <div id="memberSection" class="hidden">
-       <div class="card" style="border-top: 5px solid #4caf50;">
-         <h3 style="color: green;">Member Panel</h3>
-         <button class="danger" onclick="window.initiateLeave()">Request to Leave</button>
-         <div id="leaveOtpArea" class="hidden otp-box">
-           <input type="number" id="leaveOtpInput" placeholder="Enter Exit Code">
-           <button class="primary" onclick="window.verifyOtp('LEAVE')">Confirm Exit</button>
-         </div>
-       </div>
+    <div id="paymentPanel" class="hidden card">
+      <h3>Monthly Fee / Renewal</h3>
+      <select id="shift" onchange="window.calculate()"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
+      <input type="number" id="days" value="28" oninput="window.calculate()">
+      <p><b>Total: ₹<span id="total">500</span></b></p>
+      <button class="primary" onclick="window.payRenewal()">Pay Fee via UPI</button>
+      
+      <hr style="margin:20px 0; border:0; border-top:1px solid #eee">
+      <button class="danger" onclick="window.initiateLeave()">Request to Leave Library</button>
+      <div id="leaveOtpArea" class="hidden otp-box">
+        <p>Call Owner for Exit OTP</p>
+        <input type="number" id="leaveOtpInput" placeholder="6-digit Code">
+        <button class="primary" onclick="window.verifyOtp('LEAVE')">Confirm Exit</button>
+      </div>
+    </div>
+
+    <div id="historyCard" class="card hidden">
+      <h3>Payment History</h3>
+      <div id="userHistoryList"></div>
     </div>
 
     <button onclick="window.logout()" style="width:100%; border:none; background:none; color:gray; margin-top:20px;">Logout</button>
@@ -102,25 +106,14 @@
     <button id="sub-otp" class="active" onclick="window.switchAdminTab('otp')">Live OTP</button>
     <button id="sub-users" onclick="window.switchAdminTab('users')">User Folders</button>
   </div>
-
-  <div id="admin-otp-view">
-    <div class="card"><h3>Active OTP Signals</h3><div id="requestList">No signals.</div></div>
-  </div>
-
-  <div id="admin-users-view" class="hidden">
-    <div class="card"><h3>Registered Users</h3><div id="userFolderList">Loading...</div></div>
-    <div id="folderDetail" class="card hidden">
-       <button onclick="document.getElementById('folderDetail').classList.add('hidden')" style="float:right">Close</button>
-       <h3 id="detailName">User Folder</h3>
-       <div id="detailContent"></div>
-    </div>
-  </div>
+  <div id="admin-otp-view"><div class="card" id="requestList">No signals.</div></div>
+  <div id="admin-users-view" class="hidden"><div class="card" id="userFolderList"></div></div>
 </section>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, updateDoc, query, where, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, where, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
@@ -154,6 +147,12 @@
     document.getElementById('sub-users').classList.toggle('active', t === 'users');
   };
 
+  window.calculate = () => {
+    const rate = document.getElementById("shift").value;
+    const days = document.getElementById("days").value || 0;
+    document.getElementById("total").innerText = Math.round((rate/28) * days);
+  };
+
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
@@ -167,7 +166,9 @@
         document.getElementById("profName").value = d.name || user.displayName;
         document.getElementById("profPhone").value = d.phone || "";
         document.getElementById("profFather").value = d.father || "";
+        document.getElementById("profDob").value = d.dob || "";
         document.getElementById("displayUserStatus").innerText = d.status || "Visitor";
+        if(d.joinDate) document.getElementById("joinDateDisplay").innerText = "Joined on: " + d.joinDate;
       }
 
       if (user.email === 'c.commando822@gmail.com') {
@@ -181,31 +182,33 @@
   });
 
   window.saveProfile = async () => {
-    const oldData = (await getDoc(doc(db, "users", currentUser.uid))).data() || {};
-    const newData = {
+    const data = {
       name: document.getElementById("profName").value,
       phone: document.getElementById("profPhone").value,
-      father: document.getElementById("profFather").value
+      father: document.getElementById("profFather").value,
+      dob: document.getElementById("profDob").value
     };
-    await setDoc(doc(db, "users", currentUser.uid), newData, { merge: true });
-    
-    // Log change history
-    await addDoc(collection(db, `users/${currentUser.uid}/logs`), {
-      old: oldData,
-      new: newData,
-      time: new Date().toLocaleString()
-    });
+    await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
     alert("Profile Updated!");
   };
 
-  window.payAndRequest = () => {
+  // FLOW: VISITOR -> JOIN (OTP ONLY)
+  window.initiateJoin = () => {
+    sendSignal("JOIN", 0, "N/A");
+    document.getElementById("joinOtpArea").classList.remove("hidden");
+  };
+
+  // FLOW: MEMBER -> RENEWAL (UPI PAYMENT)
+  window.payRenewal = () => {
     const amount = document.getElementById("total").innerText;
     window.location.href = `upi://pay?pa=7500159996@ybl&pn=Rakshapal%20Singh&am=${amount}&cu=INR`;
-    setTimeout(() => {
-      const txn = prompt("Enter UPI Txn ID:");
+    setTimeout(async () => {
+      const txn = prompt("Enter UPI Transaction ID (UTR):");
       if(txn) {
-        sendSignal("JOIN", amount, txn);
-        document.getElementById("joinOtpArea").classList.remove("hidden");
+        await addDoc(collection(db, `users/${currentUser.uid}/history`), {
+          type: "RENEWAL", amount, txn, date: new Date().toLocaleString()
+        });
+        alert("Payment Logged!");
       }
     }, 2000);
   };
@@ -223,65 +226,58 @@
       name: document.getElementById("profName").value,
       type, amount, txn, otp, time: Date.now()
     });
-    
-    // AUTO-EXPIRY: Delete after 10 minutes (600,000 ms)
-    setTimeout(async () => {
-      await deleteDoc(doc(db, "signals", signalId));
-    }, 600000);
+    // Auto-Expiry
+    setTimeout(() => deleteDoc(doc(db, "signals", signalId)), 600000);
   }
 
   window.verifyOtp = async (type) => {
     const input = document.getElementById(type === 'JOIN' ? 'joinOtpInput' : 'leaveOtpInput').value;
     const sDoc = await getDoc(doc(db, "signals", currentUser.uid));
     if (sDoc.exists() && sDoc.data().otp == input) {
-      const sData = sDoc.data();
-      await setDoc(doc(db, "users", currentUser.uid), { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') }, { merge: true });
+      const update = { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') };
+      if(type === 'JOIN') update.joinDate = new Date().toLocaleDateString();
       
-      // Store in Payment/Join History Folder
-      await addDoc(collection(db, `users/${currentUser.uid}/history`), {
-        type: type,
-        amount: sData.amount,
-        txn: sData.txn,
-        date: new Date().toLocaleString()
-      });
-
+      await setDoc(doc(db, "users", currentUser.uid), update, { merge: true });
       await deleteDoc(doc(db, "signals", currentUser.uid));
-      alert("Verification Success!");
+      alert("Verified!");
       location.reload();
     } else {
-      alert("Invalid or Expired Code!");
+      alert("Invalid or Expired OTP!");
     }
   };
 
-  // ADMIN: USER FOLDERS
+  function listenToUserStatus(uid) {
+    onSnapshot(doc(db, "users", uid), (d) => {
+      const s = d.exists() ? d.data().status : "VISITOR";
+      const isMember = s === "MEMBER";
+      document.getElementById("joinSection").classList.toggle("hidden", isMember);
+      document.getElementById("paymentPanel").classList.toggle("hidden", !isMember);
+    });
+  }
+
+  function listenToRequests() {
+    onSnapshot(collection(db, "signals"), (snap) => {
+      let html = "";
+      snap.forEach(d => {
+        const r = d.data();
+        html += `<div class="card" style="border-left:5px solid gold">
+          <p><b>${r.name}</b> (${r.type})</p>
+          <p style="font-size:24px; color:red">CODE: <b>${r.otp}</b></p>
+        </div>`;
+      });
+      document.getElementById("requestList").innerHTML = html || "No pending signals.";
+    });
+  }
+
   function listenToUserFolders() {
     onSnapshot(collection(db, "users"), (snap) => {
       let html = "";
       snap.forEach(d => {
-        const u = d.data();
-        html += `<div class="history-item" onclick="window.viewFolder('${d.id}')" style="cursor:pointer; color:blue">📁 ${u.name || 'Unknown'}</div>`;
+        html += `<div style="padding:10px; border-bottom:1px solid #eee">📁 ${d.data().name}</div>`;
       });
       document.getElementById("userFolderList").innerHTML = html;
     });
   }
-
-  window.viewFolder = async (uid) => {
-    const uDoc = await getDoc(doc(db, "users", uid));
-    const history = await getDocs(collection(db, `users/${uid}/history`));
-    const logs = await getDocs(collection(db, `users/${uid}/logs`));
-    
-    document.getElementById('detailName').innerText = uDoc.data().name;
-    let html = `<h4>Profile</h4><p>Father: ${uDoc.data().father}<br>Phone: ${uDoc.data().phone}</p><h4>History</h4>`;
-    history.forEach(h => {
-      html += `<div class='history-item'>${h.data().date} - ${h.data().type} - ₹${h.data().amount}</div>`;
-    });
-    html += `<h4>Detail Changes</h4>`;
-    logs.forEach(l => {
-      html += `<div class='history-item'>${l.data().time}: Updated Details</div>`;
-    });
-    document.getElementById('detailContent').innerHTML = html;
-    document.getElementById('folderDetail').classList.remove('hidden');
-  };
 
   function listenToPersonalHistory(uid) {
     onSnapshot(collection(db, `users/${uid}/history`), (snap) => {
@@ -289,33 +285,9 @@
       document.getElementById('historyCard').classList.remove('hidden');
       let html = "";
       snap.forEach(h => {
-        html += `<div class="history-item"><b>${h.data().date}</b>: ${h.data().type} (₹${h.data().amount})</div>`;
+        html += `<div style="font-size:12px; margin-bottom:5px"><b>${h.data().date}</b>: ₹${h.data().amount}</div>`;
       });
       document.getElementById('userHistoryList').innerHTML = html;
-    });
-  }
-
-  // OTP LISTENING
-  function listenToRequests() {
-    onSnapshot(collection(db, "signals"), (snap) => {
-      let html = "";
-      snap.forEach(d => {
-        const r = d.data();
-        html += `<div class="card" style="border-left:5px solid #fbc02d">
-          <p><b>${r.name}</b> requesting <b>${r.type}</b></p>
-          <p style="font-size:24px; color:red">CODE: <b>${r.otp}</b></p>
-        </div>`;
-      });
-      document.getElementById("requestList").innerHTML = html || "Waiting for calls...";
-    });
-  }
-
-  function listenToUserStatus(uid) {
-    onSnapshot(doc(db, "users", uid), (d) => {
-      const s = d.exists() ? d.data().status : "VISITOR";
-      const isMember = s === "MEMBER";
-      document.getElementById("joinSection").classList.toggle("hidden", isMember);
-      document.getElementById("memberSection").classList.toggle("hidden", !isMember);
     });
   }
 </script>
