@@ -4,25 +4,31 @@
   <meta charset="UTF-8" />
   <title>Rakshapal Singh Library</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json" />
   <style>
-    body { margin: 0; font-family: sans-serif; background: #f4f6f8; color: #333; }
-    header { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 100; }
-    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 50px; z-index: 99; }
-    nav button { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-size: 13px; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1c1e21; }
+    header { background: #1976d2; color: white; padding: 16px; text-align: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 58px; z-index: 999; }
+    nav button { flex: 1; padding: 14px; border: none; background: none; cursor: pointer; font-size: 14px; color: #65676b; transition: 0.3s; }
     nav button.active { border-bottom: 3px solid #1976d2; color: #1976d2; font-weight: bold; }
-    section { padding: 15px; display: none; }
+    section { padding: 16px; display: none; max-width: 600px; margin: auto; }
     section.active { display: block; }
-    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .card { background: white; padding: 20px; margin-bottom: 16px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     .hidden { display: none !important; }
-    button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 4px; margin-top: 10px; font-weight: bold; cursor: pointer; }
-    button.danger { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
-    input, select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    label { font-size: 11px; color: #1976d2; font-weight: bold; display: block; margin-top: 10px; text-transform: uppercase; }
-    .otp-box { background: #fffde7; padding: 10px; border: 1px dashed #fbc02d; text-align: center; margin-top: 10px; }
-    .admin-subnav { display: flex; gap: 10px; margin-bottom: 15px; }
-    .admin-subnav button { flex: 1; padding: 8px; font-size: 12px; background: #eee; border: 1px solid #ddd; border-radius: 4px; }
-    .admin-subnav button.active { background: #1976d2; color: white; }
+    input, select { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+    label { font-size: 12px; color: #1976d2; font-weight: bold; display: block; margin-top: 12px; text-transform: uppercase; }
+    button.primary { width: 100%; padding: 14px; background: #1976d2; color: white; border: none; border-radius: 8px; margin-top: 16px; font-weight: bold; cursor: pointer; font-size: 16px; }
+    button.danger { width: 100%; padding: 14px; background: #e4e6eb; color: #4b4f56; border: none; border-radius: 8px; margin-top: 16px; cursor: pointer; }
+
+    /* OS DASHBOARD STYLE FOR ADMIN */
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 8px; padding: 12px; display: flex; align-items: center; margin-bottom: 12px; position: relative; border-left: 4px solid #3498db; cursor: pointer; }
+    .player-photo { width: 50px; height: 50px; border-radius: 6px; margin-right: 12px; border: 1px solid #3e4042; object-fit: cover; }
+    .player-info { flex-grow: 1; }
+    .player-name { font-weight: bold; font-size: 16px; color: #3498db; display: block; }
+    .player-sub { font-size: 12px; color: #b0b3b8; }
+    .status-pill { position: absolute; right: 12px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+    .status-green { background: #2d88ff; color: white; }
+    .status-red { background: #fa3e3e; color: white; }
+    .otp-box { background: #fff9e6; border: 1px dashed #ffd700; padding: 15px; text-align: center; border-radius: 8px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -31,265 +37,190 @@
 
 <nav>
   <button id="tab-home" class="active" onclick="window.openTab('home')">Home</button>
-  <button id="tab-owner" onclick="window.openTab('owner')">Owner</button>
   <button id="tab-account" onclick="window.openTab('account')">Account</button>
   <button id="tab-admin" class="hidden" onclick="window.openTab('admin')">Manage 🛠</button>
 </nav>
 
 <section id="home" class="active">
-  <div class="card"><h3>Welcome</h3><p>Sign in to manage your library membership and view your history.</p></div>
-</section>
-
-<section id="owner">
-  <div class="card"><h3>Owner</h3><a href="tel:7500159996" style="color: #1976d2; text-decoration: none; font-weight: bold;">📞 7500159996</a></div>
+  <div class="card"><h3>Safe Study Space</h3><p>Manage your admission and monthly fees easily.</p></div>
 </section>
 
 <section id="account">
-  <div id="publicView" class="card center">
-    <button class="primary" onclick="window.login()" style="background: #4285F4;">Sign in with Google</button>
+  <div id="loginView" class="card" style="text-align:center;">
+    <button class="primary" onclick="window.login()">Sign in with Google</button>
   </div>
 
-  <div id="userView" class="hidden">
-    <div class="card center">
-      <img id="userImg" src="" style="width: 60px; border-radius: 50%;">
-      <p id="displayUserStatus" style="font-weight:bold; color:#1976d2"></p>
-      <p id="joinDateDisplay" style="font-size: 12px; color: gray;"></p>
+  <div id="userProfile" class="hidden">
+    <div class="card" style="text-align:center;">
+      <img id="userImg" src="" style="width: 80px; border-radius: 50%; border: 3px solid #1976d2;">
+      <h2 id="userNameHeader"></h2>
+      <p id="statusBadge" style="font-weight:bold;"></p>
+      <p id="joiningDateText" style="color:#65676b; font-size:13px;"></p>
+      <p id="countdownText" style="font-size:18px; font-weight:bold; margin-top:10px;"></p>
     </div>
 
     <div class="card">
-      <h3>Student Profile</h3>
-      <label>Full Name</label><input type="text" id="profName">
-      <label>Father's Name</label><input type="text" id="profFather">
-      <label>Mobile Number</label><input type="tel" id="profPhone">
-      <label>Date of Birth</label><input type="date" id="profDob">
-      <button class="primary" style="background: #4caf50;" onclick="window.saveProfile()">Update Details</button>
+      <label>Full Name</label><input type="text" id="name">
+      <label>Father's Name</label><input type="text" id="father">
+      <label>Phone Number</label><input type="tel" id="phone">
+      <label>Date of Birth</label><input type="date" id="dob">
+      <button class="primary" style="background:#42b72a;" onclick="window.updateProfile()">Update Profile</button>
     </div>
 
-    <div id="joinSection" class="card">
-      <h3>Join the Library</h3>
-      <p>Click below to request membership. You will need to call the owner for an OTP.</p>
-      <button class="primary" onclick="window.initiateJoin()">Request to Join</button>
-      <div id="joinOtpArea" class="hidden otp-box">
-        <p>Call Owner for Join OTP</p>
-        <input type="number" id="joinOtpInput" placeholder="6-digit Code">
-        <button class="primary" onclick="window.verifyOtp('JOIN')">Verify & Enter Library</button>
+    <div id="joinBox" class="card">
+      <h3>Library Admission</h3>
+      <p>Ensure your profile is updated before joining.</p>
+      <button class="primary" onclick="window.requestJoin()">Join the Library</button>
+      <div id="otpInputArea" class="hidden otp-box">
+        <p><b>Call Owner for OTP</b></p>
+        <input type="number" id="otpInput" placeholder="Enter 6-digit Code">
+        <button class="primary" onclick="window.verifyAdmission()">Verify & Join</button>
       </div>
     </div>
 
-    <div id="paymentPanel" class="hidden card">
-      <h3>Monthly Fee / Renewal</h3>
-      <select id="shift" onchange="window.calculate()"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
-      <input type="number" id="days" value="28" oninput="window.calculate()">
-      <p><b>Total: ₹<span id="total">500</span></b></p>
-      <button class="primary" onclick="window.payRenewal()">Pay Fee via UPI</button>
-      
-      <hr style="margin:20px 0; border:0; border-top:1px solid #eee">
-      <button class="danger" onclick="window.initiateLeave()">Request to Leave Library</button>
-      <div id="leaveOtpArea" class="hidden otp-box">
-        <p>Call Owner for Exit OTP</p>
-        <input type="number" id="leaveOtpInput" placeholder="6-digit Code">
-        <button class="primary" onclick="window.verifyOtp('LEAVE')">Confirm Exit</button>
-      </div>
+    <div id="paymentBox" class="card hidden">
+      <h3>Fees & Renewal</h3>
+      <select id="shift"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Full (₹700)</option></select>
+      <input type="number" id="payDays" value="28">
+      <button class="primary" onclick="window.processPayment()">Pay Fee via UPI</button>
     </div>
-
-    <div id="historyCard" class="card hidden">
-      <h3>Payment History</h3>
-      <div id="userHistoryList"></div>
-    </div>
-
-    <button onclick="window.logout()" style="width:100%; border:none; background:none; color:gray; margin-top:20px;">Logout</button>
+    
+    <button class="danger" onclick="window.logout()">Log Out</button>
   </div>
 </section>
 
 <section id="admin">
-  <div class="admin-subnav">
-    <button id="sub-otp" class="active" onclick="window.switchAdminTab('otp')">Live OTP</button>
-    <button id="sub-users" onclick="window.switchAdminTab('users')">User Folders</button>
+  <div class="card">
+    <h3>Student Folders</h3>
+    <div id="folderList">Loading students...</div>
   </div>
-  <div id="admin-otp-view"><div class="card" id="requestList">No signals.</div></div>
-  <div id="admin-users-view" class="hidden"><div class="card" id="userFolderList"></div></div>
+  
+  <div id="folderView" class="card hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; overflow-y:auto; background:#f0f2f5; border-radius:0;">
+    <div style="padding:15px;">
+        <button class="danger" onclick="document.getElementById('folderView').classList.add('hidden')">← Back to List</button>
+        <div id="folderContent" style="margin-top:20px;"></div>
+    </div>
+  </div>
 </section>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, where, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
-    authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com",
-    projectId: "rakshapal-singh-library-ded2e",
-    storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app",
-    messagingSenderId: "988319651464",
-    appId: "1:988319651464:web:477fa283cddb1d1123713d"
-  };
-
+  const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  let currentUser = null;
+  // Helper visibility
+  const ui = (id, show) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); };
+
+  window.openTab = (id) => {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    if(document.getElementById('tab-'+id)) document.getElementById('tab-'+id).classList.add('active');
+  };
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = () => signOut(auth).then(() => location.reload());
-  window.openTab = (t) => {
-    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    document.getElementById(t).classList.add("active");
-    document.getElementById("tab-" + t).classList.add("active");
-  };
 
-  window.switchAdminTab = (t) => {
-    document.getElementById('admin-otp-view').classList.toggle('hidden', t !== 'otp');
-    document.getElementById('admin-users-view').classList.toggle('hidden', t !== 'users');
-    document.getElementById('sub-otp').classList.toggle('active', t === 'otp');
-    document.getElementById('sub-users').classList.toggle('active', t === 'users');
-  };
-
-  window.calculate = () => {
-    const rate = document.getElementById("shift").value;
-    const days = document.getElementById("days").value || 0;
-    document.getElementById("total").innerText = Math.round((rate/28) * days);
-  };
+  function calcDays(isoDate, paid) {
+    if(!isoDate) return 0;
+    const used = Math.floor((new Date() - new Date(isoDate)) / (1000 * 60 * 60 * 24));
+    return (paid || 0) - used;
+  }
 
   onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("publicView").classList.add("hidden");
-      document.getElementById("userView").classList.remove("hidden");
-      document.getElementById("userImg").src = user.photoURL;
+    if(user) {
+      ui('loginView', false); ui('userProfile', true);
+      document.getElementById('userImg').src = user.photoURL;
+      document.getElementById('userNameHeader').innerText = user.displayName;
       
-      const uDoc = await getDoc(doc(db, "users", user.uid));
-      if (uDoc.exists()) {
-        const d = uDoc.data();
-        document.getElementById("profName").value = d.name || user.displayName;
-        document.getElementById("profPhone").value = d.phone || "";
-        document.getElementById("profFather").value = d.father || "";
-        document.getElementById("profDob").value = d.dob || "";
-        document.getElementById("displayUserStatus").innerText = d.status || "Visitor";
-        if(d.joinDate) document.getElementById("joinDateDisplay").innerText = "Joined on: " + d.joinDate;
-      }
+      onSnapshot(doc(db, "users", user.uid), (snap) => {
+        if(snap.exists()){
+          const d = snap.data();
+          document.getElementById('name').value = d.name || "";
+          document.getElementById('father').value = d.father || "";
+          document.getElementById('phone').value = d.phone || "";
+          document.getElementById('dob').value = d.dob || "";
+          document.getElementById('statusBadge').innerText = d.status || "Visitor";
+          
+          if(d.status === "MEMBER") {
+            ui('joinBox', false); ui('paymentBox', true);
+            document.getElementById('joiningDateText').innerText = "Admission Date: " + d.joinDate;
+            const rem = calcDays(d.joinDateISO, d.totalPaidDays);
+            const text = document.getElementById('countdownText');
+            text.innerText = Math.abs(rem) + (rem >= 0 ? " Days Remaining" : " Days Behind");
+            text.style.color = rem >= 0 ? "green" : "red";
+          }
+        }
+      });
 
-      if (user.email === 'c.commando822@gmail.com') {
-        document.getElementById("tab-admin").classList.remove("hidden");
-        listenToRequests();
-        listenToUserFolders();
+      if(user.email === "c.commando822@gmail.com") {
+        ui('tab-admin', true); loadAdmin();
       }
-      listenToUserStatus(user.uid);
-      listenToPersonalHistory(user.uid);
     }
   });
 
-  window.saveProfile = async () => {
-    const data = {
-      name: document.getElementById("profName").value,
-      phone: document.getElementById("profPhone").value,
-      father: document.getElementById("profFather").value,
-      dob: document.getElementById("profDob").value
-    };
-    await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
-    alert("Profile Updated!");
+  window.updateProfile = () => {
+    setDoc(doc(db, "users", auth.currentUser.uid), {
+      name: document.getElementById('name').value,
+      father: document.getElementById('father').value,
+      phone: document.getElementById('phone').value,
+      dob: document.getElementById('dob').value,
+      photo: auth.currentUser.photoURL
+    }, {merge: true}).then(() => alert("Profile Saved!"));
   };
 
-  // FLOW: VISITOR -> JOIN (OTP ONLY)
-  window.initiateJoin = () => {
-    sendSignal("JOIN", 0, "N/A");
-    document.getElementById("joinOtpArea").classList.remove("hidden");
-  };
-
-  // FLOW: MEMBER -> RENEWAL (UPI PAYMENT)
-  window.payRenewal = () => {
-    const amount = document.getElementById("total").innerText;
-    window.location.href = `upi://pay?pa=7500159996@ybl&pn=Rakshapal%20Singh&am=${amount}&cu=INR`;
-    setTimeout(async () => {
-      const txn = prompt("Enter UPI Transaction ID (UTR):");
-      if(txn) {
-        await addDoc(collection(db, `users/${currentUser.uid}/history`), {
-          type: "RENEWAL", amount, txn, date: new Date().toLocaleString()
-        });
-        alert("Payment Logged!");
-      }
-    }, 2000);
-  };
-
-  window.initiateLeave = () => {
-    sendSignal("LEAVE", 0, "N/A");
-    document.getElementById("leaveOtpArea").classList.remove("hidden");
-  };
-
-  async function sendSignal(type, amount, txn) {
+  window.requestJoin = () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
-    const signalId = currentUser.uid;
-    await setDoc(doc(db, "signals", signalId), {
-      uid: currentUser.uid,
-      name: document.getElementById("profName").value,
-      type, amount, txn, otp, time: Date.now()
-    });
-    // Auto-Expiry
-    setTimeout(() => deleteDoc(doc(db, "signals", signalId)), 600000);
-  }
-
-  window.verifyOtp = async (type) => {
-    const input = document.getElementById(type === 'JOIN' ? 'joinOtpInput' : 'leaveOtpInput').value;
-    const sDoc = await getDoc(doc(db, "signals", currentUser.uid));
-    if (sDoc.exists() && sDoc.data().otp == input) {
-      const update = { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') };
-      if(type === 'JOIN') update.joinDate = new Date().toLocaleDateString();
-      
-      await setDoc(doc(db, "users", currentUser.uid), update, { merge: true });
-      await deleteDoc(doc(db, "signals", currentUser.uid));
-      alert("Verified!");
-      location.reload();
-    } else {
-      alert("Invalid or Expired OTP!");
-    }
+    setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('name').value }).then(() => ui('otpInputArea', true));
   };
 
-  function listenToUserStatus(uid) {
-    onSnapshot(doc(db, "users", uid), (d) => {
-      const s = d.exists() ? d.data().status : "VISITOR";
-      const isMember = s === "MEMBER";
-      document.getElementById("joinSection").classList.toggle("hidden", isMember);
-      document.getElementById("paymentPanel").classList.toggle("hidden", !isMember);
-    });
-  }
+  window.verifyAdmission = async () => {
+    const snap = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(snap.exists() && snap.data().otp == document.getElementById('otpInput').value) {
+      const now = new Date();
+      await setDoc(doc(db, "users", auth.currentUser.uid), {
+        status: "MEMBER", joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0
+      }, {merge: true});
+      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
+      location.reload();
+    } else alert("Invalid OTP");
+  };
 
-  function listenToRequests() {
-    onSnapshot(collection(db, "signals"), (snap) => {
-      let html = "";
+  function loadAdmin() {
+    onSnapshot(collection(db, "users"), (snap) => {
+      let h = "";
       snap.forEach(d => {
-        const r = d.data();
-        html += `<div class="card" style="border-left:5px solid gold">
-          <p><b>${r.name}</b> (${r.type})</p>
-          <p style="font-size:24px; color:red">CODE: <b>${r.otp}</b></p>
+        const u = d.data(); const rem = calcDays(u.joinDateISO, u.totalPaidDays);
+        h += `<div class="player-card" onclick="window.viewUser('${d.id}')">
+          <img src="${u.photo}" class="player-photo">
+          <div class="player-info"><span class="player-name">${u.name || 'Student'}</span><span class="player-sub">📞 ${u.phone || 'N/A'}</span></div>
+          <div class="status-pill ${rem >= 0 ? 'status-green' : 'status-red'}">${Math.abs(rem)} Days</div>
         </div>`;
       });
-      document.getElementById("requestList").innerHTML = html || "No pending signals.";
+      document.getElementById('folderList').innerHTML = h;
     });
   }
 
-  function listenToUserFolders() {
-    onSnapshot(collection(db, "users"), (snap) => {
-      let html = "";
-      snap.forEach(d => {
-        html += `<div style="padding:10px; border-bottom:1px solid #eee">📁 ${d.data().name}</div>`;
-      });
-      document.getElementById("userFolderList").innerHTML = html;
-    });
-  }
-
-  function listenToPersonalHistory(uid) {
-    onSnapshot(collection(db, `users/${uid}/history`), (snap) => {
-      if(snap.empty) return;
-      document.getElementById('historyCard').classList.remove('hidden');
-      let html = "";
-      snap.forEach(h => {
-        html += `<div style="font-size:12px; margin-bottom:5px"><b>${h.data().date}</b>: ₹${h.data().amount}</div>`;
-      });
-      document.getElementById('userHistoryList').innerHTML = html;
-    });
-  }
+  window.viewUser = async (uid) => {
+    const d = (await getDoc(doc(db, "users", uid))).data();
+    document.getElementById('folderContent').innerHTML = `
+      <div class="card">
+        <h2>${d.name}</h2>
+        <p><b>Status:</b> ${d.status}</p>
+        <p><b>Father:</b> ${d.father}</p>
+        <p><b>DOB:</b> ${d.dob}</p>
+        <p><b>Phone:</b> ${d.phone}</p>
+        <p><b>Admission Date:</b> ${d.joinDate || 'Not Joined'}</p>
+        <p><b>Days Paid:</b> ${d.totalPaidDays || 0}</p>
+      </div>`;
+    ui('folderView', true);
+  };
 </script>
 </body>
 </html>
