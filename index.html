@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1976d2" />
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
 
   <style>
@@ -26,6 +25,7 @@
       font-weight: bold;
       position: sticky;
       top: 0;
+      z-index: 100;
     }
 
     nav {
@@ -33,6 +33,9 @@
       justify-content: space-around;
       background: #ffffff;
       border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 54px;
+      z-index: 99;
     }
 
     nav button {
@@ -71,6 +74,7 @@
       padding: 10px;
       margin-top: 10px;
       font-size: 14px;
+      box-sizing: border-box;
     }
 
     button.primary {
@@ -106,7 +110,6 @@
   <button id="tab-account" onclick="openTab('account')">Account</button>
 </nav>
 
-<!-- HOME -->
 <section id="home" class="active">
   <div class="card">
     <h3>Welcome</h3>
@@ -117,7 +120,6 @@
   </div>
 </section>
 
-<!-- OWNER -->
 <section id="owner">
   <div class="card">
     <h3>Library Owner</h3>
@@ -127,56 +129,48 @@
   </div>
 </section>
 
-<!-- ACCOUNT -->
 <section id="account">
 
-  <!-- PUBLIC MODE -->
   <div id="publicView" class="card">
+    <div id="recaptcha-container"></div>
+    
     <h3>Account</h3>
     <p>Please login / sign up to manage your account.</p>
-    <input type="tel" id="phone" placeholder="Enter mobile number" />
+    <input type="tel" id="phone" placeholder="Enter mobile number (e.g. 9876543210)" />
     <button class="primary" onclick="sendOTP()">Send OTP</button>
   </div>
 
-  <!-- OTP -->
   <div id="otpView" class="card hidden">
     <h3>Verify OTP</h3>
-    <input type="number" id="otp" placeholder="Enter OTP" />
+    <input type="number" id="otp" placeholder="Enter 6-digit OTP" />
     <button class="primary" onclick="verifyOTP()">Verify</button>
   </div>
 
-  <!-- LOGGED IN -->
   <div id="userView" class="hidden">
-
     <div class="card center">
-      <img src="https://via.placeholder.com/80" style="border-radius:50%">
+      <img src="https://via.placeholder.com/80" style="border-radius:50%" alt="User Profile">
       <p id="userPhone"></p>
     </div>
 
     <div class="card">
       <h3>Select Shift Plan</h3>
-
       <select id="shift" onchange="calculateAmount()">
         <option value="day">Day ₹500 / 28 days</option>
         <option value="night">Night ₹400 / 28 days</option>
         <option value="both">Both ₹700 / 28 days</option>
       </select>
 
-      <input type="number" id="days" placeholder="Number of days (max 140)" onchange="calculateAmount()" />
-
+      <input type="number" id="days" placeholder="Number of days (max 140)" oninput="calculateAmount()" />
       <p><b>Total Amount:</b> ₹<span id="amount">0</span></p>
-
-      <button class="primary">Pay</button>
+      <button class="primary">Pay Now</button>
     </div>
 
     <div class="card">
       <button class="danger" onclick="logout()">Logout</button>
     </div>
-
   </div>
 </section>
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -193,28 +187,43 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'publicView', { size: 'invisible' });
+  // FIXED: Pointing to the specific empty container div
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+    size: 'invisible' 
+  });
 
   let confirmationResult;
 
   window.sendOTP = function () {
-    const phone = "+91" + document.getElementById("phone").value;
+    const phoneInput = document.getElementById("phone").value;
+    if(!phoneInput) { alert("Please enter a phone number"); return; }
+    
+    const phone = "+91" + phoneInput;
+    
     signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
       .then(result => {
         confirmationResult = result;
         document.getElementById("publicView").classList.add("hidden");
         document.getElementById("otpView").classList.remove("hidden");
       })
-      .catch(err => alert(err.message));
+      .catch(err => {
+        alert("Error: " + err.message);
+        // Reset reCAPTCHA so user can try again
+        window.recaptchaVerifier.render().then(widgetId => {
+           grecaptcha.reset(widgetId);
+        });
+      });
   };
 
   window.verifyOTP = function () {
     const code = document.getElementById("otp").value;
+    if(!code) { alert("Please enter the OTP"); return; }
+
     confirmationResult.confirm(code).then(result => {
       document.getElementById("otpView").classList.add("hidden");
       document.getElementById("userView").classList.remove("hidden");
       document.getElementById("userPhone").innerText = result.user.phoneNumber;
-    }).catch(() => alert("Invalid OTP"));
+    }).catch(() => alert("Invalid OTP. Please try again."));
   };
 
   window.logout = function () {
@@ -243,8 +252,9 @@
     document.getElementById("amount").innerText = Math.round(rate * days);
   }
 
+  // Register Service Worker for PWA
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
+    navigator.serviceWorker.register("sw.js").catch(err => console.log("SW registration failed", err));
   }
 </script>
 
