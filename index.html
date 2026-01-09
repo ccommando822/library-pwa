@@ -18,9 +18,8 @@
     button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 4px; margin-top: 10px; font-weight: bold; cursor: pointer; }
     button.danger { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
     input, select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    label { font-size: 12px; color: #666; font-weight: bold; display: block; margin-top: 10px; }
-    .center { text-align: center; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 5px; border: 1px solid transparent; }
+    label { font-size: 11px; color: #1976d2; font-weight: bold; display: block; margin-top: 10px; text-transform: uppercase; }
+    .otp-box { background: #fffde7; padding: 10px; border: 1px dashed #fbc02d; text-align: center; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -28,84 +27,84 @@
 <header>📚 Rakshapal Singh Library</header>
 
 <nav>
-  <button id="tab-home" class="active" onclick="openTab('home')">Home</button>
-  <button id="tab-owner" onclick="openTab('owner')">Owner</button>
-  <button id="tab-account" onclick="openTab('account')">Account</button>
-  <button id="tab-admin" class="hidden" onclick="openTab('admin')">Manage 🛠</button>
+  <button id="tab-home" class="active" onclick="window.openTab('home')">Home</button>
+  <button id="tab-owner" onclick="window.openTab('owner')">Owner</button>
+  <button id="tab-account" onclick="window.openTab('account')">Account</button>
+  <button id="tab-admin" class="hidden" onclick="window.openTab('admin')">Manage 🛠</button>
 </nav>
 
 <section id="home" class="active">
-  <div class="card">
-    <h3>Digital Gatekeeper</h3>
-    <p>Everything is handled automatically and securely. Join the library, pay fees, and manage your status digitally.</p>
-  </div>
+  <div class="card"><h3>Safe Study Space</h3><p>Verify your identity via phone call to the owner for all library actions.</p></div>
 </section>
 
 <section id="owner">
   <div class="card">
-    <h3>Owner Profile</h3>
-    <p><b>Name:</b> Rakshapal Singh</p>
-    <p><b>Phone:</b> 7500159996</p>
-    <p><b>Email:</b> c.commando822@gmail.com</p>
+    <h3>Owner Contact</h3>
+    <p><b>Rakshapal Singh</b></p>
+    <a href="tel:7500159996" style="color: #1976d2; font-size: 18px; text-decoration: none; font-weight: bold;">📞 7500159996</a>
   </div>
 </section>
 
 <section id="account">
-  <div id="publicView" class="card center">
-    <h3>Sign In</h3>
-    <p>Please log in with Google to continue.</p>
-    <button class="primary" onclick="window.login()" style="background: #4285F4;">Sign in with Google</button>
+  <div id="publicView" class="card" style="text-align:center">
+    <button class="primary" onclick="window.login()">Sign in with Google</button>
   </div>
 
   <div id="userView" class="hidden">
-    <div class="card center">
-      <img id="userImg" src="" style="width: 70px; border-radius: 50%;">
-      <div id="displayUserStatus" class="status-badge">Visitor</div>
-      <p id="userEmailLabel" style="font-size: 12px; color: #666;"></p>
+    <div class="card" style="text-align:center">
+      <img id="userImg" src="" style="width: 60px; border-radius: 50%;">
+      <p id="displayUserStatus" style="font-weight:bold; color:#1976d2">Visitor</p>
     </div>
 
     <div class="card">
-      <h3>Your Details</h3>
       <label>Full Name</label><input type="text" id="profName">
       <label>Father's Name</label><input type="text" id="profFather">
-      <label>Mobile Number (Mandatory)</label><input type="tel" id="profPhone">
-      <label>Full Address</label><input type="text" id="profAddr">
-      <button class="primary" style="background: #4caf50;" onclick="window.saveProfile()">Save Profile</button>
+      <label>Mobile Number</label><input type="tel" id="profPhone">
+      <button class="primary" style="background: #4caf50;" onclick="window.saveProfile()">Update Profile</button>
     </div>
 
     <div id="joinSection" class="card">
-      <h3>Library Membership</h3>
-      <label>Select Shift</label>
-      <select id="shift" onchange="window.calculate()">
-        <option value="500">Day (₹500 / 28 days)</option>
-        <option value="400">Night (₹400 / 28 days)</option>
-        <option value="700">Both (₹700 / 28 days)</option>
-      </select>
-      <label>Number of Days</label><input type="number" id="days" value="28" oninput="window.calculate()">
-      <p><b>Total Amount: ₹<span id="total">500</span></b></p>
-      <button class="primary" onclick="window.payAndRequest()">Pay with UPI & Join</button>
+      <h3>Step 1: Payment</h3>
+      <select id="shift" onchange="window.calculate()"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
+      <input type="number" id="days" value="28" oninput="window.calculate()">
+      <p><b>Total: ₹<span id="total">500</span></b></p>
+      <button class="primary" onclick="window.payAndRequest()">Pay & Get Code</button>
+      
+      <div id="joinOtpArea" class="hidden otp-box">
+        <p><b>Step 2: Call 7500159996 for OTP</b></p>
+        <input type="number" id="joinOtpInput" placeholder="Enter 6-digit Code">
+        <button class="primary" onclick="window.verifyOtp('JOIN')">Verify & Join</button>
+      </div>
     </div>
 
-    <div id="memberSection" class="hidden card" style="border-top: 4px solid #4caf50;">
-       <h3 style="color: #2e7d32;">Active Membership ✅</h3>
-       <button class="danger" onclick="window.requestLeave()">Request to Leave Library</button>
+    <div id="memberSection" class="hidden">
+       <div class="card" style="border-top: 5px solid #4caf50;">
+         <h3 style="color: green;">Member Panel ✅</h3>
+         <button class="danger" onclick="window.initiateLeave()">Request to Leave</button>
+         
+         <div id="leaveOtpArea" class="hidden otp-box">
+           <p><b>Call Owner for Exit OTP</b></p>
+           <input type="number" id="leaveOtpInput" placeholder="Enter 6-digit Code">
+           <button class="primary" onclick="window.verifyOtp('LEAVE')">Confirm Exit</button>
+         </div>
+       </div>
     </div>
 
-    <button onclick="window.logout()" style="margin-top: 15px; color: gray; background: none; border: none; width: 100%;">Logout</button>
+    <button onclick="window.logout()" style="width:100%; border:none; background:none; color:gray; margin-top:20px;">Logout</button>
   </div>
 </section>
 
 <section id="admin">
   <div class="card">
-    <h3>Pending Signals 📬</h3>
-    <div id="requestList">Checking for requests...</div>
+    <h3>Live OTP Signals</h3>
+    <div id="requestList">No active signals.</div>
   </div>
 </section>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
@@ -122,132 +121,119 @@
   const provider = new GoogleAuthProvider();
 
   let currentUser = null;
+  let activeOtp = null;
 
-  // GLOBAL FUNCTIONS
-  window.login = () => signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
-  window.logout = () => signOut(auth);
-  
+  window.login = () => signInWithPopup(auth, provider);
+  window.logout = () => signOut(auth).then(() => location.reload());
   window.openTab = (t) => {
     document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
     document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
     document.getElementById(t).classList.add("active");
     document.getElementById("tab-" + t).classList.add("active");
   };
-
   window.calculate = () => {
     const rate = document.getElementById("shift").value;
     const days = document.getElementById("days").value || 0;
     document.getElementById("total").innerText = Math.round((rate/28) * days);
   };
 
-  // AUTH STATE
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
       document.getElementById("publicView").classList.add("hidden");
       document.getElementById("userView").classList.remove("hidden");
       document.getElementById("userImg").src = user.photoURL;
-      document.getElementById("userEmailLabel").innerText = user.email;
+      
+      const uDoc = await getDoc(doc(db, "users", user.uid));
+      if (uDoc.exists()) {
+        const d = uDoc.data();
+        document.getElementById("profName").value = d.name || user.displayName;
+        document.getElementById("profPhone").value = d.phone || "";
+        document.getElementById("profFather").value = d.father || "";
+      } else {
+        document.getElementById("profName").value = user.displayName;
+      }
 
       if (user.email === 'c.commando822@gmail.com') {
         document.getElementById("displayUserStatus").innerText = "OWNER 👑";
-        document.getElementById("displayUserStatus").style.borderColor = "red";
         document.getElementById("tab-admin").classList.remove("hidden");
         listenToRequests();
       }
-      
-      loadProfile(user.uid);
       listenToUserStatus(user.uid);
-    } else {
-      document.getElementById("publicView").classList.remove("hidden");
-      document.getElementById("userView").classList.add("hidden");
-      document.getElementById("tab-admin").classList.add("hidden");
     }
   });
 
-  // PROFILE
   window.saveProfile = async () => {
     const data = {
       name: document.getElementById("profName").value,
-      father: document.getElementById("profFather").value,
       phone: document.getElementById("profPhone").value,
-      address: document.getElementById("profAddr").value
+      father: document.getElementById("profFather").value
     };
-    if(!data.name || !data.phone) return alert("Name and Phone are mandatory!");
     await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
-    alert("Profile Updated!");
+    alert("Profile Saved!");
   };
 
-  async function loadProfile(uid) {
-    const d = await getDoc(doc(db, "users", uid));
-    if(d.exists()) {
-      const data = d.data();
-      document.getElementById("profName").value = data.name || "";
-      document.getElementById("profFather").value = data.father || "";
-      document.getElementById("profPhone").value = data.phone || "";
-      document.getElementById("profAddr").value = data.address || "";
-    }
-  }
-
-  // SIGNALS & PAYMENTS
   window.payAndRequest = () => {
     const amount = document.getElementById("total").innerText;
-    const upiUrl = `upi://pay?pa=7500159996@ybl&pn=Rakshapal%20Singh&am=${amount}&cu=INR`;
-    window.location.href = upiUrl;
+    window.location.href = `upi://pay?pa=7500159996@ybl&pn=Rakshapal%20Singh&am=${amount}&cu=INR`;
     setTimeout(() => {
-      const txn = prompt("Enter UPI Transaction ID (UTR):");
-      if(txn) sendSignal("JOIN", amount, txn);
+      const txn = prompt("Enter UPI Transaction ID:");
+      if(txn) {
+        sendSignal("JOIN", amount, txn);
+        document.getElementById("joinOtpArea").classList.remove("hidden");
+      }
     }, 2000);
   };
 
-  window.requestLeave = () => {
-    if(confirm("Send leave signal to owner?")) sendSignal("LEAVE", 0, "N/A");
+  window.initiateLeave = () => {
+    if(confirm("Have you cleared fees till today?")) {
+      sendSignal("LEAVE", 0, "N/A");
+      document.getElementById("leaveOtpArea").classList.remove("hidden");
+    }
   };
 
   async function sendSignal(type, amount, txn) {
-    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-    const userData = userDoc.data() || {};
-    await addDoc(collection(db, "requests"), {
-      userId: currentUser.uid,
-      userName: userData.name || currentUser.displayName,
-      userPhone: userData.phone || "Not Set",
-      type, amount, txnId: txn,
-      status: "PENDING",
-      time: Date.now()
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    await setDoc(doc(db, "signals", currentUser.uid), {
+      uid: currentUser.uid,
+      name: document.getElementById("profName").value,
+      phone: document.getElementById("profPhone").value,
+      type, amount, txn, otp, time: Date.now()
     });
-    alert("Signal Sent to Owner!");
   }
 
-  // ADMIN LOGIC
+  window.verifyOtp = async (type) => {
+    const input = document.getElementById(type === 'JOIN' ? 'joinOtpInput' : 'leaveOtpInput').value;
+    const sDoc = await getDoc(doc(db, "signals", currentUser.uid));
+    if (sDoc.exists() && sDoc.data().otp == input) {
+      await setDoc(doc(db, "users", currentUser.uid), { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') }, { merge: true });
+      await deleteDoc(doc(db, "signals", currentUser.uid));
+      alert("Verified! Status Updated.");
+      location.reload();
+    } else {
+      alert("Wrong Code! Call Owner again.");
+    }
+  };
+
   function listenToRequests() {
-    onSnapshot(query(collection(db, "requests"), where("status", "==", "PENDING")), (snap) => {
+    onSnapshot(collection(db, "signals"), (snap) => {
       let html = "";
       snap.forEach(d => {
         const r = d.data();
-        html += `<div class="card" style="border-left: 5px solid gold;">
-          <p><b>${r.userName}</b> (${r.userPhone})</p>
-          <p><b>${r.type}</b> | ₹${r.amount} | ID: ${r.txnId}</p>
-          <button class="primary" onclick="window.approve('${d.id}', '${r.userId}', '${r.type}')">Approve</button>
+        html += `<div class="card" style="border-left:5px solid red">
+          <p><b>${r.name}</b> (${r.phone})</p>
+          <p>Reason: ${r.type} | Txn: ${r.txn}</p>
+          <p style="font-size:20px; color:blue">OTP: <b>${r.otp}</b></p>
         </div>`;
       });
-      document.getElementById("requestList").innerHTML = html || "No pending signals.";
+      document.getElementById("requestList").innerHTML = html || "No calls expected.";
     });
   }
 
-  window.approve = async (rid, uid, type) => {
-    await updateDoc(doc(db, "requests", rid), { status: "APPROVED" });
-    await setDoc(doc(db, "users", uid), { status: (type === 'JOIN' ? 'MEMBER' : 'VISITOR') }, { merge: true });
-    alert("Approved!");
-  };
-
   function listenToUserStatus(uid) {
     onSnapshot(doc(db, "users", uid), (d) => {
-      const status = d.exists() ? d.data().status : "VISITOR";
-      if(currentUser.email !== 'c.commando822@gmail.com') {
-        document.getElementById("displayUserStatus").innerText = status;
-        document.getElementById("displayUserStatus").style.color = status === 'MEMBER' ? 'green' : '#1976d2';
-      }
-      if(status === "MEMBER") {
+      const s = d.exists() ? d.data().status : "VISITOR";
+      if(s === "MEMBER") {
         document.getElementById("joinSection").classList.add("hidden");
         document.getElementById("memberSection").classList.remove("hidden");
       } else {
