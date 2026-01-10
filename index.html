@@ -17,7 +17,6 @@
     section.active { display: block; }
     .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
-    /* Detail Rows with Pencils */
     .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
     .detail-content { flex: 1; }
     .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
@@ -25,27 +24,23 @@
     .detail-content input:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
     .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
 
-    /* Step-by-Step Join Page */
     .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }
     .wizard-overlay.show { display: block; overflow-y: auto; }
-    .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; }
-    .step-active { border-color: var(--primary); background: #f0f7ff; }
+    .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; opacity: 0.6; pointer-events: none; }
+    .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
     .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
 
-    /* Survival Cards (Manage) */
-    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--primary); }
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--primary); flex-wrap: wrap; }
     .player-photo { width: 50px; height: 50px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
     .player-info { flex: 1; }
     .player-info b { display: block; font-size: 16px; }
     .player-info small { color: #b0b3b8; }
     .survival-stat { font-weight: bold; text-align: right; }
 
-    /* Admin Subtabs Horizontal */
     .admin-nav { display: flex; background: #eee; padding: 5px; border-radius: 10px; margin-bottom: 15px; }
     .admin-nav button { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: transparent; }
     .admin-nav button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-    /* Action Buttons */
     .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
     .btn-blue { background: var(--primary); color: white; }
     .btn-black { background: var(--black); color: white; }
@@ -80,21 +75,21 @@
       <div class="detail-row">
         <div class="detail-content">
           <label class="detail-label">Full Name</label>
-          <input type="text" id="p-name" readonly placeholder="Enter Name">
+          <input type="text" id="p-name" readonly placeholder="Required">
         </div>
         <span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span>
       </div>
       <div class="detail-row">
         <div class="detail-content">
           <label class="detail-label">Father's Name</label>
-          <input type="text" id="p-father" readonly placeholder="Enter Father's Name">
+          <input type="text" id="p-father" readonly placeholder="Required">
         </div>
         <span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span>
       </div>
       <div class="detail-row">
         <div class="detail-content">
           <label class="detail-label">Mobile Number</label>
-          <input type="tel" id="p-phone" readonly placeholder="Enter Mobile">
+          <input type="tel" id="p-phone" readonly placeholder="Required">
         </div>
         <span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span>
       </div>
@@ -108,29 +103,27 @@
     <div id="active-tools" class="hidden">
         <div class="card" style="background: #f0f7ff;">
             <label class="detail-label">Renewal Panel</label>
-            <select id="p-shift" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
-                <option value="500">Day Shift (₹500)</option>
-                <option value="400">Night Shift (₹400)</option>
+            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
+                <option value="500">Day Shift (₹500/28d)</option>
+                <option value="400">Night Shift (₹400/28d)</option>
             </select>
-            <input type="number" id="p-days" value="28" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
+            <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
+            <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
         </div>
         <button class="btn btn-outline" onclick="window.reqLeave()">Leave Library Membership</button>
     </div>
-    
     <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
 </section>
 
 <div id="joinWizard" class="wizard-overlay">
     <h2 style="color:var(--primary);">Admission Wizard</h2>
-    
     <div id="step1" class="step-card step-active">
-        <span class="step-num">1</span> <b>Update Profile</b>
-        <p style="font-size:13px; color:#555;">Go back and ensure your Name, Father's Name, and Mobile are saved using the pencil icons.</p>
-        <button class="btn btn-blue" onclick="closeWizard()">Return to Profile</button>
+        <span class="step-num">1</span> <b>Verify Folder Details</b>
+        <p style="font-size:13px; color:#555;">We will check if your Name, Father's Name, and Mobile are filled.</p>
+        <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button>
     </div>
-
     <div id="step2" class="step-card">
         <span class="step-num">2</span> <b>Verify Identity</b>
         <p style="font-size:13px; color:#555;">Call Owner at <b>7500159996</b> for Admission OTP.</p>
@@ -145,16 +138,10 @@
         <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live OTPs</button>
         <button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button>
     </div>
-
     <div id="am-pane-otp">
-        <div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;" id="admin-otp-list">
-            Monitoring signals...
-        </div>
+        <div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;" id="admin-otp-list">Monitoring signals...</div>
     </div>
-
-    <div id="am-pane-user" class="hidden">
-        <div id="admin-survival-list"></div>
-    </div>
+    <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
 </section>
 
 <script type="module">
@@ -168,7 +155,6 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // Navigation Logic
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
@@ -183,9 +169,19 @@
     document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
   };
 
+  window.calcTotal = () => {
+      const shiftPrice = parseInt(document.getElementById('p-shift').value);
+      const days = parseInt(document.getElementById('p-days').value) || 0;
+      const total = Math.round((shiftPrice / 28) * days);
+      document.getElementById('pay-summary').innerText = `Total Amount: ₹${total}`;
+  };
+
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
-  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
+  window.closeWizard = () => { 
+      document.getElementById('joinWizard').classList.remove('show');
+      document.getElementById('step2').classList.remove('step-active');
+  };
   
   window.toggleProceed = (el) => {
     const btn = document.getElementById('proceed-btn');
@@ -201,14 +197,12 @@
       document.getElementById('loginPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.remove('hidden');
       document.getElementById('u-img').src = user.photoURL;
-
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           const d = snap.data();
           document.getElementById('p-name').value = d.name || "";
           document.getElementById('p-father').value = d.father || "";
           document.getElementById('p-phone').value = d.phone || "";
-          
           if(d.joinDateISO) {
             document.getElementById('join-trigger-box').classList.add('hidden');
             document.getElementById('active-tools').classList.remove('hidden');
@@ -221,7 +215,6 @@
           }
         }
       });
-
       if(user.email === "c.commando822@gmail.com") {
         document.getElementById('tab-man').classList.remove('hidden');
         loadAdminData();
@@ -230,55 +223,54 @@
   });
 
   window.saveProfile = async () => {
-    const name = document.getElementById('p-name').value;
-    const phone = document.getElementById('p-phone').value;
-    if(!name || !phone) return alert("Error: Name and Mobile are mandatory!");
-    
     await setDoc(doc(db, "users", auth.currentUser.uid), {
-      name, father: document.getElementById('p-father').value, phone, photo: auth.currentUser.photoURL,
-      history: arrayUnion(`Edited Profile at ${new Date().toLocaleString()}`)
+      name: document.getElementById('p-name').value, 
+      father: document.getElementById('p-father').value, 
+      phone: document.getElementById('p-phone').value,
+      photo: auth.currentUser.photoURL
     }, {merge: true});
-    
-    // Auto-generate signal for Step 2
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
-    
     document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Step 1 Complete: Details Saved to Database.");
+    alert("Folder Saved Successfully.");
+  };
+
+  window.checkStepOne = async () => {
+      const name = document.getElementById('p-name').value;
+      const father = document.getElementById('p-father').value;
+      const phone = document.getElementById('p-phone').value;
+      if(!name || !father || !phone) {
+          alert("Step 1 Failed: Please fill Name, Father's Name, and Mobile first.");
+          closeWizard();
+      } else {
+          const otp = Math.floor(100000 + Math.random() * 900000);
+          await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
+          document.getElementById('step2').classList.add('step-active');
+          alert("Step 1 Passed. Proceed to Step 2.");
+      }
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
       const now = new Date();
-      await setDoc(doc(db, "users", auth.currentUser.uid), {
-        joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0
-      }, {merge: true});
+      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0 }, {merge: true});
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      alert("Welcome to the Library!");
       closeWizard();
     } else alert("Invalid OTP. Call 7500159996");
   };
 
   window.doPayment = async () => {
-    const amt = document.getElementById('p-shift').value;
-    const days = parseInt(document.getElementById('p-days').value);
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    if(confirm("Confirm update after payment?")) {
+    const days = parseInt(document.getElementById('p-days').value) || 0;
+    const shiftPrice = parseInt(document.getElementById('p-shift').value);
+    const total = Math.round((shiftPrice / 28) * days);
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${total}&cu=INR`;
+    if(confirm("Confirm payment completion?")) {
       const ref = doc(db, "users", auth.currentUser.uid);
       const s = await getDoc(ref);
-      await setDoc(ref, { 
-        totalPaidDays: (s.data().totalPaidDays || 0) + days,
-        payHistory: arrayUnion(`Added ${days} days (₹${amt}) on ${new Date().toLocaleDateString()}`)
-      }, {merge: true});
+      await setDoc(ref, { totalPaidDays: (s.data().totalPaidDays || 0) + days, payHistory: arrayUnion(`Added ${days} days (₹${total}) on ${new Date().toLocaleDateString()}`) }, {merge: true});
     }
   };
 
-  window.reqLeave = () => {
-    if(confirm("Are you sure you want to end membership? Your days will be lost.")) {
-        setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true}).then(() => location.reload());
-    }
-  };
+  window.reqLeave = () => { if(confirm("End membership?")) { setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true}).then(() => location.reload()); } };
 
   function loadAdminData() {
     onSnapshot(collection(db, "signals"), s => {
@@ -295,8 +287,7 @@
           <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
           <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
           <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
-            <strong>HISTORY:</strong><br>${(u.history || []).join('<br>')}<br><br>
-            <strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
+            <strong>LOGS:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
