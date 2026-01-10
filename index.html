@@ -20,8 +20,8 @@
     .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
     .detail-content { flex: 1; }
     .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
-    .detail-content input { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; }
-    .detail-content input:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
+    .detail-content input, .detail-content textarea { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; font-family: inherit; }
+    .detail-content input:not([readonly]), .detail-content textarea:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
     .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
 
     .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }
@@ -87,6 +87,7 @@
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
@@ -197,6 +198,7 @@
           document.getElementById('p-father').value = currentUserData.father || "";
           document.getElementById('p-dob').value = currentUserData.dob || "";
           document.getElementById('p-phone').value = currentUserData.phone || "";
+          document.getElementById('p-address').value = currentUserData.address || "";
           
           if(currentUserData.joinDateISO) {
             document.getElementById('join-trigger-box').classList.add('hidden');
@@ -229,7 +231,8 @@
   window.saveProfile = async () => {
     await setDoc(doc(db, "users", auth.currentUser.uid), {
       name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, 
-      dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value
+      dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value,
+      address: document.getElementById('p-address').value
     }, {merge: true});
     alert("Folder Saved.");
   };
@@ -246,16 +249,15 @@
   };
 
   window.checkStepOne = async () => {
-      if(!document.getElementById('p-name').value || !document.getElementById('p-phone').value) return alert("Fill Folder Details first!");
+      // REQUIREMENT: Check if all user details are filled
+      if(!document.getElementById('p-name').value || !document.getElementById('p-father').value || !document.getElementById('p-dob').value || !document.getElementById('p-phone').value || !document.getElementById('p-address').value) {
+          return alert("Please fill ALL details in the profile folder first!");
+      }
       const otp = Math.floor(100000 + Math.random() * 900000);
       const expiry = Date.now() + (5 * 60 * 1000); 
       await setDoc(doc(db, "signals", auth.currentUser.uid), { 
-          otp, 
-          name: document.getElementById('p-name').value, 
-          phone: document.getElementById('p-phone').value,
-          type: 'Admission', 
-          expiresAt: expiry,
-          createdAt: serverTimestamp() 
+          otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value,
+          type: 'Admission', expiresAt: expiry, createdAt: serverTimestamp() 
       });
       document.getElementById('step2').classList.add('step-active');
   };
@@ -270,20 +272,15 @@
   };
 
   window.checkLeaveFees = async () => {
-    if (survivalDays < 0) alert("Fees Pending.");
-    else {
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      const expiry = Date.now() + (5 * 60 * 1000);
-      await setDoc(doc(db, "signals", auth.currentUser.uid), { 
-          otp, 
-          name: document.getElementById('p-name').value, 
-          phone: document.getElementById('p-phone').value,
-          type: 'Exit', 
-          expiresAt: expiry,
-          createdAt: serverTimestamp() 
-      });
-      document.getElementById('lstep2').classList.add('step-active');
-    }
+    // REQUIREMENT: Fees must be paid (survivalDays >= 0)
+    if (survivalDays < 0) return alert("Pending fees detected. You must renew your membership to proceed with exit.");
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expiry = Date.now() + (5 * 60 * 1000);
+    await setDoc(doc(db, "signals", auth.currentUser.uid), { 
+        otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value,
+        type: 'Exit', expiresAt: expiry, createdAt: serverTimestamp() 
+    });
+    document.getElementById('lstep2').classList.add('step-active');
   };
 
   window.verifyLeave = async () => {
@@ -327,23 +324,16 @@
                 const sig = d.data();
                 const now = Date.now();
                 if(sig.expiresAt < now) { deleteDoc(doc(db, "signals", d.id)); return; }
-                
                 const diff = sig.expiresAt - now;
-                const m = Math.floor(diff/60000);
-                const s_sec = Math.floor((diff%60000)/1000);
+                const m = Math.floor(diff/60000), s_sec = Math.floor((diff%60000)/1000);
                 const timer = `${m}:${s_sec < 10 ? '0'+s_sec : s_sec}`;
-
                 if(sig.type === 'PAYMENT') {
                     h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px; position:relative;">
                         <span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>
                         💰 ${sig.name} (${sig.phone})<br>Amount: ₹${sig.amount}<br>
                         <button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button>
                         <button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
-                } else { 
-                    h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;">
-                        <span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>
-                        ${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`; 
-                }
+                } else { h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`; }
             });
             document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
         });
@@ -363,8 +353,24 @@
   window.openUserFolder = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
     let h = ""; (u.history || []).forEach(m => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
-    document.getElementById('folder-content').innerHTML = `<div class="card" style="text-align:center;"><img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;"><h3>${u.name}</h3></div><div class="card"><label class="detail-label">Logs</label><div style="font-size:11px;">${h}</div></div>`;
+    // REQUIREMENT: Allow owner to edit remaining days
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center;"><img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;"><h3>${u.name}</h3></div>
+      <div class="card">
+        <label class="detail-label">Adjust Survival Days (Total Paid)</label>
+        <input type="number" id="adm-edit-days" value="${u.totalPaidDays || 0}" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:8px;">
+        <button class="btn btn-blue" onclick="saveDaysFromAdmin('${uid}')">Update Balance</button>
+      </div>
+      <div class="card"><label class="detail-label">User Info</label><p style="font-size:12px;"><b>Father:</b> ${u.father}<br><b>Phone:</b> ${u.phone}<br><b>Address:</b> ${u.address}</p></div>
+      <div class="card"><label class="detail-label">Logs</label><div style="font-size:11px;">${h}</div></div>`;
     document.getElementById('owner-folder-view').classList.add('show');
+  };
+
+  // OWNER EDITING LOGIC
+  window.saveDaysFromAdmin = async (uid) => {
+    const newVal = parseFloat(document.getElementById('adm-edit-days').value);
+    await updateDoc(doc(db, "users", uid), { totalPaidDays: newVal, history: arrayUnion(`🛠 Admin Adjusted Balance to ${newVal} days [${getStamp()}]`) });
+    alert("Balance Updated.");
   };
 
   window.login = () => signInWithPopup(auth, provider);
