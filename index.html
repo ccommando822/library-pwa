@@ -3,93 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Library ERP</title>
+  <title>Rakshapal Singh Library ERP</title>
   <style>
-    body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
-    header { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; }
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
+    header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
+    
     nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; }
-    nav button.active { border-bottom: 3px solid #1976d2; color: #1976d2; font-weight: bold; }
+    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; }
+    nav button.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+
     section { padding: 15px; display: none; max-width: 500px; margin: auto; }
     section.active { display: block; }
-    .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .hidden { display: none !important; }
-    
-    /* Edit Pencil Styling */
-    .input-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-    .input-row input { border: none; background: none; font-size: 16px; width: 80%; color: #333; outline: none; }
-    .input-row input:not(:read-only) { background: #fffde7; border-bottom: 1px solid #1976d2; }
-    .edit-pencil { cursor: pointer; color: #1976d2; font-size: 18px; }
+    .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
-    button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 5px; font-weight: bold; margin-top: 10px; }
-    
-    /* Admin Folder Styling */
-    .user-folder { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 5px; border-radius: 5px; cursor: pointer; }
-    .history-box { background: #f9f9f9; padding: 10px; font-size: 12px; margin-top: 10px; border-top: 1px dashed #ccc; }
+    /* Detail Rows with Pencils */
+    .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .detail-content { flex: 1; }
+    .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+    .detail-content input { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; }
+    .detail-content input:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
+    .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
+
+    /* Step-by-Step Join Page */
+    .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }
+    .wizard-overlay.show { display: block; overflow-y: auto; }
+    .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; }
+    .step-active { border-color: var(--primary); background: #f0f7ff; }
+    .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
+
+    /* Survival Cards (Manage) */
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--primary); }
+    .player-photo { width: 50px; height: 50px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
+    .player-info { flex: 1; }
+    .player-info b { display: block; font-size: 16px; }
+    .player-info small { color: #b0b3b8; }
+    .survival-stat { font-weight: bold; text-align: right; }
+
+    /* Admin Subtabs Horizontal */
+    .admin-nav { display: flex; background: #eee; padding: 5px; border-radius: 10px; margin-bottom: 15px; }
+    .admin-nav button { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: transparent; }
+    .admin-nav button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    /* Action Buttons */
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
+    .btn-blue { background: var(--primary); color: white; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
 <header>Rakshapal Singh Library</header>
 
-<nav>
-  <button id="nav-acc" class="active" onclick="showTab('account')">Account</button>
-  <button id="nav-man" class="hidden" onclick="showTab('manage')">Manage 🛠</button>
+<nav id="main-nav">
+  <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>
+  <button id="tab-man" class="hidden" onclick="switchMain('manage')">Manage 🛠</button>
 </nav>
 
 <section id="account" class="active">
-  <div id="loginView" class="card" style="text-align:center;">
-    <button class="primary" onclick="window.login()">Sign in with Google</button>
+  <div id="loginPanel" class="card" style="text-align:center;">
+    <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button>
   </div>
 
-  <div id="userProfile" class="hidden">
-    <div class="card" style="text-align:center;">
-      <img id="userImg" style="width:70px; border-radius:50%;">
-      <div id="countdownText" style="font-size:24px; font-weight:bold; margin-top:10px;">-- Days</div>
+  <div id="profilePanel" class="hidden">
+    <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
+      <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
+      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED YET</div>
+      <div id="status-days" style="font-size: 32px; font-weight: 900; color: #ccc;">--</div>
+      <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
     </div>
 
     <div class="card">
-      <h3>Student Details</h3>
-      <div class="input-row">
-        <input type="text" id="name" readonly placeholder="Name">
-        <span class="edit-pencil" onclick="enableEdit('name')">✏️</span>
+      <div class="detail-row">
+        <div class="detail-content">
+          <label class="detail-label">Full Name</label>
+          <input type="text" id="p-name" readonly placeholder="Enter Name">
+        </div>
+        <span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span>
       </div>
-      <div class="input-row">
-        <input type="text" id="father" readonly placeholder="Father's Name">
-        <span class="edit-pencil" onclick="enableEdit('father')">✏️</span>
+      <div class="detail-row">
+        <div class="detail-content">
+          <label class="detail-label">Father's Name</label>
+          <input type="text" id="p-father" readonly placeholder="Enter Father's Name">
+        </div>
+        <span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span>
       </div>
-      <div class="input-row">
-        <input type="tel" id="phone" readonly placeholder="Mobile (Mandatory)">
-        <span class="edit-pencil" onclick="enableEdit('phone')">✏️</span>
+      <div class="detail-row">
+        <div class="detail-content">
+          <label class="detail-label">Mobile Number</label>
+          <input type="tel" id="p-phone" readonly placeholder="Enter Mobile">
+        </div>
+        <span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span>
       </div>
-      <button class="primary" style="background:#27ae60;" onclick="window.updateProfile()">Save Changes</button>
+      <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
-    <div id="joinBox" class="card">
-      <button class="primary" onclick="window.requestJoin()">Request Admission OTP</button>
-      <div id="otpInputArea" class="hidden">
-        <input type="number" id="otpInput" placeholder="Enter OTP">
-        <button class="primary" onclick="window.verifyAdmission()">Verify Admission</button>
-      </div>
+    <div id="join-trigger-box">
+        <button class="btn btn-blue" onclick="openWizard()">Join the Library</button>
     </div>
 
-    <div id="paymentBox" class="card hidden">
-      <select id="shift"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option></select>
-      <button class="primary" onclick="window.processPayment()">Pay & Add 28 Days</button>
-      <button onclick="window.leaveLibrary()" style="background:none; border:none; color:red; width:100%; margin-top:20px; cursor:pointer;">Leave Library</button>
+    <div id="active-tools" class="hidden">
+        <div class="card" style="background: #f0f7ff;">
+            <label class="detail-label">Renewal Panel</label>
+            <select id="p-shift" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
+                <option value="500">Day Shift (₹500)</option>
+                <option value="400">Night Shift (₹400)</option>
+            </select>
+            <input type="number" id="p-days" value="28" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
+            <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
+        </div>
+        <button class="btn btn-outline" onclick="window.reqLeave()">Leave Library Membership</button>
     </div>
+    
+    <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
 </section>
 
+<div id="joinWizard" class="wizard-overlay">
+    <h2 style="color:var(--primary);">Admission Wizard</h2>
+    
+    <div id="step1" class="step-card step-active">
+        <span class="step-num">1</span> <b>Update Profile</b>
+        <p style="font-size:13px; color:#555;">Go back and ensure your Name, Father's Name, and Mobile are saved using the pencil icons.</p>
+        <button class="btn btn-blue" onclick="closeWizard()">Return to Profile</button>
+    </div>
+
+    <div id="step2" class="step-card">
+        <span class="step-num">2</span> <b>Verify Identity</b>
+        <p style="font-size:13px; color:#555;">Call Owner at <b>7500159996</b> for Admission OTP.</p>
+        <input type="number" id="join-otp" placeholder="6-digit OTP" oninput="toggleProceed(this)" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;">
+        <button id="proceed-btn" class="btn btn-black" onclick="window.verifyJoin()">Proceed</button>
+    </div>
+    <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
+</div>
+
 <section id="manage">
-  <div class="card" style="background:#000; color:#0f0;">
-    <h4>OTP Monitor</h4>
-    <div id="otpList"></div>
-  </div>
-  <div class="card">
-    <h4>Student Database (Click to open folder)</h4>
-    <div id="folderList"></div>
-  </div>
+    <div class="admin-nav">
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live OTPs</button>
+        <button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button>
+    </div>
+
+    <div id="am-pane-otp">
+        <div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;" id="admin-otp-list">
+            Monitoring signals...
+        </div>
+    </div>
+
+    <div id="am-pane-user" class="hidden">
+        <div id="admin-survival-list"></div>
+    </div>
 </section>
 
 <script type="module">
@@ -103,105 +168,139 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  window.showTab = (t) => {
+  // Navigation Logic
+  window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
+    document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+t.substring(0,3)).classList.add('active');
   };
 
-  window.enableEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
+  window.switchAdmin = (t) => {
+    document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
+    document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
+    document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
+    document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
+  };
+
+  window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
+  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
+  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
+  
+  window.toggleProceed = (el) => {
+    const btn = document.getElementById('proceed-btn');
+    if(el.value.length >= 6) btn.classList.replace('btn-black', 'btn-blue');
+    else btn.classList.replace('btn-blue', 'btn-black');
+  };
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = () => signOut(auth).then(() => location.reload());
 
   onAuthStateChanged(auth, (user) => {
     if(user) {
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('userProfile').classList.remove('hidden');
-      document.getElementById('userImg').src = user.photoURL;
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('hidden');
+      document.getElementById('u-img').src = user.photoURL;
 
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           const d = snap.data();
-          document.getElementById('name').value = d.name || "";
-          document.getElementById('father').value = d.father || "";
-          document.getElementById('phone').value = d.phone || "";
+          document.getElementById('p-name').value = d.name || "";
+          document.getElementById('p-father').value = d.father || "";
+          document.getElementById('p-phone').value = d.phone || "";
+          
           if(d.joinDateISO) {
-            document.getElementById('joinBox').classList.add('hidden');
-            document.getElementById('paymentBox').classList.remove('hidden');
-            const rem = (d.totalPaidDays || 0) - Math.floor((new Date() - new Date(d.joinDateISO)) / 86400000);
-            document.getElementById('countdownText').innerText = Math.abs(rem) + " Days";
-            document.getElementById('countdownText').style.color = rem >= 0 ? "green" : "red";
+            document.getElementById('join-trigger-box').classList.add('hidden');
+            document.getElementById('active-tools').classList.remove('hidden');
+            document.getElementById('status-joined').innerText = "JOINED: " + d.joinDate;
+            const diff = Math.floor((new Date() - new Date(d.joinDateISO)) / 86400000);
+            const rem = (d.totalPaidDays || 0) - diff;
+            const disp = document.getElementById('status-days');
+            disp.innerText = rem;
+            disp.style.color = rem >= 0 ? "var(--green)" : "var(--red)";
           }
         }
       });
 
       if(user.email === "c.commando822@gmail.com") {
-        document.getElementById('nav-man').classList.remove('hidden');
-        loadAdmin();
+        document.getElementById('tab-man').classList.remove('hidden');
+        loadAdminData();
       }
     }
   });
 
-  window.updateProfile = async () => {
-    const data = { name: document.getElementById('name').value, father: document.getElementById('father').value, phone: document.getElementById('phone').value, photo: auth.currentUser.photoURL };
-    await setDoc(doc(db, "users", auth.currentUser.uid), { ...data, history: arrayUnion(`Edited on ${new Date().toLocaleString()}`) }, {merge: true});
-    document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Profile Updated");
-  };
-
-  window.requestJoin = () => {
-    if(!document.getElementById('phone').value || document.getElementById('phone').value.length < 10) return alert("Mobile number is mandatory to join!");
+  window.saveProfile = async () => {
+    const name = document.getElementById('p-name').value;
+    const phone = document.getElementById('p-phone').value;
+    if(!name || !phone) return alert("Error: Name and Mobile are mandatory!");
+    
+    await setDoc(doc(db, "users", auth.currentUser.uid), {
+      name, father: document.getElementById('p-father').value, phone, photo: auth.currentUser.photoURL,
+      history: arrayUnion(`Edited Profile at ${new Date().toLocaleString()}`)
+    }, {merge: true});
+    
+    // Auto-generate signal for Step 2
     const otp = Math.floor(100000 + Math.random() * 900000);
-    setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('name').value });
-    document.getElementById('otpInputArea').classList.remove('hidden');
+    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
+    
+    document.querySelectorAll('input').forEach(i => i.readOnly = true);
+    alert("Step 1 Complete: Details Saved to Database.");
   };
 
-  window.verifyAdmission = async () => {
-    const snap = await getDoc(doc(db, "signals", auth.currentUser.uid));
-    if(snap.exists() && snap.data().otp == document.getElementById('otpInput').value) {
-      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: new Date().toISOString(), totalPaidDays: 0 }, {merge: true});
+  window.verifyJoin = async () => {
+    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
+      const now = new Date();
+      await setDoc(doc(db, "users", auth.currentUser.uid), {
+        joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0
+      }, {merge: true});
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      location.reload();
-    }
+      alert("Welcome to the Library!");
+      closeWizard();
+    } else alert("Invalid OTP. Call 7500159996");
   };
 
-  window.processPayment = async () => {
-    const amt = document.getElementById('shift').value;
+  window.doPayment = async () => {
+    const amt = document.getElementById('p-shift').value;
+    const days = parseInt(document.getElementById('p-days').value);
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    if(confirm("Payment Success?")) {
-      const userRef = doc(db, "users", auth.currentUser.uid);
-      const snap = await getDoc(userRef);
-      await setDoc(userRef, { 
-        totalPaidDays: (snap.data().totalPaidDays || 0) + 28,
-        payHistory: arrayUnion(`Paid ₹${amt} on ${new Date().toLocaleDateString()}`)
+    if(confirm("Confirm update after payment?")) {
+      const ref = doc(db, "users", auth.currentUser.uid);
+      const s = await getDoc(ref);
+      await setDoc(ref, { 
+        totalPaidDays: (s.data().totalPaidDays || 0) + days,
+        payHistory: arrayUnion(`Added ${days} days (₹${amt}) on ${new Date().toLocaleDateString()}`)
       }, {merge: true});
     }
   };
 
-  window.leaveLibrary = async () => {
-    if(confirm("Are you sure you want to leave? This clears your seat.")) {
-      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true});
-      location.reload();
+  window.reqLeave = () => {
+    if(confirm("Are you sure you want to end membership? Your days will be lost.")) {
+        setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true}).then(() => location.reload());
     }
   };
 
-  function loadAdmin() {
+  function loadAdminData() {
     onSnapshot(collection(db, "signals"), s => {
-      let h = ""; s.forEach(d => h += `<p>${d.data().name}: ${d.data().otp}</p>`);
-      document.getElementById('otpList').innerHTML = h || "No OTPs";
+      let h = ""; s.forEach(d => h += `<p style='border-bottom:1px solid #333; padding:5px;'>${d.data().type} | ${d.data().name}: <b style='color:white;'>${d.data().otp}</b></p>`);
+      document.getElementById('admin-otp-list').innerHTML = h || "No Active Signals";
     });
     onSnapshot(collection(db, "users"), s => {
       let h = ""; s.forEach(d => {
-        const u = d.data();
-        h += `<div class="user-folder" onclick="this.querySelector('.history-box').classList.toggle('hidden')">
-          <b>📂 ${u.name}</b> (${u.phone})
-          <div class="history-box hidden">
-            <strong>Change History:</strong><br>${(u.history || []).join('<br>') || 'No changes'}<br><br>
-            <strong>Payment History:</strong><br>${(u.payHistory || []).join('<br>') || 'No payments'}
+        const u = d.data(); if(!u.joinDateISO) return;
+        const diff = Math.floor((new Date() - new Date(u.joinDateISO)) / 86400000);
+        const rem = (u.totalPaidDays || 0) - diff;
+        h += `<div class="player-card" onclick="this.querySelector('.fold').classList.toggle('hidden')">
+          <img src="${u.photo}" class="player-photo">
+          <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
+          <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
+          <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
+            <strong>HISTORY:</strong><br>${(u.history || []).join('<br>')}<br><br>
+            <strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
-      document.getElementById('folderList').innerHTML = h;
+      document.getElementById('admin-survival-list').innerHTML = h;
     });
   }
 </script>
