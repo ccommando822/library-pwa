@@ -111,6 +111,7 @@
             <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
             <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
+            <p id="pay-status-msg" style="font-size:11px; color:gray; text-align:center; display:none;">Waiting for Owner to approve your transaction...</p>
         </div>
         <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
@@ -152,7 +153,7 @@
 
 <section id="manage">
     <div class="admin-nav">
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live OTPs</button>
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live Signals</button>
         <button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button>
     </div>
     <div id="am-pane-otp">
@@ -164,7 +165,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
@@ -172,7 +173,6 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  let userGlobal = null;
   let survivalDays = 0;
 
   window.switchMain = (t) => {
@@ -214,7 +214,6 @@
 
   onAuthStateChanged(auth, (user) => {
     if(user) {
-      userGlobal = user;
       document.getElementById('loginPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.remove('hidden');
       document.getElementById('u-img').src = user.photoURL;
@@ -251,21 +250,16 @@
       photo: auth.currentUser.photoURL
     }, {merge: true});
     document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Folder Details Saved.");
+    alert("Folder Saved Successfully.");
   };
 
   window.checkStepOne = async () => {
       const name = document.getElementById('p-name').value;
-      const father = document.getElementById('p-father').value;
-      const phone = document.getElementById('p-phone').value;
-      if(!name || !father || !phone) {
-          alert("Step 1 Failed: Fill all required details first.");
-      } else {
-          const otp = Math.floor(100000 + Math.random() * 900000);
-          await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
-          document.getElementById('step2').classList.add('step-active');
-          alert("Step 1 Success. Ask owner for OTP.");
-      }
+      if(!name || !document.getElementById('p-father').value || !document.getElementById('p-phone').value) return alert("Fill details first.");
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
+      document.getElementById('step2').classList.add('step-active');
+      alert("Step 1 Success. Ask owner for OTP.");
   };
 
   window.verifyJoin = async () => {
@@ -279,9 +273,8 @@
   };
 
   window.checkLeaveFees = async () => {
-      if (survivalDays < 0) {
-          alert("Step 1 Failed: Your dues are pending. Please pay till date before leaving.");
-      } else {
+      if (survivalDays < 0) alert("Pay dues first.");
+      else {
           const otp = Math.floor(100000 + Math.random() * 900000);
           await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
           document.getElementById('lstep2').classList.add('step-active');
@@ -292,9 +285,8 @@
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true});
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      closeLeaveWizard();
       location.reload();
     } else alert("Invalid OTP.");
   };
@@ -303,17 +295,47 @@
     const days = parseInt(document.getElementById('p-days').value) || 0;
     const shiftPrice = parseInt(document.getElementById('p-shift').value);
     const total = Math.round((shiftPrice / 28) * days);
+    
+    // Send Payment Signal to Admin instead of instant update
+    await setDoc(doc(db, "signals", "pay_" + auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
+        name: document.getElementById('p-name').value,
+        type: 'PAYMENT',
+        amount: total,
+        days: days,
+        time: new Date().toLocaleString()
+    });
+    
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${total}&cu=INR`;
-    if(confirm("Payment Success?")) {
-      const ref = doc(db, "users", auth.currentUser.uid);
+    document.getElementById('pay-status-msg').style.display = 'block';
+    alert("Payment initiated. Your days will update as soon as the owner approves the transaction.");
+  };
+
+  window.approvePayment = async (sid, uid, days, amount) => {
+      const ref = doc(db, "users", uid);
       const s = await getDoc(ref);
-      await setDoc(ref, { totalPaidDays: (s.data().totalPaidDays || 0) + days, payHistory: arrayUnion(`Added ${days} days (₹${total}) on ${new Date().toLocaleDateString()}`) }, {merge: true});
-    }
+      await updateDoc(ref, { 
+          totalPaidDays: (s.data().totalPaidDays || 0) + days,
+          payHistory: arrayUnion(`Approved ₹${amount} for ${days} days on ${new Date().toLocaleDateString()}`)
+      });
+      await deleteDoc(doc(db, "signals", sid));
+      alert("Payment Approved and Days Added.");
   };
 
   function loadAdminData() {
     onSnapshot(collection(db, "signals"), s => {
-      let h = ""; s.forEach(d => h += `<p style='border-bottom:1px solid #333; padding:5px;'>${d.data().type} | ${d.data().name}: <b style='color:white;'>${d.data().otp}</b></p>`);
+      let h = ""; s.forEach(d => {
+          const sig = d.data();
+          if(sig.type === 'PAYMENT') {
+              h += `<div style='border:1px solid #0f0; padding:10px; margin-bottom:5px;'>
+                  💰 ${sig.name} sent ₹${sig.amount} for ${sig.days} days.<br>
+                  <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount})" style='background:#0f0; color:#000; border:none; padding:5px; margin-top:5px; cursor:pointer; font-weight:bold;'>APPROVE NOW</button>
+                  <button onclick="confirm('Reject?') && deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red; color:white; border:none; padding:5px; margin-left:10px;'>REJECT</button>
+              </div>`;
+          } else {
+              h += `<p style='border-bottom:1px solid #333; padding:5px;'>${sig.type} | ${sig.name}: <b style='color:white;'>${sig.otp}</b></p>`;
+          }
+      });
       document.getElementById('admin-otp-list').innerHTML = h || "Monitoring...";
     });
     onSnapshot(collection(db, "users"), s => {
@@ -326,7 +348,7 @@
           <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
           <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
           <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
-            <strong>HISTORY:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
+            <strong>LOGS:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
