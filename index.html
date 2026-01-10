@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rakshapal Singh Library ERP</title>
   <style>
-    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; }
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #f1c40f; }
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
     header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
     
@@ -46,8 +46,8 @@
     .btn-green { background: var(--green); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
-    .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
     .log-container { max-height: 120px; overflow-y: auto; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; }
+    .log-expanded { max-height: none !important; }
   </style>
 </head>
 <body>
@@ -76,6 +76,7 @@
     <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
       <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED YET</div>
+      <div id="expire-label" style="font-size: 10px; color: var(--red); font-weight: bold; display:none;">EXPIRED</div>
       <div id="status-days" style="font-size: 24px; font-weight: 900; color: #ccc;">--</div>
       <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
       <div class="deduct-note">⚠️ Note: 1 Day will be deducted every 24 hours.</div>
@@ -90,8 +91,7 @@
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
-    <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container"></div></div>
-    <div class="card"><label class="detail-label">Activity Log</label><div id="user-act-log" class="log-container"></div></div>
+    <div class="card"><label class="detail-label">Payment & Membership Logs</label><div id="user-pay-log" class="log-container"></div></div>
 
     <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
     <div id="active-tools" class="hidden">
@@ -121,7 +121,14 @@
 
 <div id="leaveWizard" class="wizard-overlay">
     <h2 style="color:var(--red);">Membership Exit</h2>
-    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
+    <div id="lstep1" class="step-card step-active">
+        <span class="step-num">1</span> <b>Check Fees History</b>
+        <div id="leave-error-box" class="hidden" style="margin-top:10px; text-align:center;">
+            <p id="leave-error-msg" style="color:var(--red); font-size:13px; font-weight:bold;"></p>
+            <button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button>
+        </div>
+        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button>
+    </div>
     <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
@@ -153,7 +160,26 @@
   let currentUserData = {};
   let survivalDays = 0;
   const getStamp = () => new Date().toLocaleString('en-GB').replace(',', '');
-  const formatSurvival = (totalDays) => { if(totalDays < 0) return "EXPIRED"; const d = Math.floor(totalDays); const h = Math.floor((totalDays - d) * 24); return `${d} days ${h} hours`; };
+  
+  // MODIFIED SURVIVAL FORMATTER
+  const formatSurvival = (totalDays) => {
+    const absVal = Math.abs(totalDays);
+    const d = Math.floor(absVal);
+    const h = Math.floor((absVal - d) * 24);
+    const prefix = totalDays < 0 ? "-" : "";
+    return `${prefix}${d} days ${h} hours`;
+  };
+
+  const updateSurvivalUI = (days, containerId, labelId) => {
+    const el = document.getElementById(containerId);
+    const lbl = document.getElementById(labelId);
+    el.innerText = formatSurvival(days);
+    if(lbl) lbl.style.display = days < 0 ? 'block' : 'none';
+    
+    if (days >= 0) el.style.color = "var(--green)";
+    else if (days < 0 && days >= -28) el.style.color = "var(--yellow)";
+    else el.style.color = "var(--red)";
+  };
 
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
@@ -186,19 +212,15 @@
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
             const diff = (new Date() - new Date(currentUserData.joinDateISO)) / 86400000;
             survivalDays = (currentUserData.totalPaidDays || 0) - diff;
-            const disp = document.getElementById('status-days');
-            disp.innerText = formatSurvival(survivalDays);
-            disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
+            updateSurvivalUI(survivalDays, 'status-days', 'expire-label');
           }
           
-          let pLog = "", aLog = "";
+          let pLog = "";
           (currentUserData.history || []).forEach(m => {
             const entry = `<div style="border-bottom:1px solid #eee; padding:5px 0;">${m}</div>`;
-            if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected")) pLog += entry;
-            else aLog += entry;
+            if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected") || m.includes("Joined") || m.includes("Left")) pLog += entry;
           });
           document.getElementById('user-pay-log').innerHTML = pLog;
-          document.getElementById('user-act-log').innerHTML = aLog;
         }
       });
       if(user.email === "c.commando822@gmail.com") { document.getElementById('tab-man').classList.remove('hidden'); loadAdminData(); }
@@ -213,20 +235,22 @@
 
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step2').classList.remove('step-active'); };
-  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.openLeaveWizard = () => {
+      document.getElementById('leave-error-box').classList.add('hidden');
+      document.getElementById('leave-verify-btn').classList.remove('hidden');
+      document.getElementById('leaveWizard').classList.add('show');
+  };
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep2').classList.remove('step-active'); };
 
   window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
 
   window.checkStepOne = async () => {
-    // FIX: Checks all fields including the new address field
     const fields = ['p-name','p-father','p-dob','p-phone','p-address'];
     const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
     if(!allFilled) return alert("Please fill ALL details in your profile first!");
     
     const otp = Math.floor(100000 + Math.random() * 900000);
     const expiry = Date.now() + (5 * 60 * 1000);
-    // Use user.uid for signal to prevent overwrite
     await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value, type: 'Admission', expiresAt: expiry, createdAt: serverTimestamp() });
     document.getElementById('step2').classList.add('step-active');
   };
@@ -234,18 +258,31 @@
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().expiresAt > Date.now() && s.data().otp == document.getElementById('join-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), history: arrayUnion(`✅ Joined Library [${getStamp()}]`) });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), history: arrayUnion(`✅ Membership Joined [${getStamp()}]`) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
     } else alert("Invalid or Expired OTP.");
   };
 
+  // LEAVE LOGIC MODIFIED
   window.checkLeaveFees = async () => {
-    if (survivalDays < 0) return alert("Pending fees detected. Renew to exit.");
+    if (survivalDays < 0) {
+        document.getElementById('leave-error-msg').innerText = `Pending fees detected: Buy ${Math.ceil(Math.abs(survivalDays))} more days to exit.`;
+        document.getElementById('leave-error-box').classList.remove('hidden');
+        document.getElementById('leave-verify-btn').classList.add('hidden');
+        return;
+    }
     const otp = Math.floor(100000 + Math.random() * 900000);
     const expiry = Date.now() + (5 * 60 * 1000);
     await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value, type: 'Exit', expiresAt: expiry, createdAt: serverTimestamp() });
     document.getElementById('lstep2').classList.add('step-active');
+  };
+
+  window.payDebtAndExit = () => {
+      document.getElementById('p-days').value = Math.ceil(Math.abs(survivalDays));
+      window.calcTotal();
+      closeLeaveWizard();
+      document.getElementById('p-days').scrollIntoView();
   };
 
   window.verifyLeave = async () => {
@@ -261,9 +298,8 @@
     let d = Math.min(parseInt(document.getElementById('p-days').value) || 0, 364);
     const a = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * d);
     const t = getStamp(), sid = "pay_" + auth.currentUser.uid + "_" + Date.now();
-    const expiry = Date.now() + (5 * 60 * 1000);
     await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days at ${t}`) });
-    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, amount: a, days: d, time: t, type: 'PAYMENT', expiresAt: expiry });
+    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, amount: a, days: d, time: t, type: 'PAYMENT' });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${a}&cu=INR`;
     document.getElementById('pay-modal').style.display = 'flex';
   };
@@ -280,11 +316,18 @@
       onSnapshot(collection(db, "signals"), s => {
         let h = ""; s.forEach(d => {
           const sig = d.data(), now = Date.now();
-          if(sig.expiresAt < now) { deleteDoc(doc(db, "signals", d.id)); return; }
-          const diff = sig.expiresAt - now, m = Math.floor(diff/60000), s_sec = Math.floor((diff%60000)/1000), timer = `${m}:${s_sec<10?'0':''}${s_sec}`;
+          // PERSISTENT PAYMENT SIGNALS: No auto-deletion for PAYMENT type
+          if(sig.type !== 'PAYMENT' && sig.expiresAt < now) { deleteDoc(doc(db, "signals", d.id)); return; }
+          
+          let timer = "";
+          if(sig.type !== 'PAYMENT') {
+              const diff = sig.expiresAt - now, m = Math.floor(diff/60000), s_sec = Math.floor((diff%60000)/1000);
+              timer = `<span style="position:absolute; right:10px; top:5px; font-size:10px;">${m}:${s_sec<10?'0':''}${s_sec}</span>`;
+          }
+
           if(sig.type === 'PAYMENT') {
-            h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px; position:relative;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>💰 ${sig.name} (${sig.phone})<br>₹${sig.amount} for ${sig.days}d<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
-          } else h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`;
+            h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px; position:relative;">💰 ${sig.name} (${sig.phone})<br>₹${sig.amount} for ${sig.days}d<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
+          } else h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;">${timer}${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`;
         });
         document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
       });
@@ -301,16 +344,19 @@
 
   window.openUserFolder = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
-    let pLog = "", aLog = "", diff = 0, srv = 0;
-    if(u.joinDateISO) { diff = (new Date() - new Date(u.joinDateISO)) / 86400000; srv = (u.totalPaidDays || 0) - diff; }
+    let pLog = "", aLog = "", srv = 0;
+    if(u.joinDateISO) { srv = (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000); }
     (u.history || []).forEach(m => {
         const ent = `<div style="border-bottom:1px solid #eee; padding:5px 0;">${m}</div>`;
-        if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected")) pLog += ent; else aLog += ent;
+        if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected") || m.includes("Joined") || m.includes("Left")) pLog += ent; 
+        else aLog += ent;
     });
+    // OWNER VIEW WITH BOTH LOGS & EXPAND
     document.getElementById('folder-content').innerHTML = `
       <div class="card" style="text-align:center; border-bottom:4px solid var(--primary);">
         <img src="${u.photo}" style="width:80px; border-radius:50%; margin-bottom:10px;">
-        <div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurvival(srv)}</div>
+        <div id="adm-expire-lbl" style="font-size: 10px; color: var(--red); font-weight: bold; display:${srv < 0 ? 'block' : 'none'};">EXPIRED</div>
+        <div id="adm-status-days" style="font-size:24px; font-weight:900;">${formatSurvival(srv)}</div>
         <div style="font-size:10px;">Survival Remaining</div>
       </div>
       <div class="card">
@@ -324,8 +370,9 @@
         <div class="detail-row"><div class="detail-content"><label class="detail-label">Phone</label><input type="text" value="${u.phone}" readonly></div></div>
         <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea readonly>${u.address}</textarea></div></div>
       </div>
-      <div class="card"><label class="detail-label">Payment History</label><div class="log-container">${pLog}</div></div>
-      <div class="card"><label class="detail-label">Activity Log</label><div class="log-container">${aLog}</div></div>`;
+      <div class="card"><label class="detail-label">Payment Logs (Click to Expand)</label><div id="adm-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')">${pLog}</div></div>
+      <div class="card"><label class="detail-label">Activity Logs (Click to Expand)</label><div id="adm-act-log" class="log-container" onclick="this.classList.toggle('log-expanded')">${aLog}</div></div>`;
+    updateSurvivalUI(srv, 'adm-status-days', 'adm-expire-lbl');
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
