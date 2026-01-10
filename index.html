@@ -32,15 +32,15 @@
 
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
-    
+
     .division-header { background: #e2e8f0; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #475569; border-radius: 6px; margin: 15px 0 8px 0; text-transform: uppercase; }
     .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); }
     .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; }
 
-    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
     .btn-blue { background: var(--primary); color: white; }
-    .btn-black { background: var(--black); color: white; }
     .btn-green { background: var(--green); color: white; }
+    .btn-black { background: var(--black); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
     .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
@@ -50,7 +50,7 @@
 
 <header>Rakshapal Singh Library</header>
 
-<div id="pay-modal" onclick="this.style.display='none'"><div class="modal-box"><h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3><p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p></div></div>
+<div id="pay-modal" onclick="this.style.display='none'"><div class="modal-box"><h3 style="color:var(--primary);">Payment Initiated</h3><p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p></div></div>
 
 <nav id="main-nav">
   <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>
@@ -140,7 +140,7 @@
 
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      await updateDoc(doc(db, "users", user.uid), { isOnline: true, photo: user.photoURL, history: arrayUnion(`🔑 Log-in: [${getStamp()}]`) }).catch(()=>{});
+      await updateDoc(doc(db, "users", user.uid), { isOnline: true, photo: user.photoURL }).catch(()=>{});
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
@@ -163,7 +163,7 @@
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
           }
           let h = ""; (currentUserData.history || []).forEach(m => {
-            if(m.includes("Request") || m.includes("Verified") || m.includes("Rejected") || m.includes("Membership Left")) h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${m}</div>`;
+            if(m.includes("Request") || m.includes("Verified") || m.includes("Rejected") || m.includes("Membership Left")) h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`;
           });
           document.getElementById('user-history-list').innerHTML = h;
         }
@@ -172,6 +172,7 @@
     }
   });
 
+  // RESTORED SIGNAL HANDLING FOR OWNER
   window.handleSignal = async (sid, uid, stat, days, amt, reqT) => {
       const actT = getStamp(), ref = doc(db, "users", uid), snap = await getDoc(ref);
       const newH = snap.data().history.map(l => l.includes(reqT) ? 
@@ -185,7 +186,7 @@
     onSnapshot(collection(db, "signals"), s => {
       let h = ""; s.forEach(d => {
         const sig = d.data();
-        if(sig.type === 'PAYMENT') h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px;">💰 ${sig.name}: ₹${sig.amount}<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
+        if(sig.type === 'PAYMENT') h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px;">💰 ${sig.name}: ₹${sig.amount}<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="margin-left:10px; color:red;">Reject</button></div>`;
         else h += `<p>${sig.type} | ${sig.name}: <b style="color:white;">${sig.otp}</b></p>`;
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
@@ -200,17 +201,23 @@
     });
   }
 
-  window.openUserFolder = async (uid) => {
-    const u = (await getDoc(doc(db, "users", uid))).data();
-    const diff = u.joinDateISO ? (new Date() - new Date(u.joinDateISO)) / 86400000 : 0;
-    const rem = (u.totalPaidDays || 0) - diff;
-    let hist = ""; (u.history || []).forEach(m => hist += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
-    document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center; border-bottom:4px solid var(--primary);"><img src="${u.photo}" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;"><div style="font-size:24px; font-weight:900;">${formatSurvival(rem)}</div><div style="font-size:10px; text-transform:uppercase;">Survival Remaining</div></div>
-      <div class="card"><label class="detail-label">Full Logs</label><div style="font-size:11px;">${hist}</div></div>`;
-    document.getElementById('owner-folder-view').classList.add('show');
+  // RESTORED ORIGINAL WIZARD/OTP GENERATION FUNCTIONS
+  window.checkStepOne = async () => {
+      const o = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp: o, name: document.getElementById('p-name').value, type: 'Admission' });
+      document.getElementById('step2').classList.add('step-active');
   };
 
+  window.checkLeaveFees = async () => {
+    if(survivalDays < 0) alert("Fees Pending"); 
+    else {
+      const o = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp: o, name: document.getElementById('p-name').value, type: 'Leave' });
+      document.getElementById('lstep2').classList.add('step-active');
+    }
+  };
+
+  // OTHER LOGIC
   window.switchMain = (t) => { document.getElementById('account').classList.toggle('active', t==='account'); document.getElementById('manage').classList.toggle('active', t==='manage'); document.getElementById('tab-acc').classList.toggle('active', t==='account'); document.getElementById('tab-man').classList.toggle('active', t==='manage'); };
   window.switchAdmin = (t) => { document.getElementById('am-pane-otp').classList.toggle('hidden', t!=='otp'); document.getElementById('am-pane-user').classList.toggle('hidden', t!=='user'); document.getElementById('am-otp-btn').classList.toggle('active', t==='otp'); document.getElementById('am-user-btn').classList.toggle('active', t==='user'); };
   window.login = () => signInWithPopup(auth, provider);
@@ -221,12 +228,11 @@
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
-  window.checkStepOne = async () => { const o = Math.floor(100000 + Math.random() * 900000); await setDoc(doc(db, "signals", auth.currentUser.uid), { otp: o, name: document.getElementById('p-name').value, type: 'Admission', createdAt: serverTimestamp() }); document.getElementById('step2').classList.add('step-active'); };
   window.verifyJoin = async () => { const s = await getDoc(doc(db, "signals", auth.currentUser.uid)); if(s.exists() && s.data().otp == document.getElementById('join-otp').value) { await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString() }); await deleteDoc(doc(db, "signals", auth.currentUser.uid)); closeWizard(); } };
-  window.checkLeaveFees = () => { if(survivalDays < 0) alert("Fees Pending"); else document.getElementById('lstep2').classList.add('step-active'); };
   window.verifyLeave = async () => { const s = await getDoc(doc(db, "signals", auth.currentUser.uid)); if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) { const log = `📉 Membership Left. Last Balance: ${formatSurvival(survivalDays)} [${getStamp()}]`; await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(log) }); await deleteDoc(doc(db, "signals", auth.currentUser.uid)); closeLeaveWizard(); } };
   window.doPayment = async () => { const d = document.getElementById('p-days').value, a = Math.round((document.getElementById('p-shift').value/28)*d), t = getStamp(), sid = "pay_" + Date.now(); await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days at ${t}`) }); await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: t, type: 'PAYMENT' }); window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${a}`; document.getElementById('pay-modal').style.display = 'flex'; };
   window.saveProfile = async () => { await updateDoc(doc(db, "users", auth.currentUser.uid), { name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value }); alert("Saved"); };
+  window.openUserFolder = async (uid) => { const u = (await getDoc(doc(db, "users", uid))).data(); let h = ""; (u.history || []).forEach(m => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`); document.getElementById('folder-content').innerHTML = `<div class="card" style="text-align:center;"><img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;"><h3>${u.name}</h3></div><div class="card"><label class="detail-label">Logs</label><div style="font-size:11px;">${h}</div></div>`; document.getElementById('owner-folder-view').classList.add('show'); };
 </script>
 </body>
 </html>
