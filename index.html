@@ -30,6 +30,10 @@
     .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
     .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
 
+    /* Centered Modal Style */
+    #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
+    .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); }
+
     .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--primary); flex-wrap: wrap; }
     .player-photo { width: 50px; height: 50px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
     .player-info { flex: 1; }
@@ -52,6 +56,15 @@
 <body>
 
 <header>Rakshapal Singh Library</header>
+
+<div id="pay-modal" onclick="this.style.display='none'">
+    <div class="modal-box">
+        <h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3>
+        <p style="font-size:14px; color:#333;">You will get your days as soon as owner verified.</p>
+        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for instant verification.</p>
+        <small style="color:gray;">Click anywhere to close</small>
+    </div>
+</div>
 
 <nav id="main-nav">
   <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>
@@ -105,13 +118,12 @@
             <label class="detail-label">Renewal Panel</label>
             <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
                 <option value="500">Day Shift (₹500/28d)</option>
-                <option value="700">Night Shift (₹700/28d)</option>
-                <option value="400">Half Shift (₹400/28d)</option>
+                <option value="400">Night Shift (₹400/28d)</option>
+                <option value="700">Both Shift (₹700/28d)</option>
             </select>
-            <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy (Max 364)">
+            <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
             <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
-            <p id="pay-status-msg" style="font-size:11px; color:var(--red); font-weight:bold; text-align:center; display:none; margin-top:10px;">Verification Pending. Call 7500159996 for instant approval.</p>
         </div>
         <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
@@ -165,13 +177,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  // Fixed common import error for firestore below
-</script>
-<script type="module">
   import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
@@ -196,10 +202,10 @@
   };
 
   window.calcTotal = () => {
-      const daysInput = document.getElementById('p-days');
-      if(parseInt(daysInput.value) > 364) { alert("Max limit is 364 days."); daysInput.value = 364; }
+      const daysIn = document.getElementById('p-days');
+      if(parseInt(daysIn.value) > 364) daysIn.value = 364;
       const shiftPrice = parseInt(document.getElementById('p-shift').value);
-      const days = parseInt(daysInput.value) || 0;
+      const days = parseInt(daysIn.value) || 0;
       const total = Math.round((shiftPrice / 28) * days);
       document.getElementById('pay-summary').innerText = `Total Amount: ₹${total}`;
   };
@@ -239,6 +245,11 @@
             const disp = document.getElementById('status-days');
             disp.innerText = survivalDays;
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
+          } else {
+             document.getElementById('join-trigger-box').classList.remove('hidden');
+             document.getElementById('active-tools').classList.add('hidden');
+             document.getElementById('status-joined').innerText = "NOT JOINED YET";
+             document.getElementById('status-days').innerText = d.totalPaidDays || 0;
           }
         }
       });
@@ -257,11 +268,11 @@
       photo: auth.currentUser.photoURL
     }, {merge: true});
     document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Profile Folder Updated.");
+    alert("Folder Saved.");
   };
 
   window.checkStepOne = async () => {
-      if(!document.getElementById('p-name').value || !document.getElementById('p-phone').value) return alert("Fill Profile Folder First.");
+      if(!document.getElementById('p-name').value || !document.getElementById('p-phone').value) return alert("Fill Profile First.");
       const otp = Math.floor(100000 + Math.random() * 900000);
       await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission' });
       document.getElementById('step2').classList.add('step-active');
@@ -271,20 +282,17 @@
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
       const now = new Date();
-      // Logic: If user has survivalDays left, add them to the new starting totalPaidDays
-      const carryForward = survivalDays > 0 ? survivalDays : 0;
-      await setDoc(doc(db, "users", auth.currentUser.uid), { 
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { 
           joinDate: now.toLocaleDateString(), 
-          joinDateISO: now.toISOString(), 
-          totalPaidDays: carryForward 
-      }, {merge: true});
+          joinDateISO: now.toISOString() 
+      });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
     } else alert("Invalid OTP.");
   };
 
   window.checkLeaveFees = async () => {
-      if (survivalDays < 0) alert("Step 1 Failed: Pay pending dues.");
+      if (survivalDays < 0) alert("Fees Pending.");
       else {
           const otp = Math.floor(100000 + Math.random() * 900000);
           await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
@@ -295,13 +303,12 @@
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      // NEW LOGIC: Save current remaining survival days into totalPaidDays before clearing the joining date
       await updateDoc(doc(db, "users", auth.currentUser.uid), { 
           totalPaidDays: survivalDays,
           joinDateISO: null 
       });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      location.reload();
+      closeLeaveWizard();
     } else alert("Invalid OTP.");
   };
 
@@ -313,7 +320,7 @@
         amount: total, days: days, time: new Date().toLocaleString()
     });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${total}&cu=INR`;
-    document.getElementById('pay-status-msg').style.display = 'block';
+    document.getElementById('pay-modal').style.display = 'flex';
   };
 
   window.approvePayment = async (sid, uid, days, amount) => {
@@ -321,10 +328,10 @@
       const s = await getDoc(ref);
       await updateDoc(ref, { 
           totalPaidDays: (s.data().totalPaidDays || 0) + days,
-          payHistory: arrayUnion(`Added ₹${amount} for ${days} days on ${new Date().toLocaleDateString()}`)
+          payHistory: arrayUnion(`Approved ₹${amount} for ${days} days on ${new Date().toLocaleDateString()}`)
       });
       await deleteDoc(doc(db, "signals", sid));
-      alert("Payment Approved.");
+      alert("Success.");
   };
 
   function loadAdminData() {
@@ -333,7 +340,7 @@
           const sig = d.data();
           if(sig.type === 'PAYMENT') {
               h += `<div style='border:1px solid #0f0; padding:10px; margin-bottom:5px;'>
-                  💰 ${sig.name} - ₹${sig.amount} (${sig.days} days)<br>
+                  💰 ${sig.name} sent ₹${sig.amount} for ${sig.days} days.<br>
                   <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount})" style='background:#0f0; padding:5px; font-weight:bold;'>APPROVE</button>
                   <button onclick="deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red; color:white; padding:5px; margin-left:10px;'>REJECT</button>
               </div>`;
@@ -351,7 +358,7 @@
           <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
           <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
           <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
-            <strong>LOGS:</strong><br>${(u.payHistory || []).join('<br>')}
+            <strong>HISTORY:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
