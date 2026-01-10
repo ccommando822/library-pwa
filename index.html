@@ -27,18 +27,15 @@
     .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
-    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); position: relative; }
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); justify-content: space-between; }
     .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; }
-    .player-surv { position: absolute; right: 10px; font-size: 10px; font-weight: bold; }
     .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
     .btn-blue { background: var(--primary); color: white; }
     .btn-green { background: var(--green); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
-    /* CHAT STYLE LOGS: Newest at bottom */
     .log-container { max-height: 200px; overflow-y: auto; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; }
     .log-expanded { max-height: none !important; }
-    .division-header { background: #e2e8f0; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #475569; border-radius: 6px; margin: 15px 0 8px 0; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -48,7 +45,7 @@
 <div id="pay-modal" onclick="this.style.display='none'">
     <div class="modal-box">
         <h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3>
-        <p style="font-size:14px; color:#333;">Owner will verify shortly.</p>
+        <p style="font-size:14px; color:#333;">Check Signal Tab for status.</p>
         <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p>
     </div>
 </div>
@@ -64,7 +61,7 @@
   </div>
 
   <div id="profilePanel" class="hidden">
-    <div class="card" id="profile-card" style="text-align:center; border-bottom: 4px solid var(--primary);">
+    <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
       <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED YET</div>
       <div id="expire-label" style="font-size: 28px; font-weight: 900; color: var(--red); display:none; margin-bottom:-5px;">EXPIRED</div>
@@ -72,7 +69,7 @@
       <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
     </div>
 
-    <div class="card" id="details-panel">
+    <div id="details-card-anchor" class="card">
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
@@ -81,7 +78,7 @@
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
-    <div class="card"><label class="detail-label">Payment & Membership Logs</label><div id="user-pay-log" class="log-container"></div></div>
+    <div class="card"><label class="detail-label">Logs</label><div id="user-pay-log" class="log-container"></div></div>
 
     <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
     <div id="active-tools" class="hidden">
@@ -104,21 +101,14 @@
 
 <div id="joinWizard" class="wizard-overlay">
     <h2 style="color:var(--primary);">Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check, Lock & Redirect</button></div>
     <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
 </div>
 
 <div id="leaveWizard" class="wizard-overlay">
     <h2 style="color:var(--red);">Membership Exit</h2>
-    <div id="lstep1" class="step-card step-active">
-        <span class="step-num">1</span> <b>Check Fees History</b>
-        <div id="leave-error-box" class="hidden">
-            <p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p>
-            <button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button>
-        </div>
-        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button>
-    </div>
+    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p><button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button></div><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
     <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
@@ -155,7 +145,7 @@
   const getStamp = () => new Date().toLocaleString('en-GB');
 
   const formatSurv = (days) => {
-    const abs = Math.abs(days), d = Math.floor(abs + 0.00001), h = Math.floor(((abs + 0.00001) - d) * 24);
+    const abs = Math.abs(days), d = Math.floor(abs), h = Math.floor((abs - d) * 24);
     return `${days < 0 ? '-' : ''}${d} days ${h} hours`;
   };
 
@@ -182,6 +172,7 @@
 
   onAuthStateChanged(auth, async (user) => {
     if(user) {
+      await updateDoc(doc(db, "users", user.uid), { isOnline: true }).catch(()=>{});
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
@@ -202,8 +193,7 @@
               logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
           });
           const logBox = document.getElementById('user-pay-log');
-          logBox.innerHTML = logs;
-          logBox.scrollTop = logBox.scrollHeight;
+          logBox.innerHTML = logs; logBox.scrollTop = logBox.scrollHeight;
         }
       });
       if(user.email === "c.commando822@gmail.com") { document.getElementById('tab-man').classList.remove('hidden'); loadAdmin(); }
@@ -217,53 +207,81 @@
       const val = document.getElementById('p-'+k).value.trim();
       if(val.length < 6) return alert(`${label} must be at least 6 characters!`);
       if(val !== (currentUserData[k] || "")) {
-        logMsg = `Edited Profile ${label} from ${currentUserData[k] || 'Empty'} →_→ ${val} at ${getStamp()}`;
+        logMsg += `Edited Profile ${label} from ${currentUserData[k] || 'Empty'} →_→ ${val} at ${getStamp()}`;
         updates[k] = val;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { ...updates, history: arrayUnion(logMsg) });
       }
     }
-    alert("Updated!");
+    if(Object.keys(updates).length > 0) {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { ...updates, history: arrayUnion(logMsg) });
+      alert("Updated!");
+    }
   };
 
+  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
+
   window.checkStepOne = async () => {
-    const isReady = ['p-name','p-father','p-dob','p-phone','p-address'].every(id => document.getElementById(id).value.trim().length >= 6);
-    if(!isReady) {
-        document.getElementById('details-panel').scrollIntoView();
-        document.getElementById('p-name').focus();
-        return alert("Redirecting: Complete profile details first!");
-    }
+    if(!['p-name','p-father','p-dob','p-phone','p-address'].every(id => document.getElementById(id).value.trim().length >= 6)) 
+        return alert("Fill all details (min 6 chars) first!");
     const otp = Math.floor(100000 + Math.random() * 900000);
     await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Admission', name: document.getElementById('p-name').value, expiresAt: Date.now() + 300000 });
     document.getElementById('step2').classList.add('step-active');
+    document.getElementById('details-card-anchor').scrollIntoView({ behavior: 'smooth' });
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
-      const bal = formatSurv(survivalDays);
+      const realTimeSurv = (currentUserData.totalPaidDays || 0) - ((new Date() - new Date(currentUserData.joinDateISO)) / 86400000);
+      const balStr = formatSurv(currentUserData.joinDateISO ? realTimeSurv : 0);
       await updateDoc(doc(db, "users", auth.currentUser.uid), { 
         joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), 
-        history: arrayUnion(`📈 Membership Joined. Starting Balance: ${bal} [${getStamp()}]`) 
+        history: arrayUnion(`📈 Membership Joined. Starting Balance: ${balStr} [${getStamp()}]`) 
       });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
     }
   };
 
+  window.checkLeaveFees = async () => {
+    if(survivalDays < -1) {
+      document.getElementById('leave-error-msg').innerText = `Buy ${Math.ceil(Math.abs(survivalDays))} more days to clear debt.`;
+      document.getElementById('leave-error-box').classList.remove('hidden');
+      document.getElementById('leave-verify-btn').classList.add('hidden');
+    } else {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Exit', name: currentUserData.name, expiresAt: Date.now() + 300000 });
+      document.getElementById('lstep2').classList.add('step-active');
+    }
+  };
+
+  window.verifyLeave = async () => {
+    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
+      const bal = formatSurv(survivalDays);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+        totalPaidDays: survivalDays, joinDateISO: null, 
+        history: arrayUnion(`📉 Membership Left. Last Balance: ${bal} [${getStamp()}]`) 
+      });
+      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
+      location.reload();
+    }
+  };
+
   window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    let d = parseInt(document.getElementById('p-days').value);
+    let shift = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
     let a = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
     let reqT = getStamp(), sid = "pay_"+auth.currentUser.uid+"_"+Date.now();
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days (${s}) at ${reqT}`) });
-    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: reqT, type: 'PAYMENT', shift: s });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days (${shift}) at ${reqT}`) });
+    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: reqT, shift, type: 'PAYMENT' });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${a}`;
     document.getElementById('pay-modal').style.display = 'flex';
   };
 
-  window.handlePay = async (sid, uid, stat, days, amt, reqT, shft) => {
+  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift) => {
     const ref = doc(db, "users", uid), snap = await getDoc(ref);
     const h = snap.data().history.map(l => l.includes(reqT) ? 
-      `${stat=='OK'?'✅ Verified':'❌ Rejected'}: ₹${amt} for ${days} days (${shft}) Request at ${reqT}. ${stat=='OK'?'Approved':'Rejected'} at ${getStamp()}` : l);
+      `${stat=='OK'?'✅ Verified':'❌ Rejected'}: ₹${amt} for ${days} days (${shift}) Request at ${reqT}. ${stat=='OK'?'Approved':'Rejected'} at ${getStamp()}` : l);
     await updateDoc(ref, { totalPaidDays: stat=='OK' ? (snap.data().totalPaidDays||0)+days : snap.data().totalPaidDays, history: h });
     await deleteDoc(doc(db, "signals", sid));
   };
@@ -277,59 +295,38 @@
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
     });
-
     onSnapshot(collection(db, "users"), s => {
-      let users = []; s.forEach(d => { 
-        const u = d.data(); 
-        const srv = u.joinDateISO ? (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000) : 0;
-        users.push({...u, id: d.id, srv}); 
-      });
-      users.sort((a,b) => a.name.localeCompare(b.name));
+      let users = []; s.forEach(d => { users.push({id: d.id, ...d.data()}); });
+      users.sort((a,b) => (a.name || "").localeCompare(b.name || ""));
       
-      const grp = { onJ: "", offJ: "", onNL: "", offNL: "" };
+      const grp = { onJ: "", offJ: "", onL: "", offL: "" };
       users.forEach(u => {
-        const isJoined = !!u.joinDateISO, isNew = !u.history?.some(m => m.includes("Joined"));
-        const card = `<div class="player-card" onclick="openUser('${u.id}')"><img src="${u.photo}" class="player-photo"><b>${u.name}</b><span class="player-surv" style="color:${u.srv>=0?'var(--green)':'var(--red)'}">${isJoined?formatSurv(u.srv):'--'}</span></div>`;
-        if(u.isOnline && isJoined) grp.onJ += card;
-        else if(!u.isOnline && isJoined) grp.offJ += card;
-        else if(u.isOnline && !isJoined) grp.onNL += card;
-        else grp.offNL += card;
+        const srv = u.joinDateISO ? (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000) : 0;
+        const color = srv >= 0 ? "var(--green)" : (srv >= -28 ? "var(--yellow)" : "var(--red)");
+        const statusHtml = u.joinDateISO ? `<span style="color:${color}; font-size:10px;">${formatSurv(srv)}</span>` : `<span style="color:gray; font-size:10px;">${u.totalPaidDays > 0 ? 'LEFT' : 'NEW'}</span>`;
+        const card = `<div class="player-card" onclick="openUser('${u.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>${statusHtml}</div>`;
+        
+        if(u.isOnline) { u.joinDateISO ? grp.onJ += card : grp.onL += card; } 
+        else { u.joinDateISO ? grp.offJ += card : grp.offL += card; }
       });
-      document.getElementById('admin-survival-list').innerHTML = `
-        <div class="division-header">Online (Joined)</div>${grp.onJ}
-        <div class="division-header">Offline (Joined)</div>${grp.offJ}
-        <div class="division-header">Online (New/Left)</div>${grp.onNL}
-        <div class="division-header">Offline (New/Left)</div>${grp.offNL}`;
+      document.getElementById('admin-survival-list').innerHTML = `<div style="font-size:10px; color:var(--primary); padding:5px;">ONLINE JOINED</div>${grp.onJ}<div style="font-size:10px; color:var(--primary); padding:5px;">OFFLINE JOINED</div>${grp.offJ}<div style="font-size:10px; color:var(--primary); padding:5px;">ONLINE NEW/LEFT</div>${grp.onL}<div style="font-size:10px; color:var(--primary); padding:5px;">OFFLINE NEW/LEFT</div>${grp.offL}`;
     });
   }
 
   window.openUser = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
     const curSurv = u.joinDateISO ? (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000) : 0;
-    let pLog = "", aLog = "";
-    (u.history || []).forEach(m => {
-        const ent = `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
-        if(m.includes("Verified") || m.includes("Rejected") || m.includes("Request") || m.includes("Membership")) pLog += ent; else aLog += ent;
-    });
+    let logs = ""; (u.history || []).forEach(m => { logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`; });
     document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;">
-        <div id="adm-exp" style="font-size:28px; font-weight:900; color:var(--red); display:${curSurv < -28 ? 'block' : 'none'};">EXPIRED</div>
-        <div id="adm-surv" style="font-size:24px; font-weight:900;">${formatSurv(curSurv)}</div>
+      <div class="card" style="text-align:center;"><div id="adm-exp" style="font-size:28px; font-weight:900; color:var(--red); display:${curSurv < -28 ? 'block' : 'none'};">EXPIRED</div><div id="adm-surv" style="font-size:24px; font-weight:900;">${formatSurv(curSurv)}</div></div>
+      <div class="card"><label class="detail-label">Adjust Survival (Enter Total Paid Days)</label>
+        <div id="adm-preview" style="font-weight:bold; color:var(--primary); margin-bottom:5px;">Current: ${formatSurv(curSurv)}</div>
+        <input type="number" id="adm-days" value="${u.totalPaidDays}" oninput="document.getElementById('adm-preview').innerText = 'New Total: ' + this.value + ' days'" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
+        <button class="btn btn-blue" onclick="saveAdmSurv('${uid}')">Update Balance</button>
       </div>
-      <div class="card">
-        <label class="detail-label">Adjust Survival (Formatted Balance)</label>
-        <div style="font-weight:bold; margin-bottom:10px;">Current: ${formatSurv(curSurv)}</div>
-        <input type="number" step="0.01" id="adm-days" value="${u.totalPaidDays}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
-        <button class="btn btn-blue" onclick="saveAdmSurv('${uid}')">Update Balance (Total Paid Days)</button>
-      </div>
-      <div class="card">
-        <div class="detail-label">Full Profile</div>
-        <div>Name: ${u.name}</div><div>Father: ${u.father}</div><div>D.O.B: ${u.dob}</div><div>Phone: ${u.phone}</div><div>Address: ${u.address}</div>
-      </div>
-      <div class="card"><label class="detail-label">Payment Logs</label><div id="adm-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')">${pLog}</div></div>
-      <div class="card"><label class="detail-label">Activity Logs</label><div id="adm-act-log" class="log-container" onclick="this.classList.toggle('log-expanded')">${aLog}</div></div>`;
+      <div class="card"><div class="detail-label">Profile</div><div>Name: ${u.name}</div><div>Father: ${u.father}</div><div>D.O.B: ${u.dob}</div><div>Phone: ${u.phone}</div><div>Address: ${u.address}</div></div>
+      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${logs}</div></div>`;
     updateUI(curSurv, 'adm-surv', 'adm-exp');
-    ['adm-pay-log','adm-act-log'].forEach(id => { const b = document.getElementById(id); if(b) b.scrollTop = b.scrollHeight; });
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
@@ -340,13 +337,12 @@
   };
 
   window.login = () => signInWithPopup(auth, provider);
-  window.logout = () => signOut(auth).then(()=>location.reload());
+  window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.calcTotal = () => { let d = document.getElementById('p-days').value; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
-  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
 </script>
 </body>
 </html>
