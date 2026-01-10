@@ -5,30 +5,40 @@
   <title>Rakshapal Singh Library</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    /* BASIC STYLING: Setting up colors and fonts for a professional look */
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1c1e21; }
     header { background: #1976d2; color: white; padding: 16px; text-align: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+    
+    /* NAVIGATION: The buttons at the top to switch between screens */
     nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 58px; z-index: 999; }
-    nav button { flex: 1; padding: 14px; border: none; background: none; cursor: pointer; font-size: 14px; color: #65676b; transition: 0.3s; }
+    nav button { flex: 1; padding: 14px; border: none; background: none; cursor: pointer; font-size: 14px; color: #65676b; }
     nav button.active { border-bottom: 3px solid #1976d2; color: #1976d2; font-weight: bold; }
+    
+    /* CARDS: White boxes used to contain information */
     section { padding: 16px; display: none; max-width: 600px; margin: auto; }
     section.active { display: block; }
     .card { background: white; padding: 20px; margin-bottom: 16px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     .hidden { display: none !important; }
+    
+    /* FORM ELEMENTS: Styling inputs, labels and buttons */
     input, select { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-    label { font-size: 12px; color: #1976d2; font-weight: bold; display: block; margin-top: 12px; text-transform: uppercase; }
-    button.primary { width: 100%; padding: 14px; background: #1976d2; color: white; border: none; border-radius: 8px; margin-top: 16px; font-weight: bold; cursor: pointer; font-size: 16px; }
-    button.danger { width: 100%; padding: 14px; background: #e4e6eb; color: #4b4f56; border: none; border-radius: 8px; margin-top: 16px; cursor: pointer; }
+    label { font-size: 11px; color: #1976d2; font-weight: bold; display: block; margin-top: 12px; text-transform: uppercase; }
+    button.primary { width: 100%; padding: 14px; background: #1976d2; color: white; border: none; border-radius: 8px; margin-top: 16px; font-weight: bold; cursor: pointer; }
+    button.danger { width: 100%; padding: 14px; background: #fee; color: #d32f2f; border: 1px solid #d32f2f; border-radius: 8px; margin-top: 10px; cursor: pointer; }
 
-    /* OS DASHBOARD STYLE FOR ADMIN */
+    /* OWNER DASHBOARD: Player card style with dark theme */
     .player-card { background: #242526; color: #e4e6eb; border-radius: 8px; padding: 12px; display: flex; align-items: center; margin-bottom: 12px; position: relative; border-left: 4px solid #3498db; cursor: pointer; }
-    .player-photo { width: 50px; height: 50px; border-radius: 6px; margin-right: 12px; border: 1px solid #3e4042; object-fit: cover; }
-    .player-info { flex-grow: 1; }
+    .player-photo { width: 50px; height: 50px; border-radius: 6px; margin-right: 12px; object-fit: cover; border: 1px solid #3e4042; }
     .player-name { font-weight: bold; font-size: 16px; color: #3498db; display: block; }
     .player-sub { font-size: 12px; color: #b0b3b8; }
+    
+    /* PILL STYLE: Green for paid-up users, Red for late users */
     .status-pill { position: absolute; right: 12px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-    .status-green { background: #2d88ff; color: white; }
-    .status-red { background: #fa3e3e; color: white; }
-    .otp-box { background: #fff9e6; border: 1px dashed #ffd700; padding: 15px; text-align: center; border-radius: 8px; margin-top: 10px; }
+    .status-green { background: #27ae60; color: white; }
+    .status-red { background: #c0392b; color: white; }
+    
+    /* OTP ALERT BOX: Used to show the owner who is requesting to join */
+    .owner-otp-alert { background: #e3f2fd; border: 1px solid #2196f3; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -42,7 +52,10 @@
 </nav>
 
 <section id="home" class="active">
-  <div class="card"><h3>Safe Study Space</h3><p>Manage your admission and monthly fees easily.</p></div>
+  <div class="card">
+    <h3>Welcome to Library</h3>
+    <p>Sign in to the Account tab to register your profile and check your fee status.</p>
+  </div>
 </section>
 
 <section id="account">
@@ -60,50 +73,59 @@
     </div>
 
     <div class="card">
+      <h3>Personal Details</h3>
       <label>Full Name</label><input type="text" id="name">
       <label>Father's Name</label><input type="text" id="father">
       <label>Phone Number</label><input type="tel" id="phone">
       <label>Date of Birth</label><input type="date" id="dob">
-      <button class="primary" style="background:#42b72a;" onclick="window.updateProfile()">Update Profile</button>
+      <button class="primary" style="background:#42b72a;" onclick="window.updateProfile()">Update Details</button>
     </div>
 
     <div id="joinBox" class="card">
-      <h3>Library Admission</h3>
-      <p>Ensure your profile is updated before joining.</p>
-      <button class="primary" onclick="window.requestJoin()">Join the Library</button>
-      <div id="otpInputArea" class="hidden otp-box">
-        <p><b>Call Owner for OTP</b></p>
-        <input type="number" id="otpInput" placeholder="Enter 6-digit Code">
-        <button class="primary" onclick="window.verifyAdmission()">Verify & Join</button>
+      <h3>Join the Library</h3>
+      <p>Once you fill your profile, click below to request admission.</p>
+      <button class="primary" onclick="window.requestJoin()">Request OTP Code</button>
+      <div id="otpInputArea" class="hidden" style="margin-top:15px; border-top: 1px solid #ddd; padding-top:10px;">
+        <p><b>Step 2: Ask Owner for the OTP</b></p>
+        <input type="number" id="otpInput" placeholder="Enter 6-digit OTP">
+        <button class="primary" onclick="window.verifyAdmission()">Verify & Finalize Join</button>
       </div>
     </div>
 
     <div id="paymentBox" class="card hidden">
-      <h3>Fees & Renewal</h3>
+      <h3>Fee Renewal</h3>
+      <label>Select Shift</label>
       <select id="shift"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Full (₹700)</option></select>
+      <label>Number of Days</label>
       <input type="number" id="payDays" value="28">
-      <button class="primary" onclick="window.processPayment()">Pay Fee via UPI</button>
+      <button class="primary" onclick="window.processPayment()">Pay via UPI</button>
     </div>
     
-    <button class="danger" onclick="window.logout()">Log Out</button>
+    <button class="danger" onclick="window.logout()">Log Out Account</button>
   </div>
 </section>
 
 <section id="admin">
   <div class="card">
-    <h3>Student Folders</h3>
-    <div id="folderList">Loading students...</div>
+    <h3>Joining Requests (OTPs)</h3>
+    <div id="ownerOtpList">No active requests.</div>
+  </div>
+
+  <div class="card">
+    <h3>Student Database</h3>
+    <div id="folderList">Loading Students...</div>
   </div>
   
   <div id="folderView" class="card hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; overflow-y:auto; background:#f0f2f5; border-radius:0;">
     <div style="padding:15px;">
-        <button class="danger" onclick="document.getElementById('folderView').classList.add('hidden')">← Back to List</button>
+        <button class="primary" style="background:#4b4f56" onclick="document.getElementById('folderView').classList.add('hidden')">← Back to Database</button>
         <div id="folderContent" style="margin-top:20px;"></div>
     </div>
   </div>
 </section>
 
 <script type="module">
+  // --- FIREBASE CONFIGURATION ---
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -114,9 +136,10 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // Helper visibility
-  const ui = (id, show) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); };
+  // --- HELPER FUNCTIONS ---
+  const toggleUI = (id, isVisible) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !isVisible); };
 
+  // Switching between Home, Account, and Manage tabs
   window.openTab = (id) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -124,24 +147,36 @@
     if(document.getElementById('tab-'+id)) document.getElementById('tab-'+id).classList.add('active');
   };
 
+  // Standard Google Login/Logout logic
   window.login = () => signInWithPopup(auth, provider);
   window.logout = () => signOut(auth).then(() => location.reload());
 
-  function calcDays(isoDate, paid) {
-    if(!isoDate) return 0;
-    const used = Math.floor((new Date() - new Date(isoDate)) / (1000 * 60 * 60 * 24));
-    return (paid || 0) - used;
+  // --- FEE CALCULATION LOGIC ---
+  // Compares Join Date with Paid Days to see if user is in "Survival" or "Offline"
+  function calculateDaysLeft(isoJoiningDate, totalPaidDays) {
+    if(!isoJoiningDate) return 0;
+    const joiningDate = new Date(isoJoiningDate);
+    const today = new Date();
+    // (Today - Join Date) gives us how many days they have stayed so far
+    const daysPassed = Math.floor((today - joiningDate) / (1000 * 60 * 60 * 24));
+    // Returns remaining balance (can be negative if they haven't paid)
+    return (totalPaidDays || 0) - daysPassed;
   }
 
+  // --- REAL-TIME DATA HANDLING ---
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      ui('loginView', false); ui('userProfile', true);
+      // If user is logged in, show profile and hide login button
+      toggleUI('loginView', false); 
+      toggleUI('userProfile', true);
       document.getElementById('userImg').src = user.photoURL;
       document.getElementById('userNameHeader').innerText = user.displayName;
       
+      // Listen to this specific user's database file
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()){
           const d = snap.data();
+          // Fill the input boxes with existing data
           document.getElementById('name').value = d.name || "";
           document.getElementById('father').value = d.father || "";
           document.getElementById('phone').value = d.phone || "";
@@ -149,22 +184,32 @@
           document.getElementById('statusBadge').innerText = d.status || "Visitor";
           
           if(d.status === "MEMBER") {
-            ui('joinBox', false); ui('paymentBox', true);
-            document.getElementById('joiningDateText').innerText = "Admission Date: " + d.joinDate;
-            const rem = calcDays(d.joinDateISO, d.totalPaidDays);
+            // Once they are a member, hide Admission box and show Payment box
+            toggleUI('joinBox', false); 
+            toggleUI('paymentBox', true);
+            document.getElementById('joiningDateText').innerText = "Member since: " + d.joinDate;
+            
+            // Show Green/Red countdown
+            const rem = calculateDaysLeft(d.joinDateISO, d.totalPaidDays);
             const text = document.getElementById('countdownText');
-            text.innerText = Math.abs(rem) + (rem >= 0 ? " Days Remaining" : " Days Behind");
-            text.style.color = rem >= 0 ? "green" : "red";
+            text.innerText = Math.abs(rem) + (rem >= 0 ? " Days Remaining (Survival)" : " Days Behind (Fees Due)");
+            text.style.color = rem >= 0 ? "#27ae60" : "#c0392b";
           }
         }
       });
 
+      // Special check: If user is the owner, unlock the Manage tab
       if(user.email === "c.commando822@gmail.com") {
-        ui('tab-admin', true); loadAdmin();
+        toggleUI('tab-admin', true); 
+        loadAdminDashboard();
+        listenForOtps(); // Start looking for students requesting to join
       }
     }
   });
 
+  // --- USER FUNCTIONS ---
+  
+  // Updates user profile (DOB is included here so it stays editable)
   window.updateProfile = () => {
     setDoc(doc(db, "users", auth.currentUser.uid), {
       name: document.getElementById('name').value,
@@ -172,54 +217,88 @@
       phone: document.getElementById('phone').value,
       dob: document.getElementById('dob').value,
       photo: auth.currentUser.photoURL
-    }, {merge: true}).then(() => alert("Profile Saved!"));
+    }, {merge: true}).then(() => alert("Details Saved!"));
   };
 
+  // Student clicks this to generate an OTP that the owner sees
   window.requestJoin = () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
-    setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('name').value }).then(() => ui('otpInputArea', true));
+    // Saves OTP to a special "signals" collection for the owner to read
+    setDoc(doc(db, "signals", auth.currentUser.uid), { 
+      otp: otp, 
+      name: document.getElementById('name').value, 
+      time: new Date().toLocaleTimeString() 
+    }).then(() => toggleUI('otpInputArea', true));
   };
 
+  // Verifies the OTP. This is the only place Join Date is set (Locked forever)
   window.verifyAdmission = async () => {
     const snap = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(snap.exists() && snap.data().otp == document.getElementById('otpInput').value) {
       const now = new Date();
       await setDoc(doc(db, "users", auth.currentUser.uid), {
-        status: "MEMBER", joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0
+        status: "MEMBER",
+        joinDate: now.toLocaleDateString(), // String version for easy reading
+        joinDateISO: now.toISOString(),     // ISO version for date math
+        totalPaidDays: 0                    // Starts at 0 until they pay
       }, {merge: true});
+      // Delete the OTP request after use
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       location.reload();
-    } else alert("Invalid OTP");
+    } else alert("The code entered is incorrect.");
   };
 
-  function loadAdmin() {
-    onSnapshot(collection(db, "users"), (snap) => {
-      let h = "";
+  // --- OWNER FUNCTIONS ---
+
+  // OTP TAB REPLACEMENT: This looks at the "signals" collection and shows owner the OTPs
+  function listenForOtps() {
+    onSnapshot(collection(db, "signals"), (snap) => {
+      let html = "";
       snap.forEach(d => {
-        const u = d.data(); const rem = calcDays(u.joinDateISO, u.totalPaidDays);
-        h += `<div class="player-card" onclick="window.viewUser('${d.id}')">
-          <img src="${u.photo}" class="player-photo">
-          <div class="player-info"><span class="player-name">${u.name || 'Student'}</span><span class="player-sub">📞 ${u.phone || 'N/A'}</span></div>
-          <div class="status-pill ${rem >= 0 ? 'status-green' : 'status-red'}">${Math.abs(rem)} Days</div>
+        const s = d.data();
+        html += `<div class="owner-otp-alert">
+          <b>${s.name}</b> is requesting to join.<br>
+          Give them this OTP: <span style="font-size:18px; color:#d32f2f;"><b>${s.otp}</b></span>
         </div>`;
       });
-      document.getElementById('folderList').innerHTML = h;
+      document.getElementById('ownerOtpList').innerHTML = html || "No active requests.";
     });
   }
 
-  window.viewUser = async (uid) => {
+  // DATABASE VIEW: Shows list of students with Green/Red status pills
+  function loadAdminDashboard() {
+    onSnapshot(collection(db, "users"), (snap) => {
+      let html = "";
+      snap.forEach(d => {
+        const u = d.data(); 
+        const rem = calculateDaysLeft(u.joinDateISO, u.totalPaidDays);
+        // Using the Player-Card format provided in JPG logic
+        html += `<div class="player-card" onclick="window.viewUserFolder('${d.id}')">
+          <img src="${u.photo}" class="player-photo">
+          <div class="player-info">
+            <span class="player-name">${u.name || 'Student'}</span>
+            <span class="player-sub">📞 ${u.phone || 'No Phone'}</span>
+          </div>
+          <div class="status-pill ${rem >= 0 ? 'status-green' : 'status-red'}">${Math.abs(rem)} Days</div>
+        </div>`;
+      });
+      document.getElementById('folderList').innerHTML = html;
+    });
+  }
+
+  // FOLDER LOGIC: Shows full profile of a student when clicked
+  window.viewUserFolder = async (uid) => {
     const d = (await getDoc(doc(db, "users", uid))).data();
     document.getElementById('folderContent').innerHTML = `
       <div class="card">
         <h2>${d.name}</h2>
-        <p><b>Status:</b> ${d.status}</p>
         <p><b>Father:</b> ${d.father}</p>
         <p><b>DOB:</b> ${d.dob}</p>
+        <p><b>Admission Date:</b> ${d.joinDate}</p>
         <p><b>Phone:</b> ${d.phone}</p>
-        <p><b>Admission Date:</b> ${d.joinDate || 'Not Joined'}</p>
-        <p><b>Days Paid:</b> ${d.totalPaidDays || 0}</p>
+        <p><b>Total Paid Period:</b> ${d.totalPaidDays || 0} Days</p>
       </div>`;
-    ui('folderView', true);
+    toggleUI('folderView', true);
   };
 </script>
 </body>
