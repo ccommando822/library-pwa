@@ -51,7 +51,6 @@
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
 
-    /* Yellow message style */
     .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
   </style>
 </head>
@@ -88,13 +87,14 @@
     </div>
 
     <div class="card" id="history-box">
-      <label class="detail-label">Payment History</label>
-      <div id="user-history-list" style="max-height: 120px; overflow-y: auto; font-size: 12px; margin-top: 10px;"></div>
+      <label class="detail-label">Payment & Deduction Log</label>
+      <div id="user-history-list" style="max-height: 150px; overflow-y: auto; font-size: 12px; margin-top: 10px; display: flex; flex-direction: column;"></div>
     </div>
 
     <div class="card">
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
@@ -121,15 +121,15 @@
 
 <div id="joinWizard" class="wizard-overlay">
     <h2 style="color:var(--primary);">Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><p style="font-size:13px; color:#555;">Checking if details are filled.</p><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
-    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><p style="font-size:13px; color:#555;">Call Owner at <b>7500159996</b> for Admission OTP.</p><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><p style="font-size:13px; color:#555;">Checking details.</p><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
+    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><p style="font-size:13px; color:#555;">Call 7500159996 for OTP.</p><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
 </div>
 
 <div id="leaveWizard" class="wizard-overlay">
     <h2 style="color:var(--red);">Membership Exit</h2>
-    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><p style="font-size:13px; color:#555;">Verifying fees.</p><button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
-    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><p style="font-size:13px; color:#555;">Call Owner for Exit OTP.</p><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
+    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
+    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
 
@@ -199,6 +199,7 @@
           const d = snap.data();
           document.getElementById('p-name').value = d.name || "";
           document.getElementById('p-father').value = d.father || "";
+          document.getElementById('p-dob').value = d.dob || "";
           document.getElementById('p-phone').value = d.phone || "";
           if(d.joinDateISO) {
             document.getElementById('join-trigger-box').classList.add('hidden');
@@ -210,11 +211,18 @@
             disp.innerText = formatSurvival(survivalDays);
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
           }
+          
+          // Chat-style History Filtering (Payments and Deductions Only)
           let hHtml = "";
-          (d.history || []).reverse().forEach(h => {
-              hHtml += `<div style="border-bottom:1px solid #eee; padding:5px 0;">${h}</div>`;
+          const logList = d.history || [];
+          logList.forEach(log => {
+              if (log.includes("💰") || log.includes("✅") || log.includes("📉")) {
+                  hHtml += `<div style="border-bottom:1px solid #eee; padding:8px 0; display:block;">${log}</div>`;
+              }
           });
-          document.getElementById('user-history-list').innerHTML = hHtml || "No history yet.";
+          const hBox = document.getElementById('user-history-list');
+          hBox.innerHTML = hHtml || "No active records.";
+          hBox.scrollTop = hBox.scrollHeight; // Auto-scroll to bottom
         }
       });
       if(user.email === "c.commando822@gmail.com") {
@@ -226,7 +234,11 @@
 
   window.saveProfile = async () => {
     await setDoc(doc(db, "users", auth.currentUser.uid), {
-      name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, phone: document.getElementById('p-phone').value, photo: auth.currentUser.photoURL
+      name: document.getElementById('p-name').value, 
+      father: document.getElementById('p-father').value, 
+      dob: document.getElementById('p-dob').value,
+      phone: document.getElementById('p-phone').value, 
+      photo: auth.currentUser.photoURL
     }, {merge: true});
     alert("Folder Saved.");
   };
@@ -258,7 +270,8 @@
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null });
+      const logEntry = `📉 Membership Left. Last Balance: ${formatSurvival(survivalDays)}`;
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(logEntry) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeLeaveWizard();
     }
@@ -268,7 +281,7 @@
     const days = parseInt(document.getElementById('p-days').value) || 0;
     const amt = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * days);
     const timeStr = new Date().toLocaleString();
-    const entry = `💰 Request: ₹${amt} for ${days} days at ${timeStr} [Pending Verification]`;
+    const entry = `💰 Request: ₹${amt} for ${days} days at ${timeStr} [Status: Pending]`;
     
     await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(entry) });
     await setDoc(doc(db, "signals", "pay_" + auth.currentUser.uid), {
@@ -286,10 +299,7 @@
       const hist = snap.data().history || [];
       const updatedHist = hist.map(item => item.includes(reqTime) ? `✅ Verified: ₹${amount} for ${days} days. Approved at ${verTime}` : item);
       
-      await updateDoc(ref, { 
-          totalPaidDays: (snap.data().totalPaidDays || 0) + days,
-          history: updatedHist
-      });
+      await updateDoc(ref, { totalPaidDays: (snap.data().totalPaidDays || 0) + days, history: updatedHist });
       await deleteDoc(doc(db, "signals", sid));
       alert("Success.");
   };
