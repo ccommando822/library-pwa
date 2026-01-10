@@ -33,15 +33,18 @@
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
 
-    /* Admin UI */
+    /* Survival UI Classes */
     .division-header { background: #e2e8f0; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #475569; border-radius: 6px; margin: 15px 0 8px 0; text-transform: uppercase; }
     .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); }
-    .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
+    .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; }
+    .admin-nav { display: flex; background: #eee; padding: 5px; border-radius: 10px; margin-bottom: 15px; }
+    .admin-nav button { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: transparent; }
+    .admin-nav button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
     .btn-blue { background: var(--primary); color: white; }
-    .btn-green { background: var(--green); color: white; }
     .btn-black { background: var(--black); color: white; }
+    .btn-green { background: var(--green); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
     .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
@@ -127,35 +130,34 @@
 </div>
 
 <section id="manage">
-    <div style="display:flex; background:#eee; padding:5px; border-radius:10px; margin-bottom:15px;">
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Live Signals</button>
-        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Survivals</button>
-    </div>
-    <div id="am-pane-otp"><div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;" id="admin-otp-list"></div></div>
+    <div class="admin-nav"><button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live Signals</button><button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button></div>
+    <div id="am-pane-otp"><div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px; overflow-y:auto;" id="admin-otp-list"></div></div>
     <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
 </section>
 
 <div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg); overflow-y:auto;">
-    <div style="max-width:500px; margin:auto; padding:15px;"><button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button><div id="folder-content"></div></div>
+    <div style="max-width:500px; margin:auto; padding:15px;">
+        <button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button>
+        <div id="folder-content"></div>
+    </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  // Redefining imports properly for code block clarity
-  import { getFirestore as getFS, doc as dDoc, setDoc as sDoc, getDoc as gDoc, collection as coll, onSnapshot as oSnap, deleteDoc as delDoc, arrayUnion as aUnion, updateDoc as uDoc, serverTimestamp as sTime } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getFS(app);
+  const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
   let survivalDays = 0;
 
   function getStamp() { return new Date().toLocaleString('en-GB').replace(',', ''); }
+
   function formatSurvival(totalDays) {
       if(totalDays < 0) return "EXPIRED";
       const d = Math.floor(totalDays);
@@ -163,10 +165,29 @@
       return `${d} days ${h} hours`;
   }
 
+  window.switchMain = (t) => {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(t).classList.add('active');
+    document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+t.substring(0,3)).classList.add('active');
+  };
+
+  window.switchAdmin = (t) => {
+    document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
+    document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
+    document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
+    document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
+  };
+
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      await uDoc(dDoc(db, "users", user.uid), { isOnline: true, photo: user.photoURL }).catch(()=>{});
-      oSnap(dDoc(db, "users", user.uid), (snap) => {
+      await updateDoc(doc(db, "users", user.uid), { 
+          isOnline: true, 
+          photo: user.photoURL,
+          history: arrayUnion(`🔑 Log-in: [${getStamp()}]`) 
+      }).catch(()=>{});
+      
+      onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
           document.getElementById('loginPanel').classList.add('hidden');
@@ -187,7 +208,311 @@
             disp.innerText = formatSurvival(survivalDays);
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
           }
-          let h = ""; (currentUserData.history || []).forEach(m => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
+
+          let h = "";
+          (currentUserData.history || []).forEach(m => {
+              if(m.includes("Request") || m.includes("Verified") || m.includes("Rejected") || m.includes("Membership Left")) {
+                  h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${m}</div>`;
+              }
+          });
+          const box = document.getElementById('user-history-list');
+          box.innerHTML = h; box.scrollTop = box.scrollHeight;
+        }
+      });
+      if(user.email === "c.commando822@gmail.com") {
+        document.getElementById('tab-man').classList.remove('hidden');
+        loadAdminData();
+      }
+    }
+  });
+
+  // RESTORED ORIGINAL PROFILE SAVE
+  window.saveProfile = async () => {
+    await setDoc(doc(db, "users", auth.currentUser.uid), {
+      name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, 
+      dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value
+    }, {merge: true});
+    alert("Folder Saved.");
+  };
+
+  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
+  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
+  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
+
+  window.checkStepOne = async () => {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission', createdAt: serverTimestamp() });
+      document.getElementById('step2').classList.add('step-active');
+  };
+
+  window.verifyJoin = async () => {
+    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString() });
+      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
+      document.getElementById('joinWizard').classList.remove('show');
+    }
+  };
+
+  window.checkLeaveFees = async () => {
+    if (survivalDays < 0) alert("Fees Pending.");
+    else {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit', createdAt: serverTimestamp() });
+      document.getElementById('lstep2').classList.add('step-active');
+    }
+  };
+
+  window.verifyLeave = async () => {
+    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
+      const logMsg = `Membership Left. Last Balance: ${formatSurvival(survivalDays)} [${getStamp()}]`;
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(logMsg) });
+      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
+      document.getElementById('leaveWizard').classList.remove('show');
+    }
+  };
+
+  window.doPayment = async () => {
+    const d = parseInt(document.getElementById('p-days').value) || 0;
+    const a = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * d);
+    const t = getStamp();
+    const sid = "pay_" + Date.now();
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days at ${t}`) });
+    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: t, type: 'PAYMENT' });
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${a}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'flex';
+  };
+
+  window.handleSignal = async (sid, uid, stat, days, amt, reqT) => {
+      const actT = getStamp();
+      const ref = doc(db, "users", uid);
+      const snap = await getDoc(ref);
+      const newHist = snap.data().history.map(l => l.includes(reqT) ? 
+        (stat==='OK' ? `Verified: ₹${amt} for ${days} days Request at ${reqT}. Approved at ${actT}` : 
+                       `Rejected: ₹${amt} for ${days} days Request at ${reqT}. Rejected at ${actT}`) : l);
+      await updateDoc(ref, { totalPaidDays: stat==='OK' ? (snap.data().totalPaidDays || 0) + days : snap.data().totalPaidDays, history: newHist });
+      await deleteDoc(doc(db, "signals", sid));
+  };
+
+  function loadAdminData() {
+    onSnapshot(collection(db, "signals"), s => {
+      let h = ""; s.forEach(d => {
+        const sig = d.data();
+        if(sig.type === 'PAYMENT') {
+          h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px;">💰 ${sig.name}: ₹${sig.amount}<br>
+            <button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button>
+            <button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
+        } else { h += `<p>${sig.type} | ${sig.name}: <b style="color:white;">${sig.otp}</b></p>`; }
+      });
+      document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
+    });
+
+    onSnapshot(collection(db, "users"), s => {
+      let joinedIn = "", leftIn = "", loggedOut = "";
+      s.forEach(d => {
+        const u = d.data();
+        const card = `<div class="player-card" onclick="openUserFolder('${d.id}')">
+            <img src="${u.photo||''}" class="player-photo">
+            <div class="player-info"><b>${u.name}</b><small>${u.phone||'No Phone'}</small></div>
+        </div>`;
+        if(u.isOnline) { u.joinDateISO ? joinedIn += card : leftIn += card; } else { loggedOut += card; }
+      });
+      document.getElementById('admin-survival-list').innerHTML = `
+        <div class="division-header">Logged In (Joined)</div>${joinedIn}
+        <div class="division-header">Logged In (Left)</div>${leftIn}
+        <div class="division-header">Logged Out</div>${loggedOut}`;
+    });
+  }
+
+  window.openUserFolder = async (uid) => {
+    const u = (await getDoc(doc(db, "users", uid))).data();
+    let hist = ""; (u.history || []).forEach(m => hist += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
+    document.getElementById('folder-content').innerHTML = `
+        <div class="card" style="text-align:center;">
+            <img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;">
+            <h3>${u.name}</h3>
+            <p>${u.phone}</p>
+        </div>
+        <div class="card">
+            <label class="detail-label">Full History</label>
+            <div style="font-size:11px;">${hist}</div>
+        </div>`;
+    document.getElementById('owner-folder-view').classList.add('show');
+  };
+
+  window.logout = async () => { 
+    if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false });
+    signOut(auth).then(()=>location.reload()); 
+  };
+  window.makeEdit = (i) =><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rakshapal Singh Library ERP</title>
+  <style>
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
+    header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
+    
+    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; }
+    nav button.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+
+    section { padding: 15px; display: none; max-width: 500px; margin: auto; }
+    section.active { display: block; }
+    .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+    .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .detail-content { flex: 1; }
+    .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+    .detail-content input { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; }
+    .detail-content input:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
+    .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
+
+    .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }
+    .wizard-overlay.show { display: block; overflow-y: auto; }
+    .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; opacity: 0.6; pointer-events: none; }
+    .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
+    .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
+
+    #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
+    .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
+    
+    .division-header { background: #e2e8f0; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #475569; border-radius: 6px; margin: 15px 0 8px 0; text-transform: uppercase; }
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); }
+    .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; }
+
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
+    .btn-blue { background: var(--primary); color: white; }
+    .btn-black { background: var(--black); color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
+    .hidden { display: none !important; }
+    .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>Rakshapal Singh Library</header>
+
+<div id="pay-modal" onclick="this.style.display='none'"><div class="modal-box"><h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3><p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p></div></div>
+
+<nav id="main-nav">
+  <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>
+  <button id="tab-man" class="hidden" onclick="switchMain('manage')">Manage 🛠</button>
+</nav>
+
+<section id="account" class="active">
+  <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
+  <div id="profilePanel" class="hidden">
+    <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
+      <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
+      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED</div>
+      <div id="status-days" style="font-size: 24px; font-weight: 900; color: #ccc;">--</div>
+      <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
+      <div class="deduct-note">⚠️ Note: 1 Day will be deducted every 24 hours.</div>
+    </div>
+    <div class="card"><label class="detail-label">Payment & Deduction Log</label><div id="user-history-list" style="max-height: 150px; overflow-y: auto; font-size: 11px; margin-top: 10px;"></div></div>
+    <div class="card">
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
+      <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
+    </div>
+    <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
+    <div id="active-tools" class="hidden">
+        <div class="card" style="background: #f0f7ff;">
+            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px;"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Both (₹700)</option></select>
+            <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px;">
+            <div id="pay-summary" style="font-weight:bold; margin:10px 0;">Total Amount: ₹500</div>
+            <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
+        </div>
+        <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
+    </div>
+    <button style="width:100%; background:none; border:none; color:gray; padding:20px;" onclick="window.logout()">Logout Account</button>
+  </div>
+</section>
+
+<div id="joinWizard" class="wizard-overlay">
+    <h2>Admission Wizard</h2>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Lock Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock</button></div>
+    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify OTP</b><input type="number" id="join-otp" placeholder="Enter OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyJoin()">Join Now</button></div>
+    <button onclick="closeWizard()" style="width:100%; background:none; border:none; color:gray; padding:15px;">Cancel</button>
+</div>
+
+<div id="leaveWizard" class="wizard-overlay">
+    <h2>Membership Exit</h2>
+    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees</b><button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Status</button></div>
+    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Verify OTP</b><input type="number" id="leave-otp" placeholder="Enter OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
+    <button onclick="closeLeaveWizard()" style="width:100%; background:none; border:none; color:gray; padding:15px;">Cancel</button>
+</div>
+
+<section id="manage">
+    <div style="display:flex; background:#eee; padding:5px; border-radius:10px; margin-bottom:15px;">
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold;">Signals</button>
+        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold;">Survivals</button>
+    </div>
+    <div id="am-pane-otp"><div id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace; padding:10px; border-radius:10px;"></div></div>
+    <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
+</section>
+
+<div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg); overflow-y:auto;">
+    <div style="max-width:500px; margin:auto; padding:15px;"><button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button><div id="folder-content"></div></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  let currentUserData = {};
+  let survivalDays = 0;
+
+  function getStamp() { return new Date().toLocaleString('en-GB').replace(',', ''); }
+  function formatSurvival(totalDays) {
+      if(totalDays < 0) return "EXPIRED";
+      const d = Math.floor(totalDays);
+      const h = Math.floor((totalDays - d) * 24);
+      return `${d} days ${h} hours`;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(user) {
+      await updateDoc(doc(db, "users", user.uid), { isOnline: true, photo: user.photoURL, history: arrayUnion(`🔑 Log-in: [${getStamp()}]`) }).catch(()=>{});
+      onSnapshot(doc(db, "users", user.uid), (snap) => {
+        if(snap.exists()) {
+          currentUserData = snap.data();
+          document.getElementById('loginPanel').classList.add('hidden');
+          document.getElementById('profilePanel').classList.remove('hidden');
+          document.getElementById('u-img').src = user.photoURL;
+          document.getElementById('p-name').value = currentUserData.name || "";
+          document.getElementById('p-father').value = currentUserData.father || "";
+          document.getElementById('p-dob').value = currentUserData.dob || "";
+          document.getElementById('p-phone').value = currentUserData.phone || "";
+          
+          if(currentUserData.joinDateISO) {
+            document.getElementById('join-trigger-box').classList.add('hidden');
+            document.getElementById('active-tools').classList.remove('hidden');
+            document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
+            const diff = (new Date() - new Date(currentUserData.joinDateISO)) / 86400000;
+            survivalDays = (currentUserData.totalPaidDays || 0) - diff;
+            const disp = document.getElementById('status-days');
+            disp.innerText = formatSurvival(survivalDays);
+            disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
+          }
+          let h = ""; (currentUserData.history || []).forEach(m => {
+            if(m.includes("Request") || m.includes("Verified") || m.includes("Rejected") || m.includes("Membership Left")) h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${m}</div>`;
+          });
           document.getElementById('user-history-list').innerHTML = h;
         }
       });
@@ -195,72 +520,25 @@
     }
   });
 
-  // RESTORED ORIGINAL STEP 1 LOGIC
-  window.checkStepOne = async () => {
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      await sDoc(dDoc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission', createdAt: sTime() });
-      document.getElementById('step2').classList.add('step-active');
-  };
-
-  window.checkLeaveFees = async () => {
-    if (survivalDays < 0) alert("Fees Pending.");
-    else {
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      await sDoc(dDoc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit', createdAt: sTime() });
-      document.getElementById('lstep2').classList.add('step-active');
-    }
-  };
-
-  // RESTORED ORIGINAL JOIN/LEAVE VERIFICATION
-  window.verifyJoin = async () => {
-    const s = await gDoc(dDoc(db, "signals", auth.currentUser.uid));
-    if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
-      await uDoc(dDoc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString() });
-      await delDoc(dDoc(db, "signals", auth.currentUser.uid));
-      document.getElementById('joinWizard').classList.remove('show');
-    }
-  };
-
-  window.verifyLeave = async () => {
-    const s = await gDoc(dDoc(db, "signals", auth.currentUser.uid));
-    if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      const log = `📉 Membership Left. Last Balance: ${formatSurvival(survivalDays)} [${getStamp()}]`;
-      await uDoc(dDoc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: aUnion(log) });
-      await delDoc(dDoc(db, "signals", auth.currentUser.uid));
-      document.getElementById('leaveWizard').classList.remove('show');
-    }
-  };
-
-  // RESTORED ORIGINAL PAYMENT LOGIC WITH CORRECT CALC
-  window.doPayment = async () => {
-    const d = parseInt(document.getElementById('p-days').value) || 0;
-    const a = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * d);
-    const t = getStamp(), sid = "pay_" + Date.now();
-    await uDoc(dDoc(db, "users", auth.currentUser.uid), { history: aUnion(`Request: ₹${a} for ${d} days at ${t}`) });
-    await sDoc(dDoc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: t, type: 'PAYMENT' });
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${a}`;
-    document.getElementById('pay-modal').style.display = 'flex';
-  };
-
   window.handleSignal = async (sid, uid, stat, days, amt, reqT) => {
-      const actT = getStamp(), ref = dDoc(db, "users", uid), snap = await gDoc(ref);
+      const actT = getStamp(), ref = doc(db, "users", uid), snap = await getDoc(ref);
       const newH = snap.data().history.map(l => l.includes(reqT) ? 
         (stat==='OK' ? `✅ Verified: ₹${amt} for ${days} days Request at ${reqT}. Approved at ${actT}` : 
                        `❌ Rejected: ₹${amt} for ${days} days Request at ${reqT}. Rejected at ${actT}`) : l);
-      await uDoc(ref, { totalPaidDays: stat==='OK' ? (snap.data().totalPaidDays || 0) + parseInt(days) : snap.data().totalPaidDays, history: newH });
-      await delDoc(dDoc(db, "signals", sid));
+      await updateDoc(ref, { totalPaidDays: stat==='OK' ? (snap.data().totalPaidDays || 0) + parseInt(days) : snap.data().totalPaidDays, history: newH });
+      await deleteDoc(doc(db, "signals", sid));
   };
 
   function loadAdminData() {
-    oSnap(coll(db, "signals"), s => {
+    onSnapshot(collection(db, "signals"), s => {
       let h = ""; s.forEach(d => {
         const sig = d.data();
-        if(sig.type === 'PAYMENT') h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px;">💰 ${sig.name}: ₹${sig.amount}<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="margin-left:10px; color:red;">Reject</button></div>`;
+        if(sig.type === 'PAYMENT') h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px;">💰 ${sig.name}: ₹${sig.amount}<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
         else h += `<p>${sig.type} | ${sig.name}: <b style="color:white;">${sig.otp}</b></p>`;
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
     });
-    oSnap(coll(db, "users"), s => {
+    onSnapshot(collection(db, "users"), s => {
       let joined = "", left = "", out = "";
       s.forEach(d => {
         const u = d.data(), card = `<div class="player-card" onclick="openUserFolder('${d.id}')"><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>`;
@@ -271,23 +549,40 @@
   }
 
   window.openUserFolder = async (uid) => {
-    const u = (await gDoc(dDoc(db, "users", uid))).data();
-    let h = ""; (u.history || []).forEach(m => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
-    document.getElementById('folder-content').innerHTML = `<div class="card" style="text-align:center;"><img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;"><h3>${u.name}</h3></div><div class="card"><label class="detail-label">Logs</label><div style="font-size:11px;">${h}</div></div>`;
+    const u = (await getDoc(doc(db, "users", uid))).data();
+    const diff = u.joinDateISO ? (new Date() - new Date(u.joinDateISO)) / 86400000 : 0;
+    const rem = (u.totalPaidDays || 0) - diff;
+    let hist = ""; (u.history || []).forEach(m => hist += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center; border-bottom:4px solid var(--primary);"><img src="${u.photo}" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;"><div style="font-size:24px; font-weight:900;">${formatSurvival(rem)}</div><div style="font-size:10px; text-transform:uppercase;">Survival Remaining</div></div>
+      <div class="card"><label class="detail-label">Full Logs</label><div style="font-size:11px;">${hist}</div></div>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = async () => { if(auth.currentUser) await uDoc(dDoc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.switchMain = (t) => { document.getElementById('account').classList.toggle('active', t==='account'); document.getElementById('manage').classList.toggle('active', t==='manage'); document.getElementById('tab-acc').classList.toggle('active', t==='account'); document.getElementById('tab-man').classList.toggle('active', t==='manage'); };
   window.switchAdmin = (t) => { document.getElementById('am-pane-otp').classList.toggle('hidden', t!=='otp'); document.getElementById('am-pane-user').classList.toggle('hidden', t!=='user'); document.getElementById('am-otp-btn').classList.toggle('active', t==='otp'); document.getElementById('am-user-btn').classList.toggle('active', t==='user'); };
+  window.login = () => signInWithPopup(auth, provider);
+  window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.makeEdit = (i) => { document.getElementById(i).readOnly = false; document.getElementById(i).focus(); };
   window.calcTotal = () => { const d = document.getElementById('p-days').value, t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
-  window.saveProfile = async () => { await uDoc(dDoc(db, "users", auth.currentUser.uid), { name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value }); alert("Saved"); };
+  window.checkStepOne = async () => { const o = Math.floor(100000 + Math.random() * 900000); await setDoc(doc(db, "signals", auth.currentUser.uid), { otp: o, name: document.getElementById('p-name').value, type: 'Admission', createdAt: serverTimestamp() }); document.getElementById('step2').classList.add('step-active'); };
+  window.verifyJoin = async () => { const s = await getDoc(doc(db, "signals", auth.currentUser.uid)); if(s.exists() && s.data().otp == document.getElementById('join-otp').value) { await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString() }); await deleteDoc(doc(db, "signals", auth.currentUser.uid)); closeWizard(); } };
+  window.checkLeaveFees = () => { if(survivalDays < 0) alert("Fees Pending"); else document.getElementById('lstep2').classList.add('step-active'); };
+  window.verifyLeave = async () => { const s = await getDoc(doc(db, "signals", auth.currentUser.uid)); if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) { const log = `📉 Membership Left. Last Balance: ${formatSurvival(survivalDays)} [${getStamp()}]`; await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(log) }); await deleteDoc(doc(db, "signals", auth.currentUser.uid)); closeLeaveWizard(); } };
+  window.doPayment = async () => { const d = document.getElementById('p-days').value, a = Math.round((document.getElementById('p-shift').value/28)*d), t = getStamp(), sid = "pay_" + Date.now(); await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days at ${t}`) }); await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: t, type: 'PAYMENT' }); window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${a}`; document.getElementById('pay-modal').style.display = 'flex'; };
+  window.saveProfile = async () => { await updateDoc(doc(db, "users", auth.currentUser.uid), { name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value }); alert("Saved"); };
+</script>
+</body>
+</html>
+ { document.getElementById(i).readOnly = false; document.getElementById(i).focus(); };
+  window.calcTotal = () => {
+    const d = document.getElementById('p-days').value, t = Math.round((document.getElementById('p-shift').value/28)*d);
+    document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`;
+  };
 </script>
 </body>
 </html>
