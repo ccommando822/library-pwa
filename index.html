@@ -33,7 +33,6 @@
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
 
-    /* Survival UI Classes */
     .division-header { background: #e2e8f0; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #475569; border-radius: 6px; margin: 15px 0 8px 0; text-transform: uppercase; }
     .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); }
     .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; }
@@ -48,6 +47,7 @@
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
     .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
+    .log-container { max-height: 120px; overflow-y: auto; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; }
   </style>
 </head>
 <body>
@@ -57,9 +57,8 @@
 <div id="pay-modal" onclick="this.style.display='none'">
     <div class="modal-box">
         <h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3>
-        <p style="font-size:14px; color:#333;">You will get your days as soon as owner verified.</p>
-        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for instant verification.</p>
-        <small style="color:gray;">Click anywhere to close</small>
+        <p style="font-size:14px; color:#333;">Owner will verify shortly.</p>
+        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p>
     </div>
 </div>
 
@@ -91,13 +90,10 @@
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
-    <div class="card" id="history-box">
-      <label class="detail-label">Payment & Deduction Log</label>
-      <div id="user-history-list" style="max-height: 150px; overflow-y: auto; font-size: 12px; margin-top: 10px; display: flex; flex-direction: column;"></div>
-    </div>
+    <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container"></div></div>
+    <div class="card"><label class="detail-label">Activity Log</label><div id="user-act-log" class="log-container"></div></div>
 
     <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
-
     <div id="active-tools" class="hidden">
         <div class="card" style="background: #f0f7ff;">
             <label class="detail-label">Renewal Panel</label>
@@ -107,7 +103,7 @@
                 <option value="700">Both Shift (₹700/28d)</option>
             </select>
             <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
-            <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
+            <div id="pay-summary" style="font-weight:bold; color:var(--primary);">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
         </div>
         <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
@@ -118,8 +114,8 @@
 
 <div id="joinWizard" class="wizard-overlay">
     <h2 style="color:var(--primary);">Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><p style="font-size:13px; color:#555;">Checking details.</p><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
-    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><p style="font-size:13px; color:#555;">Call 7500159996 for OTP.</p><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
+    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
 </div>
 
@@ -156,15 +152,8 @@
 
   let currentUserData = {};
   let survivalDays = 0;
-
-  function getStamp() { return new Date().toLocaleString('en-GB').replace(',', ''); }
-
-  function formatSurvival(totalDays) {
-      if(totalDays < 0) return "EXPIRED";
-      const d = Math.floor(totalDays);
-      const h = Math.floor((totalDays - d) * 24);
-      return `${d} days ${h} hours`;
-  }
+  const getStamp = () => new Date().toLocaleString('en-GB').replace(',', '');
+  const formatSurvival = (totalDays) => { if(totalDays < 0) return "EXPIRED"; const d = Math.floor(totalDays); const h = Math.floor((totalDays - d) * 24); return `${d} days ${h} hours`; };
 
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
@@ -182,23 +171,14 @@
 
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      await updateDoc(doc(db, "users", user.uid), { 
-          isOnline: true, 
-          photo: user.photoURL,
-          history: arrayUnion(`🔑 Log-in: [${getStamp()}]`) 
-      }).catch(()=>{});
-      
+      await updateDoc(doc(db, "users", user.uid), { isOnline: true, photo: user.photoURL }).catch(()=>{});
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
           document.getElementById('loginPanel').classList.add('hidden');
           document.getElementById('profilePanel').classList.remove('hidden');
           document.getElementById('u-img').src = user.photoURL;
-          document.getElementById('p-name').value = currentUserData.name || "";
-          document.getElementById('p-father').value = currentUserData.father || "";
-          document.getElementById('p-dob').value = currentUserData.dob || "";
-          document.getElementById('p-phone').value = currentUserData.phone || "";
-          document.getElementById('p-address').value = currentUserData.address || "";
+          ['name','father','dob','phone','address'].forEach(k => document.getElementById('p-'+k).value = currentUserData[k] || "");
           
           if(currentUserData.joinDateISO) {
             document.getElementById('join-trigger-box').classList.add('hidden');
@@ -210,95 +190,77 @@
             disp.innerText = formatSurvival(survivalDays);
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
           }
-
-          let h = "";
+          
+          let pLog = "", aLog = "";
           (currentUserData.history || []).forEach(m => {
-              if(m.includes("Request") || m.includes("Verified") || m.includes("Rejected") || m.includes("Membership Left")) {
-                  h += `<div style="border-bottom:1px solid #eee; padding:8px 0;">${m}</div>`;
-              }
+            const entry = `<div style="border-bottom:1px solid #eee; padding:5px 0;">${m}</div>`;
+            if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected")) pLog += entry;
+            else aLog += entry;
           });
-          const box = document.getElementById('user-history-list');
-          box.innerHTML = h; box.scrollTop = box.scrollHeight;
+          document.getElementById('user-pay-log').innerHTML = pLog;
+          document.getElementById('user-act-log').innerHTML = aLog;
         }
       });
-      if(user.email === "c.commando822@gmail.com") {
-        document.getElementById('tab-man').classList.remove('hidden');
-        loadAdminData();
-      }
+      if(user.email === "c.commando822@gmail.com") { document.getElementById('tab-man').classList.remove('hidden'); loadAdminData(); }
     }
   });
 
   window.saveProfile = async () => {
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-      name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, 
-      dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value,
-      address: document.getElementById('p-address').value
-    }, {merge: true});
+    const d = { name: document.getElementById('p-name').value, father: document.getElementById('p-father').value, dob: document.getElementById('p-dob').value, phone: document.getElementById('p-phone').value, address: document.getElementById('p-address').value };
+    await setDoc(doc(db, "users", auth.currentUser.uid), d, {merge: true});
     alert("Folder Saved.");
   };
 
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
-  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
+  window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step2').classList.remove('step-active'); };
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
-  window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
+  window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep2').classList.remove('step-active'); };
 
-  window.makeEdit = (id) => {
-    const el = document.getElementById(id);
-    el.readOnly = false;
-    el.focus();
-  };
+  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
 
   window.checkStepOne = async () => {
-      // REQUIREMENT: Check if all user details are filled
-      if(!document.getElementById('p-name').value || !document.getElementById('p-father').value || !document.getElementById('p-dob').value || !document.getElementById('p-phone').value || !document.getElementById('p-address').value) {
-          return alert("Please fill ALL details in the profile folder first!");
-      }
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      const expiry = Date.now() + (5 * 60 * 1000); 
-      await setDoc(doc(db, "signals", auth.currentUser.uid), { 
-          otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value,
-          type: 'Admission', expiresAt: expiry, createdAt: serverTimestamp() 
-      });
-      document.getElementById('step2').classList.add('step-active');
+    // FIX: Checks all fields including the new address field
+    const fields = ['p-name','p-father','p-dob','p-phone','p-address'];
+    const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
+    if(!allFilled) return alert("Please fill ALL details in your profile first!");
+    
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expiry = Date.now() + (5 * 60 * 1000);
+    // Use user.uid for signal to prevent overwrite
+    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value, type: 'Admission', expiresAt: expiry, createdAt: serverTimestamp() });
+    document.getElementById('step2').classList.add('step-active');
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().expiresAt > Date.now() && s.data().otp == document.getElementById('join-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString() });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), history: arrayUnion(`✅ Joined Library [${getStamp()}]`) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      document.getElementById('joinWizard').classList.remove('show');
-    } else { alert("Expired or Invalid OTP."); }
+      closeWizard();
+    } else alert("Invalid or Expired OTP.");
   };
 
   window.checkLeaveFees = async () => {
-    // REQUIREMENT: Fees must be paid (survivalDays >= 0)
-    if (survivalDays < 0) return alert("Pending fees detected. You must renew your membership to proceed with exit.");
+    if (survivalDays < 0) return alert("Pending fees detected. Renew to exit.");
     const otp = Math.floor(100000 + Math.random() * 900000);
     const expiry = Date.now() + (5 * 60 * 1000);
-    await setDoc(doc(db, "signals", auth.currentUser.uid), { 
-        otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value,
-        type: 'Exit', expiresAt: expiry, createdAt: serverTimestamp() 
-    });
+    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value, type: 'Exit', expiresAt: expiry, createdAt: serverTimestamp() });
     document.getElementById('lstep2').classList.add('step-active');
   };
 
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().expiresAt > Date.now() && s.data().otp == document.getElementById('leave-otp').value) {
-      const logMsg = `📉 Membership Left. Last Balance: ${formatSurvival(survivalDays)} [${getStamp()}]`;
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(logMsg) });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: survivalDays, joinDateISO: null, history: arrayUnion(`📉 Membership Left [${getStamp()}]`) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      document.getElementById('leaveWizard').classList.remove('show');
-    } else { alert("Expired or Invalid OTP."); }
+      closeLeaveWizard();
+    } else alert("Invalid or Expired OTP.");
   };
 
   window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value) || 0;
-    if(d > 364) d = 364; 
+    let d = Math.min(parseInt(document.getElementById('p-days').value) || 0, 364);
     const a = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * d);
-    const t = getStamp();
-    const sid = "pay_" + Date.now();
+    const t = getStamp(), sid = "pay_" + auth.currentUser.uid + "_" + Date.now();
     const expiry = Date.now() + (5 * 60 * 1000);
     await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days at ${t}`) });
     await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, amount: a, days: d, time: t, type: 'PAYMENT', expiresAt: expiry });
@@ -307,75 +269,75 @@
   };
 
   window.handleSignal = async (sid, uid, stat, days, amt, reqT) => {
-      const actT = getStamp();
-      const ref = doc(db, "users", uid);
-      const snap = await getDoc(ref);
-      const newHist = snap.data().history.map(l => l.includes(reqT) ? 
-        (stat==='OK' ? `✅ Verified: ₹${amt} for ${days} days Request at ${reqT}. Approved at ${actT}` : 
-                       `❌ Rejected: ₹${amt} for ${days} days Request at ${reqT}. Rejected at ${actT}`) : l);
-      await updateDoc(ref, { totalPaidDays: stat==='OK' ? (snap.data().totalPaidDays || 0) + days : snap.data().totalPaidDays, history: newHist });
-      await deleteDoc(doc(db, "signals", sid));
+    const actT = getStamp(), ref = doc(db, "users", uid), snap = await getDoc(ref);
+    const newHist = snap.data().history.map(l => l.includes(reqT) ? (stat==='OK' ? `✅ Verified: ₹${amt} for ${days} days [Approved: ${actT}]` : `❌ Rejected: ₹${amt} for ${days} days [Rejected: ${actT}]`) : l);
+    await updateDoc(ref, { totalPaidDays: stat==='OK' ? (snap.data().totalPaidDays || 0) + days : snap.data().totalPaidDays, history: newHist });
+    await deleteDoc(doc(db, "signals", sid));
   };
 
   function loadAdminData() {
     setInterval(() => {
-        onSnapshot(collection(db, "signals"), s => {
-            let h = ""; s.forEach(d => {
-                const sig = d.data();
-                const now = Date.now();
-                if(sig.expiresAt < now) { deleteDoc(doc(db, "signals", d.id)); return; }
-                const diff = sig.expiresAt - now;
-                const m = Math.floor(diff/60000), s_sec = Math.floor((diff%60000)/1000);
-                const timer = `${m}:${s_sec < 10 ? '0'+s_sec : s_sec}`;
-                if(sig.type === 'PAYMENT') {
-                    h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px; position:relative;">
-                        <span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>
-                        💰 ${sig.name} (${sig.phone})<br>Amount: ₹${sig.amount}<br>
-                        <button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button>
-                        <button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
-                } else { h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`; }
-            });
-            document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
+      onSnapshot(collection(db, "signals"), s => {
+        let h = ""; s.forEach(d => {
+          const sig = d.data(), now = Date.now();
+          if(sig.expiresAt < now) { deleteDoc(doc(db, "signals", d.id)); return; }
+          const diff = sig.expiresAt - now, m = Math.floor(diff/60000), s_sec = Math.floor((diff%60000)/1000), timer = `${m}:${s_sec<10?'0':''}${s_sec}`;
+          if(sig.type === 'PAYMENT') {
+            h += `<div style="border:1px solid #0f0; padding:10px; margin-bottom:5px; position:relative;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>💰 ${sig.name} (${sig.phone})<br>₹${sig.amount} for ${sig.days}d<br><button onclick="handleSignal('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}')" style="background:#0f0; border:none; padding:5px;">Accept</button><button onclick="handleSignal('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}')" style="background:red; color:white; border:none; padding:5px; margin-left:10px;">Reject</button></div>`;
+          } else h += `<div style="position:relative; border-bottom:1px solid #333; padding:5px;"><span style="position:absolute; right:10px; top:5px; font-size:10px;">${timer}</span>${sig.type} | ${sig.name} (${sig.phone}): <b style="color:white;">${sig.otp}</b></div>`;
         });
-    }, 1000);
-
-    onSnapshot(collection(db, "users"), s => {
-      let joined = "", left = "", out = "";
-      s.forEach(d => {
-        const u = d.data();
-        const card = `<div class="player-card" onclick="openUserFolder('${d.id}')"><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>`;
-        if(u.isOnline) { u.joinDateISO ? joined += card : left += card; } else { out += card; }
+        document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
       });
-      document.getElementById('admin-survival-list').innerHTML = `<div class="division-header">Logged In (Joined)</div>${joined}<div class="division-header">Logged In (Left)</div>${left}<div class="division-header">Logged Out</div>${out}`;
+    }, 1000);
+    onSnapshot(collection(db, "users"), s => {
+      let j = "", l = "", o = "";
+      s.forEach(d => {
+        const u = d.data(), card = `<div class="player-card" onclick="openUserFolder('${d.id}')"><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>`;
+        if(u.isOnline) { u.joinDateISO ? j += card : l += card; } else o += card;
+      });
+      document.getElementById('admin-survival-list').innerHTML = `<div class="division-header">Joined</div>${j}<div class="division-header">Left</div>${l}<div class="division-header">Offline</div>${o}`;
     });
   }
 
   window.openUserFolder = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
-    let h = ""; (u.history || []).forEach(m => h += `<div style="border-bottom:1px solid #eee; padding:5px;">${m}</div>`);
-    // REQUIREMENT: Allow owner to edit remaining days
+    let pLog = "", aLog = "", diff = 0, srv = 0;
+    if(u.joinDateISO) { diff = (new Date() - new Date(u.joinDateISO)) / 86400000; srv = (u.totalPaidDays || 0) - diff; }
+    (u.history || []).forEach(m => {
+        const ent = `<div style="border-bottom:1px solid #eee; padding:5px 0;">${m}</div>`;
+        if(m.includes("Verified") || m.includes("Request") || m.includes("Rejected")) pLog += ent; else aLog += ent;
+    });
     document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><img src="${u.photo}" style="width:70px; border-radius:50%; margin-bottom:10px;"><h3>${u.name}</h3></div>
+      <div class="card" style="text-align:center; border-bottom:4px solid var(--primary);">
+        <img src="${u.photo}" style="width:80px; border-radius:50%; margin-bottom:10px;">
+        <div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurvival(srv)}</div>
+        <div style="font-size:10px;">Survival Remaining</div>
+      </div>
       <div class="card">
-        <label class="detail-label">Adjust Survival Days (Total Paid)</label>
+        <label class="detail-label">Adjust Survival Days</label>
         <input type="number" id="adm-edit-days" value="${u.totalPaidDays || 0}" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:8px;">
         <button class="btn btn-blue" onclick="saveDaysFromAdmin('${uid}')">Update Balance</button>
       </div>
-      <div class="card"><label class="detail-label">User Info</label><p style="font-size:12px;"><b>Father:</b> ${u.father}<br><b>Phone:</b> ${u.phone}<br><b>Address:</b> ${u.address}</p></div>
-      <div class="card"><label class="detail-label">Logs</label><div style="font-size:11px;">${h}</div></div>`;
+      <div class="card">
+        <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" value="${u.name}" readonly></div></div>
+        <div class="detail-row"><div class="detail-content"><label class="detail-label">Father</label><input type="text" value="${u.father}" readonly></div></div>
+        <div class="detail-row"><div class="detail-content"><label class="detail-label">Phone</label><input type="text" value="${u.phone}" readonly></div></div>
+        <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea readonly>${u.address}</textarea></div></div>
+      </div>
+      <div class="card"><label class="detail-label">Payment History</label><div class="log-container">${pLog}</div></div>
+      <div class="card"><label class="detail-label">Activity Log</label><div class="log-container">${aLog}</div></div>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
-  // OWNER EDITING LOGIC
   window.saveDaysFromAdmin = async (uid) => {
-    const newVal = parseFloat(document.getElementById('adm-edit-days').value);
-    await updateDoc(doc(db, "users", uid), { totalPaidDays: newVal, history: arrayUnion(`🛠 Admin Adjusted Balance to ${newVal} days [${getStamp()}]`) });
-    alert("Balance Updated.");
+    const v = parseFloat(document.getElementById('adm-edit-days').value);
+    await updateDoc(doc(db, "users", uid), { totalPaidDays: v, history: arrayUnion(`🛠 Admin Adjusted Balance to ${v} days [${getStamp()}]`) });
+    alert("Updated.");
   };
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
-  window.calcTotal = () => { let d = document.getElementById('p-days').value; if(d > 364) d = 364; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
+  window.calcTotal = () => { let d = Math.min(document.getElementById('p-days').value, 364); const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
 </script>
 </body>
 </html>
