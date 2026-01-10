@@ -3,36 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Library ERP - Admin & Student</title>
-  
+  <title>Library ERP</title>
   <style>
-    /* SHARED STYLES */
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1c1e21; }
-    header { background: #1976d2; color: white; padding: 18px; text-align: center; font-weight: bold; }
+    body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
+    header { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; }
     nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-size: 14px; color: #65676b; }
+    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; }
     nav button.active { border-bottom: 3px solid #1976d2; color: #1976d2; font-weight: bold; }
-    section { padding: 16px; display: none; max-width: 500px; margin: auto; }
+    section { padding: 15px; display: none; max-width: 500px; margin: auto; }
     section.active { display: block; }
-    .card { background: white; padding: 20px; margin-bottom: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .hidden { display: none !important; }
     
-    /* COMPLEX FORM STYLING */
-    .form-group { margin-bottom: 15px; border-left: 3px solid #ddd; padding-left: 10px; }
-    label { font-size: 11px; color: #1976d2; font-weight: bold; text-transform: uppercase; }
-    input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
-    .terms-text { font-size: 11px; color: #777; margin: 10px 0; display: flex; align-items: center; gap: 5px; }
+    /* Edit Pencil Styling */
+    .input-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .input-row input { border: none; background: none; font-size: 16px; width: 80%; color: #333; outline: none; }
+    .input-row input:not(:read-only) { background: #fffde7; border-bottom: 1px solid #1976d2; }
+    .edit-pencil { cursor: pointer; color: #1976d2; font-size: 18px; }
+
+    button.primary { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 5px; font-weight: bold; margin-top: 10px; }
     
-    /* BUTTONS */
-    button.primary { width: 100%; padding: 14px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    button.danger { background: #fff; color: #d32f2f; border: 1px solid #d32f2f; }
-    
-    /* ADMIN LISTS */
-    .sub-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-    .sub-nav button { flex: 1; padding: 8px; border-radius: 20px; border: 1px solid #1976d2; font-size: 12px; }
-    .sub-nav button.active { background: #1976d2; color: white; }
-    .user-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    /* Admin Folder Styling */
+    .user-folder { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 5px; border-radius: 5px; cursor: pointer; }
+    .history-box { background: #f9f9f9; padding: 10px; font-size: 12px; margin-top: 10px; border-top: 1px dashed #ccc; }
   </style>
 </head>
 <body>
@@ -40,218 +33,124 @@
 <header>Rakshapal Singh Library</header>
 
 <nav>
-  <button id="btn-acc" class="active" onclick="showTab('account')">Account</button>
-  <button id="btn-man" class="hidden" onclick="showTab('manage')">Manage 🛠</button>
+  <button id="nav-acc" class="active" onclick="showTab('account')">Account</button>
+  <button id="nav-man" class="hidden" onclick="showTab('manage')">Manage 🛠</button>
 </nav>
 
 <section id="account" class="active">
   <div id="loginView" class="card" style="text-align:center;">
-    <button class="primary" onclick="window.login()">Authorize via Google</button>
+    <button class="primary" onclick="window.login()">Sign in with Google</button>
   </div>
 
   <div id="userProfile" class="hidden">
     <div class="card" style="text-align:center;">
-      <img id="userImg" src="" style="width: 70px; border-radius: 50%;">
-      <h2 id="userNameHeader" style="margin: 5px 0;"></h2>
-      <div id="countdownText" style="font-size: 24px; font-weight: bold;">-- Days</div>
+      <img id="userImg" style="width:70px; border-radius:50%;">
+      <div id="countdownText" style="font-size:24px; font-weight:bold; margin-top:10px;">-- Days</div>
     </div>
 
     <div class="card">
-      <h3 style="margin-top: 0;">Registration Profile</h3>
-      <div class="form-group">
-        <label>Official Full Name</label>
-        <input type="text" id="name" placeholder="As per Aadhaar">
+      <h3>Student Details</h3>
+      <div class="input-row">
+        <input type="text" id="name" readonly placeholder="Name">
+        <span class="edit-pencil" onclick="enableEdit('name')">✏️</span>
       </div>
-      <div class="form-group">
-        <label>Guardian / Father's Name</label>
-        <input type="text" id="father">
+      <div class="input-row">
+        <input type="text" id="father" readonly placeholder="Father's Name">
+        <span class="edit-pencil" onclick="enableEdit('father')">✏️</span>
       </div>
-      <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-          <label>Date of Birth</label>
-          <input type="date" id="dob">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label>Contact Number</label>
-          <input type="tel" id="phone" value="+91 ">
-        </div>
+      <div class="input-row">
+        <input type="tel" id="phone" readonly placeholder="Mobile (Mandatory)">
+        <span class="edit-pencil" onclick="enableEdit('phone')">✏️</span>
       </div>
-      <div class="terms-text">
-        <input type="checkbox" id="terms"> I confirm these details are accurate for library records.
-      </div>
-      <button class="primary" id="saveBtn" onclick="window.updateProfile()">Commit Changes</button>
+      <button class="primary" style="background:#27ae60;" onclick="window.updateProfile()">Save Changes</button>
     </div>
 
     <div id="joinBox" class="card">
-        <button class="primary" onclick="window.requestJoin()">Request Admission OTP</button>
-        <div id="otpInputArea" class="hidden">
-            <input type="number" id="otpInput" placeholder="Enter 6-digit Secret">
-            <button class="primary" style="background:#000;" onclick="window.verifyAdmission()">Verify Identity</button>
-        </div>
+      <button class="primary" onclick="window.requestJoin()">Request Admission OTP</button>
+      <div id="otpInputArea" class="hidden">
+        <input type="number" id="otpInput" placeholder="Enter OTP">
+        <button class="primary" onclick="window.verifyAdmission()">Verify Admission</button>
+      </div>
     </div>
 
     <div id="paymentBox" class="card hidden">
-        <label>Renewal Plan</label>
-        <select id="shift"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option></select>
-        <button class="primary" onclick="window.processPayment()">Secure UPI Payment</button>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <button class="primary danger" onclick="window.leaveLibrary()">Leave Library (Cancel Membership)</button>
-        <button style="border:none; background:none; width:100%; color:gray; font-size:12px; margin-top:15px;" onclick="window.logout()">Sign Out</button>
+      <select id="shift"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option></select>
+      <button class="primary" onclick="window.processPayment()">Pay & Add 28 Days</button>
+      <button onclick="window.leaveLibrary()" style="background:none; border:none; color:red; width:100%; margin-top:20px; cursor:pointer;">Leave Library</button>
     </div>
   </div>
 </section>
 
 <section id="manage">
-  <div class="sub-nav">
-    <button id="sub-otp-btn" class="active" onclick="switchManage('otp')">Admission Requests</button>
-    <button id="sub-user-btn" onclick="switchManage('users')">Database</button>
+  <div class="card" style="background:#000; color:#0f0;">
+    <h4>OTP Monitor</h4>
+    <div id="otpList"></div>
   </div>
-
-  <div id="manage-otp" class="card" style="background: #1a1a1a; color: #00ff00; font-family: monospace;">
-    <h3 style="color: #1976d2;">Live OTP Feed</h3>
-    <div id="ownerOtpList">Monitoring for signals...</div>
-  </div>
-
-  <div id="manage-users" class="hidden">
-    <div class="card">
-        <h3>Enrolled Students</h3>
-        <div id="folderList"></div>
-    </div>
+  <div class="card">
+    <h4>Student Database (Click to open folder)</h4>
+    <div id="folderList"></div>
   </div>
 </section>
-
-
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = { 
-    apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", 
-    authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", 
-    projectId: "rakshapal-singh-library-ded2e", 
-    storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", 
-    messagingSenderId: "988319651464", 
-    appId: "1:988319651464:web:477fa283cddb1d1123713d" 
-  };
-
+  const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // TAB LOGIC
   window.showTab = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
   };
 
-  window.switchManage = (m) => {
-    document.getElementById('manage-otp').classList.toggle('hidden', m !== 'otp');
-    document.getElementById('manage-users').classList.toggle('hidden', m !== 'users');
-    document.getElementById('sub-otp-btn').classList.toggle('active', m === 'otp');
-    document.getElementById('sub-user-btn').classList.toggle('active', m === 'users');
-  };
+  window.enableEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = () => signOut(auth).then(() => location.reload());
-
-  // LEAVE LIBRARY LOGIC
-  window.leaveLibrary = async () => {
-    if(confirm("WARNING: This will delete your library membership and admission date. You will need a new OTP to join again. Proceed?")) {
-        await setDoc(doc(db, "users", auth.currentUser.uid), {
-            joinDate: null,
-            joinDateISO: null,
-            totalPaidDays: 0
-        }, {merge: true});
-        alert("You have left the library.");
-        location.reload();
-    }
-  };
 
   onAuthStateChanged(auth, (user) => {
     if(user) {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('userProfile').classList.remove('hidden');
       document.getElementById('userImg').src = user.photoURL;
-      document.getElementById('userNameHeader').innerText = user.displayName;
 
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           const d = snap.data();
           document.getElementById('name').value = d.name || "";
           document.getElementById('father').value = d.father || "";
-          document.getElementById('dob').value = d.dob || "";
           document.getElementById('phone').value = d.phone || "";
           if(d.joinDateISO) {
             document.getElementById('joinBox').classList.add('hidden');
             document.getElementById('paymentBox').classList.remove('hidden');
-            const diff = Math.floor((new Date() - new Date(d.joinDateISO)) / 86400000);
-            const rem = (d.totalPaidDays || 0) - diff;
+            const rem = (d.totalPaidDays || 0) - Math.floor((new Date() - new Date(d.joinDateISO)) / 86400000);
             document.getElementById('countdownText').innerText = Math.abs(rem) + " Days";
-            document.getElementById('countdownText').style.color = rem >= 0 ? "#2ecc71" : "#e74c3c";
+            document.getElementById('countdownText').style.color = rem >= 0 ? "green" : "red";
           }
         }
       });
 
-      // OWNER ACCESS
       if(user.email === "c.commando822@gmail.com") {
-        document.getElementById('btn-man').classList.remove('hidden');
-        loadManageData();
+        document.getElementById('nav-man').classList.remove('hidden');
+        loadAdmin();
       }
     }
   });
 
-  // COMPLEX UPDATE LOGIC
-  window.updateProfile = () => {
-    if(!document.getElementById('terms').checked) return alert("Please accept the terms to update.");
-    const btn = document.getElementById('saveBtn');
-    btn.innerText = "Verifying...";
-    setTimeout(() => {
-        setDoc(doc(db, "users", auth.currentUser.uid), {
-            name: document.getElementById('name').value,
-            father: document.getElementById('father').value,
-            dob: document.getElementById('dob').value,
-            phone: document.getElementById('phone').value,
-            photo: auth.currentUser.photoURL
-        }, {merge: true}).then(() => {
-            alert("Database Synced Successfully.");
-            btn.innerText = "Commit Changes";
-        });
-    }, 1200);
+  window.updateProfile = async () => {
+    const data = { name: document.getElementById('name').value, father: document.getElementById('father').value, phone: document.getElementById('phone').value, photo: auth.currentUser.photoURL };
+    await setDoc(doc(db, "users", auth.currentUser.uid), { ...data, history: arrayUnion(`Edited on ${new Date().toLocaleString()}`) }, {merge: true});
+    document.querySelectorAll('input').forEach(i => i.readOnly = true);
+    alert("Profile Updated");
   };
 
-  // ADMIN FEED
-  function loadManageData() {
-    onSnapshot(collection(db, "signals"), (snap) => {
-      let h = "";
-      snap.forEach(d => h += `<div style='padding:10px; border-bottom:1px solid #333;'>USER: ${d.data().name}<br>CODE: <span style='color:white; font-size:18px;'>${d.data().otp}</span></div>`);
-      document.getElementById('ownerOtpList').innerHTML = h || "No pending signals.";
-    });
-
-    onSnapshot(collection(db, "users"), (snap) => {
-      let h = "";
-      snap.forEach(d => {
-        const u = d.data();
-        if(!u.joinDateISO) return;
-        const diff = Math.floor((new Date() - new Date(u.joinDateISO)) / 86400000);
-        const rem = (u.totalPaidDays || 0) - diff;
-        h += `<div class="user-item">
-                <div><b>${u.name}</b><br><small>${u.phone}</small></div>
-                <div style="color:${rem >=0 ? 'green':'red'}">${rem}d</div>
-              </div>`;
-      });
-      document.getElementById('folderList').innerHTML = h;
-    });
-  }
-
-  // ADMISSION & PAYMENT (OWNER NUMBER: 7500159996)
   window.requestJoin = () => {
+    if(!document.getElementById('phone').value || document.getElementById('phone').value.length < 10) return alert("Mobile number is mandatory to join!");
     const otp = Math.floor(100000 + Math.random() * 900000);
     setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('name').value });
     document.getElementById('otpInputArea').classList.remove('hidden');
@@ -266,9 +165,45 @@
     }
   };
 
-  window.processPayment = () => {
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${document.getElementById('shift').value}&cu=INR`;
+  window.processPayment = async () => {
+    const amt = document.getElementById('shift').value;
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+    if(confirm("Payment Success?")) {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      const snap = await getDoc(userRef);
+      await setDoc(userRef, { 
+        totalPaidDays: (snap.data().totalPaidDays || 0) + 28,
+        payHistory: arrayUnion(`Paid ₹${amt} on ${new Date().toLocaleDateString()}`)
+      }, {merge: true});
+    }
   };
+
+  window.leaveLibrary = async () => {
+    if(confirm("Are you sure you want to leave? This clears your seat.")) {
+      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true});
+      location.reload();
+    }
+  };
+
+  function loadAdmin() {
+    onSnapshot(collection(db, "signals"), s => {
+      let h = ""; s.forEach(d => h += `<p>${d.data().name}: ${d.data().otp}</p>`);
+      document.getElementById('otpList').innerHTML = h || "No OTPs";
+    });
+    onSnapshot(collection(db, "users"), s => {
+      let h = ""; s.forEach(d => {
+        const u = d.data();
+        h += `<div class="user-folder" onclick="this.querySelector('.history-box').classList.toggle('hidden')">
+          <b>📂 ${u.name}</b> (${u.phone})
+          <div class="history-box hidden">
+            <strong>Change History:</strong><br>${(u.history || []).join('<br>') || 'No changes'}<br><br>
+            <strong>Payment History:</strong><br>${(u.payHistory || []).join('<br>') || 'No payments'}
+          </div>
+        </div>`;
+      });
+      document.getElementById('folderList').innerHTML = h;
+    });
+  }
 </script>
 </body>
 </html>
