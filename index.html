@@ -108,10 +108,10 @@
                 <option value="700">Night Shift (₹700/28d)</option>
                 <option value="400">Half Shift (₹400/28d)</option>
             </select>
-            <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
+            <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy (Max 364)">
             <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
-            <p id="pay-status-msg" style="font-size:11px; color:gray; text-align:center; display:none;">Waiting for Owner to approve your transaction...</p>
+            <p id="pay-status-msg" style="font-size:11px; color:var(--red); font-weight:bold; text-align:center; display:none; margin-top:10px;">Verification Pending. Call 7500159996 for instant approval.</p>
         </div>
         <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
@@ -165,7 +165,13 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  // Fixed common import error for firestore below
+</script>
+<script type="module">
   import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
@@ -190,8 +196,10 @@
   };
 
   window.calcTotal = () => {
+      const daysInput = document.getElementById('p-days');
+      if(parseInt(daysInput.value) > 364) { alert("Max limit is 364 days."); daysInput.value = 364; }
       const shiftPrice = parseInt(document.getElementById('p-shift').value);
-      const days = parseInt(document.getElementById('p-days').value) || 0;
+      const days = parseInt(daysInput.value) || 0;
       const total = Math.round((shiftPrice / 28) * days);
       document.getElementById('pay-summary').innerText = `Total Amount: ₹${total}`;
   };
@@ -199,7 +207,6 @@
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step2').classList.remove('step-active'); };
-  
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep2').classList.remove('step-active'); };
 
@@ -250,42 +257,49 @@
       photo: auth.currentUser.photoURL
     }, {merge: true});
     document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Folder Saved Successfully.");
+    alert("Profile Folder Updated.");
   };
 
   window.checkStepOne = async () => {
-      const name = document.getElementById('p-name').value;
-      if(!name || !document.getElementById('p-father').value || !document.getElementById('p-phone').value) return alert("Fill details first.");
+      if(!document.getElementById('p-name').value || !document.getElementById('p-phone').value) return alert("Fill Profile Folder First.");
       const otp = Math.floor(100000 + Math.random() * 900000);
-      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission' });
       document.getElementById('step2').classList.add('step-active');
-      alert("Step 1 Success. Ask owner for OTP.");
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
       const now = new Date();
-      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0 }, {merge: true});
+      // Logic: If user has survivalDays left, add them to the new starting totalPaidDays
+      const carryForward = survivalDays > 0 ? survivalDays : 0;
+      await setDoc(doc(db, "users", auth.currentUser.uid), { 
+          joinDate: now.toLocaleDateString(), 
+          joinDateISO: now.toISOString(), 
+          totalPaidDays: carryForward 
+      }, {merge: true});
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
     } else alert("Invalid OTP.");
   };
 
   window.checkLeaveFees = async () => {
-      if (survivalDays < 0) alert("Pay dues first.");
+      if (survivalDays < 0) alert("Step 1 Failed: Pay pending dues.");
       else {
           const otp = Math.floor(100000 + Math.random() * 900000);
           await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
           document.getElementById('lstep2').classList.add('step-active');
-          alert("Step 1 Success. Ask owner for Exit OTP.");
       }
   };
 
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 });
+      // NEW LOGIC: Save current remaining survival days into totalPaidDays before clearing the joining date
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+          totalPaidDays: survivalDays,
+          joinDateISO: null 
+      });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       location.reload();
     } else alert("Invalid OTP.");
@@ -293,22 +307,13 @@
 
   window.doPayment = async () => {
     const days = parseInt(document.getElementById('p-days').value) || 0;
-    const shiftPrice = parseInt(document.getElementById('p-shift').value);
-    const total = Math.round((shiftPrice / 28) * days);
-    
-    // Send Payment Signal to Admin instead of instant update
+    const total = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * days);
     await setDoc(doc(db, "signals", "pay_" + auth.currentUser.uid), {
-        uid: auth.currentUser.uid,
-        name: document.getElementById('p-name').value,
-        type: 'PAYMENT',
-        amount: total,
-        days: days,
-        time: new Date().toLocaleString()
+        uid: auth.currentUser.uid, name: document.getElementById('p-name').value, type: 'PAYMENT',
+        amount: total, days: days, time: new Date().toLocaleString()
     });
-    
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${total}&cu=INR`;
     document.getElementById('pay-status-msg').style.display = 'block';
-    alert("Payment initiated. Your days will update as soon as the owner approves the transaction.");
   };
 
   window.approvePayment = async (sid, uid, days, amount) => {
@@ -316,10 +321,10 @@
       const s = await getDoc(ref);
       await updateDoc(ref, { 
           totalPaidDays: (s.data().totalPaidDays || 0) + days,
-          payHistory: arrayUnion(`Approved ₹${amount} for ${days} days on ${new Date().toLocaleDateString()}`)
+          payHistory: arrayUnion(`Added ₹${amount} for ${days} days on ${new Date().toLocaleDateString()}`)
       });
       await deleteDoc(doc(db, "signals", sid));
-      alert("Payment Approved and Days Added.");
+      alert("Payment Approved.");
   };
 
   function loadAdminData() {
@@ -328,13 +333,11 @@
           const sig = d.data();
           if(sig.type === 'PAYMENT') {
               h += `<div style='border:1px solid #0f0; padding:10px; margin-bottom:5px;'>
-                  💰 ${sig.name} sent ₹${sig.amount} for ${sig.days} days.<br>
-                  <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount})" style='background:#0f0; color:#000; border:none; padding:5px; margin-top:5px; cursor:pointer; font-weight:bold;'>APPROVE NOW</button>
-                  <button onclick="confirm('Reject?') && deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red; color:white; border:none; padding:5px; margin-left:10px;'>REJECT</button>
+                  💰 ${sig.name} - ₹${sig.amount} (${sig.days} days)<br>
+                  <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount})" style='background:#0f0; padding:5px; font-weight:bold;'>APPROVE</button>
+                  <button onclick="deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red; color:white; padding:5px; margin-left:10px;'>REJECT</button>
               </div>`;
-          } else {
-              h += `<p style='border-bottom:1px solid #333; padding:5px;'>${sig.type} | ${sig.name}: <b style='color:white;'>${sig.otp}</b></p>`;
-          }
+          } else { h += `<p style='border-bottom:1px solid #333; padding:5px;'>${sig.type} | ${sig.name}: <b style='color:white;'>${sig.otp}</b></p>`; }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "Monitoring...";
     });
@@ -348,7 +351,7 @@
           <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
           <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
           <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
-            <strong>LOGS:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
+            <strong>LOGS:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
