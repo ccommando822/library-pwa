@@ -45,8 +45,8 @@
 <div id="pay-modal" onclick="this.style.display='none'">
     <div class="modal-box">
         <h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3>
-        <p style="font-size:14px; color:#333;">Check Signal Tab for status.</p>
-        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for verification.</p>
+        <p style="font-size:14px; color:#333;">Owner verification required.</p>
+        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996</p>
     </div>
 </div>
 
@@ -59,7 +59,6 @@
   <div id="loginPanel" class="card" style="text-align:center;">
     <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button>
   </div>
-
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
@@ -68,8 +67,7 @@
       <div id="status-days" style="font-size: 24px; font-weight: 900; color: #ccc;">--</div>
       <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
     </div>
-
-    <div id="details-card-anchor" class="card">
+    <div id="details-anchor" class="card">
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
@@ -77,9 +75,7 @@
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
-
     <div class="card"><label class="detail-label">Logs</label><div id="user-pay-log" class="log-container"></div></div>
-
     <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
     <div id="active-tools" class="hidden">
         <div class="card" style="background: #f0f7ff;">
@@ -100,14 +96,14 @@
 </section>
 
 <div id="joinWizard" class="wizard-overlay">
-    <h2 style="color:var(--primary);">Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check, Lock & Redirect</button></div>
+    <h2>Admission Wizard</h2>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
     <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
 </div>
 
 <div id="leaveWizard" class="wizard-overlay">
-    <h2 style="color:var(--red);">Membership Exit</h2>
+    <h2>Membership Exit</h2>
     <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p><button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button></div><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
     <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
@@ -141,7 +137,6 @@
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
-  let survivalDays = 0;
   const getStamp = () => new Date().toLocaleString('en-GB');
 
   const formatSurv = (days) => {
@@ -149,12 +144,21 @@
     return `${days < 0 ? '-' : ''}${d} days ${h} hours`;
   };
 
-  const updateUI = (days, elId, lblId) => {
-    const el = document.getElementById(elId), lbl = document.getElementById(lblId);
-    el.innerText = formatSurv(days);
-    if(lbl) lbl.style.display = days < -28 ? 'block' : 'none';
-    el.style.color = days >= 0 ? "var(--green)" : (days >= -28 ? "var(--yellow)" : "var(--red)");
+  const getRealSurvival = (u) => {
+    if(!u.joinDateISO) return u.totalPaidDays || 0;
+    return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
   };
+
+  const updateGlobalUI = () => {
+    if(currentUserData && currentUserData.joinDateISO) {
+        const srv = getRealSurvival(currentUserData);
+        const el = document.getElementById('status-days'), lbl = document.getElementById('expire-label');
+        el.innerText = formatSurv(srv);
+        if(lbl) lbl.style.display = srv < -28 ? 'block' : 'none';
+        el.style.color = srv >= 0 ? "var(--green)" : (srv >= -28 ? "var(--yellow)" : "var(--red)");
+    }
+  };
+  setInterval(updateGlobalUI, 60000);
 
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
@@ -172,7 +176,6 @@
 
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      await updateDoc(doc(db, "users", user.uid), { isOnline: true }).catch(()=>{});
       onSnapshot(doc(db, "users", user.uid), (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
@@ -184,11 +187,9 @@
             document.getElementById('join-trigger-box').classList.add('hidden');
             document.getElementById('active-tools').classList.remove('hidden');
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
-            survivalDays = (currentUserData.totalPaidDays || 0) - ((new Date() - new Date(currentUserData.joinDateISO)) / 86400000);
-            updateUI(survivalDays, 'status-days', 'expire-label');
+            updateGlobalUI();
           }
-          let logs = "";
-          (currentUserData.history || []).forEach(m => {
+          let logs = ""; (currentUserData.history || []).forEach(m => {
             if(m.includes("Verified") || m.includes("Rejected") || m.includes("Request") || m.includes("Membership"))
               logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
           });
@@ -205,7 +206,7 @@
     const updates = {}; let logMsg = "";
     for (let [k, label] of Object.entries(fields)) {
       const val = document.getElementById('p-'+k).value.trim();
-      if(val.length < 6) return alert(`${label} must be at least 6 characters!`);
+      if(val.length < 6) return alert(`${label} min 6 chars!`);
       if(val !== (currentUserData[k] || "")) {
         logMsg += `Edited Profile ${label} from ${currentUserData[k] || 'Empty'} →_→ ${val} at ${getStamp()}`;
         updates[k] = val;
@@ -221,21 +222,20 @@
 
   window.checkStepOne = async () => {
     if(!['p-name','p-father','p-dob','p-phone','p-address'].every(id => document.getElementById(id).value.trim().length >= 6)) 
-        return alert("Fill all details (min 6 chars) first!");
+        return alert("Fill details (min 6 chars)!");
     const otp = Math.floor(100000 + Math.random() * 900000);
     await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Admission', name: document.getElementById('p-name').value, expiresAt: Date.now() + 300000 });
     document.getElementById('step2').classList.add('step-active');
-    document.getElementById('details-card-anchor').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('details-anchor').scrollIntoView();
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
-      const realTimeSurv = (currentUserData.totalPaidDays || 0) - ((new Date() - new Date(currentUserData.joinDateISO)) / 86400000);
-      const balStr = formatSurv(currentUserData.joinDateISO ? realTimeSurv : 0);
+      const curBal = getRealSurvival(currentUserData);
       await updateDoc(doc(db, "users", auth.currentUser.uid), { 
         joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), 
-        history: arrayUnion(`📈 Membership Joined. Starting Balance: ${balStr} [${getStamp()}]`) 
+        history: arrayUnion(`📈 Membership Joined. Starting Balance: ${formatSurv(curBal)} [${getStamp()}]`) 
       });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
@@ -243,8 +243,9 @@
   };
 
   window.checkLeaveFees = async () => {
-    if(survivalDays < -1) {
-      document.getElementById('leave-error-msg').innerText = `Buy ${Math.ceil(Math.abs(survivalDays))} more days to clear debt.`;
+    const srv = getRealSurvival(currentUserData);
+    if(srv < -1) {
+      document.getElementById('leave-error-msg').innerText = `Pending fees: Buy ${Math.ceil(Math.abs(srv))} days.`;
       document.getElementById('leave-error-box').classList.remove('hidden');
       document.getElementById('leave-verify-btn').classList.add('hidden');
     } else {
@@ -257,9 +258,9 @@
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      const bal = formatSurv(survivalDays);
+      const bal = formatSurv(getRealSurvival(currentUserData));
       await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-        totalPaidDays: survivalDays, joinDateISO: null, 
+        totalPaidDays: getRealSurvival(currentUserData), joinDateISO: null, 
         history: arrayUnion(`📉 Membership Left. Last Balance: ${bal} [${getStamp()}]`) 
       });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
@@ -269,12 +270,12 @@
 
   window.doPayment = async () => {
     let d = parseInt(document.getElementById('p-days').value);
-    let shift = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
-    let a = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
+    let shiftFull = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
     let reqT = getStamp(), sid = "pay_"+auth.currentUser.uid+"_"+Date.now();
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${a} for ${d} days (${shift}) at ${reqT}`) });
-    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: a, days: d, time: reqT, shift, type: 'PAYMENT' });
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${a}`;
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(`Request: ₹${amt} for ${d} days (${shiftFull}) at ${reqT}`) });
+    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: amt, days: d, time: reqT, shift: shiftFull, type: 'PAYMENT' });
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${amt}`;
     document.getElementById('pay-modal').style.display = 'flex';
   };
 
@@ -290,43 +291,39 @@
     onSnapshot(collection(db, "signals"), s => {
       let h = ""; s.forEach(d => {
         const sig = d.data();
-        if(sig.type === 'PAYMENT') h += `<div>💰 ${sig.name}: ₹${sig.amount} (${sig.days}d - ${sig.shift})<br><button onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">OK</button><button onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">X</button></div>`;
+        if(sig.type !== 'PAYMENT' && sig.expiresAt < Date.now()) { deleteDoc(doc(db, "signals", d.id)); return; }
+        if(sig.type === 'PAYMENT') h += `<div>💰 ${sig.name.toUpperCase()}: ₹${sig.amount} (${sig.days}d - ${sig.shift})<br><button onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">OK</button><button onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">X</button></div>`;
         else h += `<div>${sig.type} | ${sig.name}: ${sig.otp}</div>`;
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No Signals.";
     });
     onSnapshot(collection(db, "users"), s => {
-      let users = []; s.forEach(d => { users.push({id: d.id, ...d.data()}); });
-      users.sort((a,b) => (a.name || "").localeCompare(b.name || ""));
-      
-      const grp = { onJ: "", offJ: "", onL: "", offL: "" };
-      users.forEach(u => {
-        const srv = u.joinDateISO ? (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000) : 0;
-        const color = srv >= 0 ? "var(--green)" : (srv >= -28 ? "var(--yellow)" : "var(--red)");
-        const statusHtml = u.joinDateISO ? `<span style="color:${color}; font-size:10px;">${formatSurv(srv)}</span>` : `<span style="color:gray; font-size:10px;">${u.totalPaidDays > 0 ? 'LEFT' : 'NEW'}</span>`;
-        const card = `<div class="player-card" onclick="openUser('${u.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>${statusHtml}</div>`;
-        
-        if(u.isOnline) { u.joinDateISO ? grp.onJ += card : grp.onL += card; } 
-        else { u.joinDateISO ? grp.offJ += card : grp.offL += card; }
+      let uList = []; s.forEach(d => uList.push({id: d.id, ...d.data()}));
+      uList.sort((a,b) => (a.name || "").localeCompare(b.name || ""));
+      const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
+      uList.forEach(u => {
+        const srv = getRealSurvival(u);
+        const sHtml = `<span style="font-size:10px; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</span>`;
+        const card = `<div class="player-card" onclick="openUser('${u.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div>${sHtml}</div>`;
+        if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
       });
-      document.getElementById('admin-survival-list').innerHTML = `<div style="font-size:10px; color:var(--primary); padding:5px;">ONLINE JOINED</div>${grp.onJ}<div style="font-size:10px; color:var(--primary); padding:5px;">OFFLINE JOINED</div>${grp.offJ}<div style="font-size:10px; color:var(--primary); padding:5px;">ONLINE NEW/LEFT</div>${grp.onL}<div style="font-size:10px; color:var(--primary); padding:5px;">OFFLINE NEW/LEFT</div>${grp.offL}`;
+      document.getElementById('admin-survival-list').innerHTML = `<div class="detail-label">Online Joined</div>${g.onJ}<div class="detail-label">Offline Joined</div>${g.offJ}<div class="detail-label">Online New/Left</div>${g.onNL}<div class="detail-label">Offline New/Left</div>${g.offNL}`;
     });
   }
 
   window.openUser = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
-    const curSurv = u.joinDateISO ? (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000) : 0;
-    let logs = ""; (u.history || []).forEach(m => { logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`; });
+    const srv = getRealSurvival(u);
+    let pLog = "", aLog = ""; (u.history || []).forEach(m => {
+        const ent = `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
+        if(m.includes("Verified") || m.includes("Rejected") || m.includes("Request") || m.includes("Membership")) pLog += ent; else aLog += ent;
+    });
     document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><div id="adm-exp" style="font-size:28px; font-weight:900; color:var(--red); display:${curSurv < -28 ? 'block' : 'none'};">EXPIRED</div><div id="adm-surv" style="font-size:24px; font-weight:900;">${formatSurv(curSurv)}</div></div>
-      <div class="card"><label class="detail-label">Adjust Survival (Enter Total Paid Days)</label>
-        <div id="adm-preview" style="font-weight:bold; color:var(--primary); margin-bottom:5px;">Current: ${formatSurv(curSurv)}</div>
-        <input type="number" id="adm-days" value="${u.totalPaidDays}" oninput="document.getElementById('adm-preview').innerText = 'New Total: ' + this.value + ' days'" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;">
-        <button class="btn btn-blue" onclick="saveAdmSurv('${uid}')">Update Balance</button>
-      </div>
+      <div class="card" style="text-align:center;"><div id="adm-exp" style="font-size:28px; font-weight:900; color:var(--red); display:${srv<-28?'block':'none'}">EXPIRED</div><div id="adm-surv" style="font-size:24px; font-weight:900;">${formatSurv(srv)}</div></div>
+      <div class="card"><label class="detail-label">Adjust Survival (Total Days)</label><div id="adm-pre" style="font-weight:bold; color:var(--primary);">Current: ${formatSurv(srv)}</div><input type="number" id="adm-days" value="${u.totalPaidDays}" oninput="document.getElementById('adm-pre').innerText = 'New Total: ' + this.value + ' days'" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;"><button class="btn btn-blue" onclick="saveAdmSurv('${uid}')">Update</button></div>
       <div class="card"><div class="detail-label">Profile</div><div>Name: ${u.name}</div><div>Father: ${u.father}</div><div>D.O.B: ${u.dob}</div><div>Phone: ${u.phone}</div><div>Address: ${u.address}</div></div>
-      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${logs}</div></div>`;
-    updateUI(curSurv, 'adm-surv', 'adm-exp');
+      <div class="card"><label class="detail-label">Payment Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${pLog}</div></div>
+      <div class="card"><label class="detail-label">Activity Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${aLog}</div></div>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
@@ -339,9 +336,9 @@
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.calcTotal = () => { let d = document.getElementById('p-days').value; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
-  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
+  window.openWizard = () => { document.getElementById('step2').classList.remove('step-active'); document.getElementById('joinWizard').classList.add('show'); };
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
-  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.openLeaveWizard = () => { document.getElementById('lstep2').classList.remove('step-active'); document.getElementById('leaveWizard').classList.add('show'); };
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
 </script>
 </body>
