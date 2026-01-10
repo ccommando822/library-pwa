@@ -239,6 +239,7 @@
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
 
+  // ESSENTIAL CHANGE: Attached to window for HTML onclick
   window.checkStepOne = async () => {
       const otp = Math.floor(100000 + Math.random() * 900000);
       await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission', createdAt: serverTimestamp() });
@@ -254,6 +255,7 @@
     }
   };
 
+  // ESSENTIAL CHANGE: Attached to window for HTML onclick
   window.checkLeaveFees = async () => {
     if (survivalDays < 0) alert("Fees Pending.");
     else {
