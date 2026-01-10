@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rakshapal Singh Library ERP</title>
   <style>
-    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #fff9c4; }
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; }
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
     header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
     
@@ -28,24 +28,31 @@
     .wizard-overlay.show { display: block; overflow-y: auto; }
     .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; opacity: 0.6; pointer-events: none; }
     .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
+    .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
 
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
 
-    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid var(--primary); flex-wrap: wrap; }
+    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 15px; display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--primary); flex-wrap: wrap; }
+    .player-photo { width: 50px; height: 50px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
     .player-info { flex: 1; }
+    .player-info b { display: block; font-size: 16px; }
+    .player-info small { color: #b0b3b8; }
     .survival-stat { font-weight: bold; text-align: right; }
 
-    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
+    .admin-nav { display: flex; background: #eee; padding: 5px; border-radius: 10px; margin-bottom: 15px; }
+    .admin-nav button { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: transparent; }
+    .admin-nav button.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
     .btn-blue { background: var(--primary); color: white; }
+    .btn-black { background: var(--black); color: white; }
     .btn-green { background: var(--green); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
 
-    /* New Transaction History Styling */
-    .history-item { font-size: 12px; border-bottom: 1px dashed #ccc; padding: 10px 0; color: #444; }
-    .history-item b { color: var(--primary); }
-    .deduct-note { background: var(--yellow); padding: 8px; border-radius: 8px; font-size: 11px; margin-top: 10px; text-align: center; border: 1px solid #f0e68c; }
+    /* Yellow message style */
+    .deduct-note { background: #fff9c4; padding: 10px; border-radius: 10px; font-size: 12px; color: #856404; margin-top: 10px; border: 1px solid #ffeeba; text-align: center; }
   </style>
 </head>
 <body>
@@ -55,8 +62,9 @@
 <div id="pay-modal" onclick="this.style.display='none'">
     <div class="modal-box">
         <h3 style="color:var(--primary); margin-top:0;">Payment Initiated</h3>
-        <p>You will get your days as soon as owner verified.</p>
-        <p style="font-weight:bold; color:var(--red);">Call 7500159996 for instant verification.</p>
+        <p style="font-size:14px; color:#333;">You will get your days as soon as owner verified.</p>
+        <p style="font-size:16px; font-weight:bold; color:var(--red);">Call 7500159996 for instant verification.</p>
+        <small style="color:gray;">Click anywhere to close</small>
     </div>
 </div>
 
@@ -73,23 +81,21 @@
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
-      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">--</div>
-      <div id="status-days" style="font-size: 32px; font-weight: 900; color: #ccc;">--</div>
-      <div style="font-size: 10px; text-transform: uppercase;">Survival Remaining</div>
-      <div class="deduct-note">⚠️ Note: 1 Day will be deducted every 24 hours in real-time.</div>
+      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED YET</div>
+      <div id="status-days" style="font-size: 24px; font-weight: 900; color: #ccc;">--</div>
+      <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
+      <div class="deduct-note">⚠️ Note: 1 Day will be deducted every 24 hours.</div>
     </div>
 
-    <div class="card" id="history-card">
-        <label class="detail-label">My Transaction History</label>
-        <div id="user-history-list" style="margin-top:10px; max-height:150px; overflow-y:auto;">
-            <p style="font-size:12px; color:gray;">No transactions yet.</p>
-        </div>
+    <div class="card" id="history-box">
+      <label class="detail-label">Payment History</label>
+      <div id="user-history-list" style="max-height: 120px; overflow-y: auto; font-size: 12px; margin-top: 10px;"></div>
     </div>
 
     <div class="card">
-      <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span onclick="makeEdit('p-name')">✏️</span></div>
-      <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span onclick="makeEdit('p-father')">✏️</span></div>
-      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span onclick="makeEdit('p-phone')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
     </div>
 
@@ -98,38 +104,38 @@
     <div id="active-tools" class="hidden">
         <div class="card" style="background: #f0f7ff;">
             <label class="detail-label">Renewal Panel</label>
-            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px;">
+            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
                 <option value="500">Day Shift (₹500/28d)</option>
                 <option value="400">Night Shift (₹400/28d)</option>
                 <option value="700">Both Shift (₹700/28d)</option>
             </select>
-            <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px;">
-            <div id="pay-summary" style="font-weight:bold; color:var(--primary);">Total Amount: ₹500</div>
+            <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
+            <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
         </div>
         <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
-    <button style="width:100%; background:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
+    <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
 </section>
 
 <div id="joinWizard" class="wizard-overlay">
-    <h2>Admission Wizard</h2>
-    <div id="step1" class="step-card step-active">1. Verify Folder <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock</button></div>
-    <div id="step2" class="step-card">2. Identity Verification <input type="number" id="join-otp" placeholder="OTP"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
-    <button class="btn" onclick="closeWizard()">Cancel</button>
+    <h2 style="color:var(--primary);">Admission Wizard</h2>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><p style="font-size:13px; color:#555;">Checking if details are filled.</p><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
+    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><p style="font-size:13px; color:#555;">Call Owner at <b>7500159996</b> for Admission OTP.</p><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
+    <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
 </div>
 
 <div id="leaveWizard" class="wizard-overlay">
-    <h2>Membership Exit</h2>
-    <div id="lstep1" class="step-card step-active">1. Verify Fees <button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees</button></div>
-    <div id="lstep2" class="step-card">2. Exit Approval <input type="number" id="leave-otp" placeholder="OTP"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
-    <button class="btn" onclick="closeLeaveWizard()">Cancel</button>
+    <h2 style="color:var(--red);">Membership Exit</h2>
+    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><p style="font-size:13px; color:#555;">Verifying fees.</p><button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
+    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><p style="font-size:13px; color:#555;">Call Owner for Exit OTP.</p><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
+    <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
 
 <section id="manage">
     <div class="admin-nav"><button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Live Signals</button><button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button></div>
-    <div id="am-pane-otp"><div class="card" style="background:#000; color:#0f0;" id="admin-otp-list"></div></div>
+    <div id="am-pane-otp"><div class="card" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;" id="admin-otp-list"></div></div>
     <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
 </section>
 
@@ -145,6 +151,13 @@
   const provider = new GoogleAuthProvider();
 
   let survivalDays = 0;
+
+  function formatSurvival(totalDays) {
+      if(totalDays < 0) return "EXPIRED";
+      const d = Math.floor(totalDays);
+      const h = Math.floor((totalDays - d) * 24);
+      return `${d} days ${h} hours`;
+  }
 
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
@@ -187,35 +200,21 @@
           document.getElementById('p-name').value = d.name || "";
           document.getElementById('p-father').value = d.father || "";
           document.getElementById('p-phone').value = d.phone || "";
-          
-          // REAL TIME SURVIVAL CALCULATION
           if(d.joinDateISO) {
             document.getElementById('join-trigger-box').classList.add('hidden');
             document.getElementById('active-tools').classList.remove('hidden');
             document.getElementById('status-joined').innerText = "JOINED: " + d.joinDate;
-            const msPassed = new Date() - new Date(d.joinDateISO);
-            const daysPassed = msPassed / (1000 * 60 * 60 * 24); 
-            survivalDays = (d.totalPaidDays || 0) - daysPassed;
+            const diff = (new Date() - new Date(d.joinDateISO)) / 86400000;
+            survivalDays = (d.totalPaidDays || 0) - diff;
             const disp = document.getElementById('status-days');
-            disp.innerText = survivalDays.toFixed(2); // Shows real-time reduction
+            disp.innerText = formatSurvival(survivalDays);
             disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
-          } else {
-             document.getElementById('join-trigger-box').classList.remove('hidden');
-             document.getElementById('active-tools').classList.add('hidden');
-             document.getElementById('status-joined').innerText = "NOT JOINED YET";
-             document.getElementById('status-days').innerText = (d.totalPaidDays || 0).toFixed(2);
           }
-
-          // UPDATE TRANSACTION HISTORY VIEW
-          if(d.transactions) {
-              let h = "";
-              d.transactions.reverse().forEach(t => {
-                  h += `<div class="history-item"><b>₹${t.amt}</b> for ${t.days}d<br>
-                        <small>Requested: ${t.reqTime}</small><br>
-                        <small>Verified: ${t.verTime || 'Pending'}</small></div>`;
-              });
-              document.getElementById('user-history-list').innerHTML = h;
-          }
+          let hHtml = "";
+          (d.history || []).reverse().forEach(h => {
+              hHtml += `<div style="border-bottom:1px solid #eee; padding:5px 0;">${h}</div>`;
+          });
+          document.getElementById('user-history-list').innerHTML = hHtml || "No history yet.";
         }
       });
       if(user.email === "c.commando822@gmail.com") {
@@ -233,9 +232,8 @@
   };
 
   window.checkStepOne = async () => {
-      const name = document.getElementById('p-name').value;
       const otp = Math.floor(100000 + Math.random() * 900000);
-      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Admission' });
       document.getElementById('step2').classList.add('step-active');
   };
 
@@ -249,12 +247,12 @@
   };
 
   window.checkLeaveFees = async () => {
-      if (survivalDays < 0) alert("Fees Pending.");
-      else {
-          const otp = Math.floor(100000 + Math.random() * 900000);
-          await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
-          document.getElementById('lstep2').classList.add('step-active');
-      }
+    if (survivalDays < 0) alert("Fees Pending.");
+    else {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
+      document.getElementById('lstep2').classList.add('step-active');
+    }
   };
 
   window.verifyLeave = async () => {
@@ -269,11 +267,13 @@
   window.doPayment = async () => {
     const days = parseInt(document.getElementById('p-days').value) || 0;
     const amt = Math.round((parseInt(document.getElementById('p-shift').value) / 28) * days);
-    const reqTime = new Date().toLocaleString();
+    const timeStr = new Date().toLocaleString();
+    const entry = `💰 Request: ₹${amt} for ${days} days at ${timeStr} [Pending Verification]`;
     
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(entry) });
     await setDoc(doc(db, "signals", "pay_" + auth.currentUser.uid), {
         uid: auth.currentUser.uid, name: document.getElementById('p-name').value, type: 'PAYMENT',
-        amount: amt, days: days, time: reqTime
+        amount: amt, days: days, time: timeStr
     });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
     document.getElementById('pay-modal').style.display = 'flex';
@@ -282,14 +282,13 @@
   window.approvePayment = async (sid, uid, days, amount, reqTime) => {
       const verTime = new Date().toLocaleString();
       const ref = doc(db, "users", uid);
-      const s = await getDoc(ref);
-      const userData = s.data();
+      const snap = await getDoc(ref);
+      const hist = snap.data().history || [];
+      const updatedHist = hist.map(item => item.includes(reqTime) ? `✅ Verified: ₹${amount} for ${days} days. Approved at ${verTime}` : item);
       
       await updateDoc(ref, { 
-          totalPaidDays: (userData.totalPaidDays || 0) + days,
-          transactions: arrayUnion({
-              user: userData.name, amt: amount, days: days, reqTime: reqTime, verTime: verTime
-          })
+          totalPaidDays: (snap.data().totalPaidDays || 0) + days,
+          history: updatedHist
       });
       await deleteDoc(doc(db, "signals", sid));
       alert("Success.");
@@ -302,19 +301,24 @@
           if(sig.type === 'PAYMENT') {
               h += `<div style='border:1px solid #0f0; padding:10px; margin-bottom:5px;'>
                   💰 ${sig.name} - ₹${sig.amount} (${sig.days}d)<br>
-                  <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount}, '${sig.time}')" style='background:#0f0;'>APPROVE</button>
-                  <button onclick="deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red;'>REJECT</button>
+                  <button onclick="approvePayment('${d.id}', '${sig.uid}', ${sig.days}, ${sig.amount}, '${sig.time}')" style='background:#0f0; border:none; padding:5px; font-weight:bold;'>APPROVE</button>
+                  <button onclick="deleteDoc(doc(db, 'signals', '${d.id}'))" style='background:red; color:white; border:none; padding:5px; margin-left:10px;'>REJECT</button>
               </div>`;
-          } else { h += `<p>${sig.type} | ${sig.name}: <b>${sig.otp}</b></p>`; }
+          } else { h += `<p style='border-bottom:1px solid #333; padding:5px;'>${sig.type} | ${sig.name}: <b style='color:white;'>${sig.otp}</b></p>`; }
       });
-      document.getElementById('admin-otp-list').innerHTML = h;
+      document.getElementById('admin-otp-list').innerHTML = h || "Monitoring...";
     });
     onSnapshot(collection(db, "users"), s => {
       let h = ""; s.forEach(d => {
         const u = d.data(); if(!u.joinDateISO) return;
-        const diff = (new Date() - new Date(u.joinDateISO)) / (1000*60*60*24);
+        const diff = (new Date() - new Date(u.joinDateISO)) / 86400000;
         const rem = (u.totalPaidDays || 0) - diff;
-        h += `<div class="player-card"><b>${u.name}</b><div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem.toFixed(2)}</div></div>`;
+        h += `<div class="player-card" onclick="this.querySelector('.fold').classList.toggle('hidden')">
+          <img src="${u.photo}" class="player-photo">
+          <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
+          <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${formatSurvival(rem)}</div>
+          <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">${(u.history || []).join('<br>')}</div>
+        </div>`;
       });
       document.getElementById('admin-survival-list').innerHTML = h;
     });
