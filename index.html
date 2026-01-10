@@ -105,13 +105,14 @@
             <label class="detail-label">Renewal Panel</label>
             <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
                 <option value="500">Day Shift (₹500/28d)</option>
-                <option value="400">Night Shift (₹400/28d)</option>
+                <option value="700">Night Shift (₹700/28d)</option>
+                <option value="400">Half Shift (₹400/28d)</option>
             </select>
             <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" placeholder="Days to buy">
             <div id="pay-summary" style="font-weight:bold; color:var(--primary); margin: 5px 0;">Total Amount: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
         </div>
-        <button class="btn btn-outline" onclick="window.reqLeave()">Leave Library Membership</button>
+        <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
     <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
@@ -121,16 +122,32 @@
     <h2 style="color:var(--primary);">Admission Wizard</h2>
     <div id="step1" class="step-card step-active">
         <span class="step-num">1</span> <b>Verify Folder Details</b>
-        <p style="font-size:13px; color:#555;">We will check if your Name, Father's Name, and Mobile are filled.</p>
+        <p style="font-size:13px; color:#555;">Checking if Name, Father's Name, and Mobile are filled.</p>
         <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button>
     </div>
     <div id="step2" class="step-card">
         <span class="step-num">2</span> <b>Verify Identity</b>
         <p style="font-size:13px; color:#555;">Call Owner at <b>7500159996</b> for Admission OTP.</p>
-        <input type="number" id="join-otp" placeholder="6-digit OTP" oninput="toggleProceed(this)" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;">
+        <input type="number" id="join-otp" placeholder="6-digit OTP" oninput="toggleProceed(this, 'proceed-btn')" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;">
         <button id="proceed-btn" class="btn btn-black" onclick="window.verifyJoin()">Proceed</button>
     </div>
     <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
+</div>
+
+<div id="leaveWizard" class="wizard-overlay">
+    <h2 style="color:var(--red);">Membership Exit</h2>
+    <div id="lstep1" class="step-card step-active">
+        <span class="step-num">1</span> <b>Check Fees History</b>
+        <p style="font-size:13px; color:#555;">Verifying if all fees are paid till date.</p>
+        <button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button>
+    </div>
+    <div id="lstep2" class="step-card">
+        <span class="step-num">2</span> <b>Exit Approval</b>
+        <p style="font-size:13px; color:#555;">Call Owner for Exit OTP to clear seat.</p>
+        <input type="number" id="leave-otp" placeholder="6-digit OTP" oninput="toggleProceed(this, 'lproceed-btn')" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;">
+        <button id="lproceed-btn" class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button>
+    </div>
+    <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
 
 <section id="manage">
@@ -155,6 +172,9 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
+  let userGlobal = null;
+  let survivalDays = 0;
+
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
@@ -178,13 +198,13 @@
 
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
-  window.closeWizard = () => { 
-      document.getElementById('joinWizard').classList.remove('show');
-      document.getElementById('step2').classList.remove('step-active');
-  };
+  window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step2').classList.remove('step-active'); };
   
-  window.toggleProceed = (el) => {
-    const btn = document.getElementById('proceed-btn');
+  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep2').classList.remove('step-active'); };
+
+  window.toggleProceed = (el, btnId) => {
+    const btn = document.getElementById(btnId);
     if(el.value.length >= 6) btn.classList.replace('btn-black', 'btn-blue');
     else btn.classList.replace('btn-blue', 'btn-black');
   };
@@ -194,6 +214,7 @@
 
   onAuthStateChanged(auth, (user) => {
     if(user) {
+      userGlobal = user;
       document.getElementById('loginPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.remove('hidden');
       document.getElementById('u-img').src = user.photoURL;
@@ -208,10 +229,10 @@
             document.getElementById('active-tools').classList.remove('hidden');
             document.getElementById('status-joined').innerText = "JOINED: " + d.joinDate;
             const diff = Math.floor((new Date() - new Date(d.joinDateISO)) / 86400000);
-            const rem = (d.totalPaidDays || 0) - diff;
+            survivalDays = (d.totalPaidDays || 0) - diff;
             const disp = document.getElementById('status-days');
-            disp.innerText = rem;
-            disp.style.color = rem >= 0 ? "var(--green)" : "var(--red)";
+            disp.innerText = survivalDays;
+            disp.style.color = survivalDays >= 0 ? "var(--green)" : "var(--red)";
           }
         }
       });
@@ -230,7 +251,7 @@
       photo: auth.currentUser.photoURL
     }, {merge: true});
     document.querySelectorAll('input').forEach(i => i.readOnly = true);
-    alert("Folder Saved Successfully.");
+    alert("Folder Details Saved.");
   };
 
   window.checkStepOne = async () => {
@@ -238,13 +259,12 @@
       const father = document.getElementById('p-father').value;
       const phone = document.getElementById('p-phone').value;
       if(!name || !father || !phone) {
-          alert("Step 1 Failed: Please fill Name, Father's Name, and Mobile first.");
-          closeWizard();
+          alert("Step 1 Failed: Fill all required details first.");
       } else {
           const otp = Math.floor(100000 + Math.random() * 900000);
           await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name, type: 'Admission' });
           document.getElementById('step2').classList.add('step-active');
-          alert("Step 1 Passed. Proceed to Step 2.");
+          alert("Step 1 Success. Ask owner for OTP.");
       }
   };
 
@@ -255,7 +275,28 @@
       await setDoc(doc(db, "users", auth.currentUser.uid), { joinDate: now.toLocaleDateString(), joinDateISO: now.toISOString(), totalPaidDays: 0 }, {merge: true});
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
-    } else alert("Invalid OTP. Call 7500159996");
+    } else alert("Invalid OTP.");
+  };
+
+  window.checkLeaveFees = async () => {
+      if (survivalDays < 0) {
+          alert("Step 1 Failed: Your dues are pending. Please pay till date before leaving.");
+      } else {
+          const otp = Math.floor(100000 + Math.random() * 900000);
+          await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, name: document.getElementById('p-name').value, type: 'Exit' });
+          document.getElementById('lstep2').classList.add('step-active');
+          alert("Step 1 Success. Ask owner for Exit OTP.");
+      }
+  };
+
+  window.verifyLeave = async () => {
+    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
+    if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
+      await setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true});
+      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
+      closeLeaveWizard();
+      location.reload();
+    } else alert("Invalid OTP.");
   };
 
   window.doPayment = async () => {
@@ -263,19 +304,17 @@
     const shiftPrice = parseInt(document.getElementById('p-shift').value);
     const total = Math.round((shiftPrice / 28) * days);
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${total}&cu=INR`;
-    if(confirm("Confirm payment completion?")) {
+    if(confirm("Payment Success?")) {
       const ref = doc(db, "users", auth.currentUser.uid);
       const s = await getDoc(ref);
       await setDoc(ref, { totalPaidDays: (s.data().totalPaidDays || 0) + days, payHistory: arrayUnion(`Added ${days} days (₹${total}) on ${new Date().toLocaleDateString()}`) }, {merge: true});
     }
   };
 
-  window.reqLeave = () => { if(confirm("End membership?")) { setDoc(doc(db, "users", auth.currentUser.uid), { joinDateISO: null, totalPaidDays: 0 }, {merge: true}).then(() => location.reload()); } };
-
   function loadAdminData() {
     onSnapshot(collection(db, "signals"), s => {
       let h = ""; s.forEach(d => h += `<p style='border-bottom:1px solid #333; padding:5px;'>${d.data().type} | ${d.data().name}: <b style='color:white;'>${d.data().otp}</b></p>`);
-      document.getElementById('admin-otp-list').innerHTML = h || "No Active Signals";
+      document.getElementById('admin-otp-list').innerHTML = h || "Monitoring...";
     });
     onSnapshot(collection(db, "users"), s => {
       let h = ""; s.forEach(d => {
@@ -287,7 +326,7 @@
           <div class="player-info"><b>${u.name}</b><small>${u.phone}</small></div>
           <div class="survival-stat" style="color:${rem >=0 ? 'var(--green)':'var(--red)'}">${rem}<br><small>SURVIVAL</small></div>
           <div class="fold hidden" style="width:100%; font-size:11px; margin-top:10px; border-top:1px solid #444; padding-top:10px;">
-            <strong>LOGS:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
+            <strong>HISTORY:</strong><br>${(u.history || []).join('<br>')}<br><br><strong>PAYMENTS:</strong><br>${(u.payHistory || []).join('<br>')}
           </div>
         </div>`;
       });
