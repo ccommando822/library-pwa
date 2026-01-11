@@ -230,7 +230,7 @@
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
-    // Navigation
+  // Navigation
   window.switchMain = (t) => {
     localStorage.setItem('activeTab', t);
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
