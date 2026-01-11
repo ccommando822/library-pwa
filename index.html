@@ -97,7 +97,6 @@
     <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
 </section>
-
 <div id="joinWizard" class="wizard-overlay">
     <h2>Admission Wizard</h2>
     <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
@@ -110,22 +109,6 @@
     <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p><button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button></div><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
     <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
-</div>
-
-<section id="manage">
-    <div class="admin-nav" style="display:flex; gap:5px; padding:5px; background:#eee; border-radius:10px; margin-bottom:15px;">
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Signals</button>
-        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Survivals</button>
-    </div>
-    <div id="am-pane-otp"><div class="card" id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;"></div></div>
-    <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
-</section>
-
-<div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg);">
-    <div style="max-width:500px; margin:auto; padding:15px;">
-        <button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button>
-        <div id="folder-content"></div>
-    </div>
 </div>
 
 <script type="module">
@@ -163,30 +146,31 @@
   };
   setInterval(updateGlobalUI, 60000);
 
-  window.switchMain = (t) => {
-    localStorage.setItem('activeTab', t);
-    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-    document.getElementById(t).classList.add('active');
-    document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
-    const btnId = t === 'account' ? 'tab-acc' : 'tab-man';
-    document.getElementById(btnId).classList.add('active');
-  };
-
-  window.switchAdmin = (t) => {
-    localStorage.setItem('adminTab', t);
-    document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
-    document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
-    document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
-    document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
+  const renderLogs = (history) => {
+    let logs = "";
+    (history || []).slice().reverse().forEach(m => {
+      if (typeof m === 'string') {
+        logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
+      } else {
+        const icon = m.status === 'Pending' ? "💰" : (m.status === 'Verified' ? "✅" : "❌");
+        logs += `<div style="padding:10px 0; border-bottom:1px solid #eee; white-space:pre-wrap; font-size:12px;">` +
+        `${icon} ${m.status}: Request at ${m.reqT}\n` +
+        `=>shift:-${m.shift}\n=>Days:- ${m.days}\n=>Amount:-₹${m.amt}\n` +
+        (m.status === 'Pending' ? `=> [Status: Pending]` : `=>${m.status} at ${m.actionT}\n=>Net days:- ${Math.floor(m.finalNet)}d`) +
+        `</div>`;
+      }
+    });
+    return logs;
   };
 
   onAuthStateChanged(auth, async (user) => {
     if(user) {
-      await updateDoc(doc(db, "users", user.uid), { isOnline: true }).catch(async () => {
-          await setDoc(doc(db, "users", user.uid), { name: user.displayName, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
+      const uRef = doc(db, "users", user.uid);
+      await updateDoc(uRef, { isOnline: true }).catch(async () => {
+          await setDoc(uRef, { name: user.displayName, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
       });
 
-      onSnapshot(doc(db, "users", user.uid), (snap) => {
+      onSnapshot(uRef, (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
           document.getElementById('loginPanel').classList.add('hidden');
@@ -199,26 +183,7 @@
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
             updateGlobalUI();
           }
-          
-          let logs = ""; 
-          (currentUserData.history || []).slice().reverse().forEach(m => {
-              if (typeof m === 'string') {
-                  logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
-              } else {
-                  const isPending = m.status === 'Pending';
-                  const isVerified = m.status === 'Verified';
-                  const icon = isPending ? "💰" : (isVerified ? "✅" : "❌");
-                  logs += `<div style="padding:10px 0; border-bottom:1px solid #eee; white-space:pre-wrap; font-size:12px;">` +
-                  `${icon} ${m.status}: Request at ${m.reqT}\n` +
-                  `=>shift:-${m.shift}\n` +
-                  `=>Days to buy:- ${m.days} days.\n` +
-                  `=>Amount to pay:-₹${m.amt}.\n` +
-                  (isPending ? `=> [Status: Pending]` : `\n=>${m.status} at ${m.actionT}.\n=>Net days(updated) :- ${Math.floor(m.finalNet)} days`) +
-                  `</div>`;
-              }
-          });
-          document.getElementById('user-pay-log').innerHTML = logs;
-          
+          document.getElementById('user-pay-log').innerHTML = renderLogs(currentUserData.history);
           const savedTab = localStorage.getItem('activeTab');
           if(savedTab) switchMain(savedTab);
         }
@@ -227,26 +192,12 @@
       if(user.email === "c.commando822@gmail.com") { 
           document.getElementById('tab-man').classList.remove('hidden'); 
           loadAdmin(); 
-          const savedAdminTab = localStorage.getItem('adminTab');
-          if(savedAdminTab) switchAdmin(savedAdminTab);
       }
     } else {
         document.getElementById('loginPanel').classList.remove('hidden');
         document.getElementById('profilePanel').classList.add('hidden');
     }
   });
-
-  window.updateUserPhoto = (input) => {
-      if (input.files && input.files[0]) {
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-              const base64 = e.target.result;
-              await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: base64 });
-              document.getElementById('u-img').src = base64;
-          };
-          reader.readAsDataURL(input.files[0]);
-      }
-  };
 
   window.saveProfile = async () => {
     const updates = {};
@@ -255,130 +206,86 @@
     await updateDoc(doc(db, "users", auth.currentUser.uid), { ...updates, history: arrayUnion(`Profile updated at ${getStamp()}`) });
     alert("Saved.");
   };
-
-  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
-
-  window.checkStepOne = async () => {
-    const pFields = ['p-name','p-father','p-dob','p-phone','p-address'];
-    if(pFields.some(id => document.getElementById(id).value.trim().length < 3)) return alert("Fill profile details first!");
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Admission', name: document.getElementById('p-name').value, expiresAt: Date.now() + 300000 });
-    document.getElementById('step2').classList.add('step-active');
+    window.switchMain = (t) => {
+    localStorage.setItem('activeTab', t);
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(t).classList.add('active');
+    document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(t === 'account' ? 'tab-acc' : 'tab-man').classList.add('active');
   };
 
-  window.verifyJoin = async () => {
-    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
-    if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-        joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), 
-        history: arrayUnion(`📈 Membership Joined at ${getStamp()}`) 
-      });
-      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      closeWizard();
-    } else alert("Invalid OTP");
+  window.switchAdmin = (t) => {
+    localStorage.setItem('adminTab', t);
+    document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
+    document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
+    document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
+    document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
   };
 
-  window.checkLeaveFees = async () => {
-    const srv = getRealSurvival(currentUserData);
-    if(srv < -1) {
-      document.getElementById('leave-error-msg').innerText = `Buy ${Math.ceil(Math.abs(srv))} days to clear debt.`;
-      document.getElementById('leave-error-box').classList.remove('hidden');
-      document.getElementById('leave-verify-btn').classList.add('hidden');
-    } else {
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Exit', name: currentUserData.name, expiresAt: Date.now() + 300000 });
-      document.getElementById('lstep2').classList.add('step-active');
-    }
-  };
-
-  window.verifyLeave = async () => {
-    const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
-    if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-        totalPaidDays: getRealSurvival(currentUserData), joinDateISO: null, 
-        history: arrayUnion(`📉 Membership Left at ${getStamp()}`) 
-      });
-      await deleteDoc(doc(db, "signals", auth.currentUser.uid));
-      location.reload();
-    }
-  };
-
-  window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value);
-    if(d > 364) return alert("Max 364 days allowed.");
-    let shiftFull = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
-    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
-    let reqT = getStamp(), payId = Date.now(), sid = "pay_"+auth.currentUser.uid+"_"+payId;
-    const historyObj = { id: payId, reqT, shift: shiftFull, days: d, amt, status: 'Pending' };
-    await setDoc(doc(db, "signals", sid), { ...historyObj, uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone || "N/A", type: 'PAYMENT' });
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(historyObj) });
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${amt}`;
-    document.getElementById('pay-modal').style.display = 'flex';
-  };
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
     const ref = doc(db, "users", uid), snap = await getDoc(ref);
-    const userData = snap.data();
-    const newTotal = stat == 'OK' ? (userData.totalPaidDays || 0) + days : (userData.totalPaidDays || 0);
-    
-    const newHistory = userData.history.map(item => {
-      if (item.id === payId) {
-        return { 
-          ...item, 
-          status: stat == 'OK' ? 'Verified' : 'Rejected', 
-          actionT: getStamp(), 
-          finalNet: newTotal 
-        };
-      }
-      return item;
+    const uData = snap.data();
+    const newTotal = stat == 'OK' ? (uData.totalPaidDays || 0) + days : uData.totalPaidDays;
+    const newHistory = uData.history.map(item => {
+        if(item.id === payId) return { ...item, status: stat == 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newTotal };
+        return item;
     });
-
     await updateDoc(ref, { totalPaidDays: newTotal, history: newHistory });
     await deleteDoc(doc(db, "signals", sid));
   };
 
   window.forcedLeave = async (uid) => {
-    if (confirm("Force this user to leave library?")) {
-      const uRef = doc(db, "users", uid);
-      const snap = await getDoc(uRef);
-      await updateDoc(uRef, { 
-        totalPaidDays: getRealSurvival(snap.data()), 
-        joinDateISO: null, 
-        history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) 
-      });
-      document.getElementById('owner-folder-view').classList.remove('show');
+    if(confirm("Force this user to leave library?")) {
+        const uRef = doc(db, "users", uid);
+        const snap = await getDoc(uRef);
+        await updateDoc(uRef, { totalPaidDays: getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) });
+        document.getElementById('owner-folder-view').classList.remove('show');
     }
+  };
+
+  window.openUser = async (uid) => {
+    const u = (await getDoc(doc(db, "users", uid))).data();
+    const srv = getRealSurvival(u);
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</div></div>
+      <div class="card">
+        <label class="detail-label">Full Profile</label>
+        <div style="font-size:14px; line-height:1.6; margin-top:5px;">
+            <b>Name:</b> ${u.name || 'N/A'}<br>
+            <b>Father:</b> ${u.father || 'N/A'}<br>
+            <b>DOB:</b> ${u.dob || 'N/A'}<br>
+            <b>Phone:</b> ${u.phone || 'N/A'}<br>
+            <b>Address:</b> ${u.address || 'N/A'}
+        </div>
+      </div>
+      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${renderLogs(u.history)}</div></div>
+      <button class="btn btn-outline" onclick="forcedLeave('${uid}')">Forced Leave Membership</button>`;
+    document.getElementById('owner-folder-view').classList.add('show');
   };
 
   function loadAdmin() {
     onSnapshot(collection(db, "signals"), s => {
-      let h = ""; 
-      s.forEach(d => {
+      let h = ""; s.forEach(d => {
         const sig = d.data();
-        if (sig.type !== 'PAYMENT') {
-          const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now()) / 1000));
-          if (rem <= 0) { deleteDoc(doc(db, "signals", d.id)); return; }
-          h += `<div class="sig-item"> &nbsp;&nbsp; 📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
+        if(sig.type !== 'PAYMENT') {
+            const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
+            if(rem <= 0) { deleteDoc(doc(db, "signals", d.id)); return; }
+            h += `<div class="sig-item"> &nbsp;&nbsp; 📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
         } else {
-          h += `<div class="sig-item" style="font-family:monospace; white-space:pre-wrap; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
-          `=>name :- ${sig.name}\n` +
-          `=>phone number:- ${sig.phone}\n` +
-          `=>Shift:- ${sig.shift}\n` +
-          `=>No of days to buy:- ${sig.days}\n` +
-          `=>Total amount:- ₹${sig.amt}\n` +
-          `=>Net days:- ${formatSurv(getRealSurvival(currentUserData))}\n\n` + 
-          `<button class="btn btn-green" style="width:45%; padding:5px; font-size:12px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Accept</button>` +
-          `<button class="btn btn-outline" style="width:45%; padding:5px; margin-left:5%; font-size:12px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Reject</button></div>`;
+            h += `<div class="sig-item" style="font-family:monospace; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
+            `=>name :- ${sig.name}\n=>phone :- ${sig.phone}\n=>Shift:- ${sig.shift}\n=>Days:- ${sig.days}\n=>Amount:- ₹${sig.amt}\n\n` + 
+            `<button class="btn btn-green" style="width:45%; padding:5px" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Accept</button>` +
+            `<button class="btn btn-outline" style="width:45%; padding:5px; margin-left:5%" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Reject</button></div>`;
         }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No signals.";
     });
 
     onSnapshot(collection(db, "users"), s => {
-      let uList = []; s.forEach(d => uList.push({id: d.id, ...d.data()}));
       const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
-      uList.forEach(u => {
-        const srv = getRealSurvival(u);
-        const card = `<div class="player-card" onclick="openUser('${u.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div><span style="font-size:10px; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</span></div>`;
+      s.forEach(d => {
+        const u = d.data(); const srv = getRealSurvival(u);
+        const card = `<div class="player-card" onclick="openUser('${d.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div><span style="font-size:10px; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</span></div>`;
         if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } 
         else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
       });
@@ -386,27 +293,15 @@
     });
   }
 
-  window.openUser = async (uid) => {
-    const u = (await getDoc(doc(db, "users", uid))).data();
-    const srv = getRealSurvival(u);
-    let logs = (u.history || []).map(m => `<div style="padding:5px 0; border-bottom:1px solid #eee;">${typeof m === 'string' ? m : (m.status + " " + m.reqT)}</div>`).join("");
-    document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</div></div>
-      <div class="card"><label class="detail-label">Data</label><div>Name: ${u.name}</div><div>Father: ${u.father}</div><div>Phone: ${u.phone}</div></div>
-      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${logs}</div></div>
-      <button class="btn btn-outline" onclick="forcedLeave('${uid}')">Forced Leave Membership</button>`;
-    document.getElementById('owner-folder-view').classList.add('show');
-  };
-
+  window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
+  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
-  window.calcTotal = () => { let d = document.getElementById('p-days').value; if(d > 364) d = 364; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
-  window.openWizard = () => { document.getElementById('joinWizard').classList.add('show'); };
+  window.calcTotal = () => { let d = document.getElementById('p-days').value; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
+  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
-  window.openLeaveWizard = () => { document.getElementById('leaveWizard').classList.add('show'); };
+  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
-  
-  setInterval(() => { if(!document.getElementById('am-pane-otp').classList.contains('hidden')) { /* Periodic refresh logic if needed */ } }, 1000);
 </script>
 </body>
 </html>
