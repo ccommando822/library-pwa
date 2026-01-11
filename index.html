@@ -176,7 +176,9 @@
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
-    window.switchMain = (t) => {
+  // --- Navigation ---
+  window.switchMain = (t) => {
+    localStorage.setItem('activeTab', t);
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
     document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
@@ -184,13 +186,96 @@
   };
 
   window.switchAdmin = (t) => {
+    localStorage.setItem('adminTab', t);
     document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
     document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
     document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
     document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
   };
 
+  // --- Owner Folder View & Management ---
+  window.openUser = async (uid) => {
+    const uSnap = await getDoc(doc(db, "users", uid));
+    if(!uSnap.exists()) return;
+    const u = uSnap.data();
+    const srv = window.getRealSurvival(u);
+    
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center;">
+        <img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;">
+        <div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${srv.toFixed(2)}d Remaining</div>
+      </div>
+
+      <div class="card" style="background:#f0f7ff; border:1px solid var(--primary);">
+        <label class="detail-label">Update Days Manually</label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
+            <input type="number" id="adm-manual-days" placeholder="+/- Days" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px;">
+            <button class="btn btn-blue" style="width:auto; margin-top:0; padding:10px 20px;" onclick="window.adminEditDays('${uid}')">Update</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="detail-label">Full Profile Details</label>
+        <div style="font-size:14px; line-height:1.8; margin-top:10px;">
+            <b>Name:</b> ${u.name || '---'}<br>
+            <b>Father:</b> ${u.father || '---'}<br>
+            <b>DOB:</b> ${u.dob || '---'}<br>
+            <b>Phone:</b> ${u.phone || '---'}<br>
+            <b>Address:</b> ${u.address || '---'}
+        </div>
+      </div>
+      <div class="card">
+        <label class="detail-label">Activity Logs</label>
+        <div class="log-container" onclick="this.classList.toggle('log-expanded')">${window.renderLogs(u.history)}</div>
+      </div>
+      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">Force Membership Exit</button>`;
+    document.getElementById('owner-folder-view').classList.add('show');
+  };
+
+  window.adminEditDays = async (uid) => {
+    const dVal = document.getElementById('adm-manual-days').value;
+    if(!dVal) return;
+    const daysToAdd = parseInt(dVal);
+    const uRef = doc(db, "users", uid);
+    const snap = await getDoc(uRef);
+    const currentTotal = snap.data().totalPaidDays || 0;
+    
+    await updateDoc(uRef, { 
+        totalPaidDays: currentTotal + daysToAdd,
+        history: arrayUnion(`🛠 Admin manually adjusted days by ${daysToAdd > 0 ? '+' : ''}${daysToAdd} at ${getStamp()}`)
+    });
+    alert("Days updated successfully.");
+    window.openUser(uid); // Refresh the view
+  };
+
+  window.adminForceLeave = async (uid) => {
+    if(confirm("Confirm: Terminate this user's membership?")) {
+        const uRef = doc(db, "users", uid);
+        const snap = await getDoc(uRef);
+        await updateDoc(uRef, { 
+            totalPaidDays: window.getRealSurvival(snap.data()), 
+            joinDateISO: null, 
+            history: arrayUnion(`⚠️ MEMBERSHIP TERMINATED BY OWNER at ${getStamp()}`) 
+        });
+        document.getElementById('owner-folder-view').classList.remove('show');
+    }
+  };
+
+  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
+    const ref = doc(db, "users", uid), snap = await getDoc(ref);
+    const uData = snap.data();
+    const newTotal = stat == 'OK' ? (uData.totalPaidDays || 0) + days : uData.totalPaidDays;
+    const newHistory = uData.history.map(item => {
+        if(item.id === payId) return { ...item, status: stat == 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newTotal };
+        return item;
+    });
+    await updateDoc(ref, { totalPaidDays: newTotal, history: newHistory });
+    await deleteDoc(doc(db, "signals", sid));
+  };
+
+  // --- Main Admin Logic ---
   window.loadAdmin = () => {
+    // 1. Signals Listener (Fixed: Now uses white-space: pre-wrap for proper lines)
     onSnapshot(collection(db, "signals"), s => {
       let h = ""; 
       s.forEach(d => {
@@ -198,82 +283,64 @@
         if(sig.type !== 'PAYMENT') {
             const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
             h += `<div class="sig-item" style="background:#1a1a1a; margin-bottom:5px; border-radius:5px; border-left: 3px solid var(--yellow); color:white;">` +
-                 `&nbsp;&nbsp; 📡 <b>${sig.type}</b> | ${sig.name}<br>` +
+                 `&nbsp;&nbsp; 📡 <b>${sig.type}</b> | User: ${sig.name}<br>` +
                  `&nbsp;&nbsp; OTP: <span style="color:var(--yellow); font-size:16px;">${sig.otp}</span> ` +
                  `<span class="sig-timer">${rem}s</span></div>`;
         } else {
-            h += `<div class="sig-item" style="font-family:monospace; background:#000; color:#0f0; padding:12px; border:1px solid #333; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
-            `[PAYMENT SIGNAL]\n--------------------------\n` +
-            `NAME   : ${sig.name}\nPHONE  : ${sig.phone}\nSHIFT  : ${sig.shift}\nDAYS   : ${sig.days} Days\nAMOUNT : ₹${sig.amt}\n` +
-            `--------------------------\n\n<div style="display:flex; gap:10px;">` +
+            // "white-space: pre-wrap" ensures every \n is treated as a new line
+            h += `<div class="sig-item" style="white-space: pre-wrap; font-family:monospace; background:#000; color:#0f0; padding:12px; border:1px solid #333; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
+            `[PAYMENT SIGNAL]\n` +
+            `--------------------------\n` +
+            `NAME   : ${sig.name}\n` +
+            `PHONE  : ${sig.phone}\n` +
+            `SHIFT  : ${sig.shift}\n` +
+            `DAYS   : ${sig.days} Days\n` +
+            `AMOUNT : ₹${sig.amt}\n` +
+            `--------------------------\n\n` + 
+            `<div style="display:flex; gap:10px;">` +
             `<button class="btn btn-green" style="flex:1; padding:8px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">VERIFY</button>` +
             `<button class="btn btn-outline" style="flex:1; padding:8px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">REJECT</button>` +
             `</div></div>`;
         }
       });
-      document.getElementById('admin-otp-list').innerHTML = h || "No signals.";
+      document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
     });
 
+    // 2. Survivability Categorization Listener
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
       s.forEach(d => {
         const u = d.data(); const srv = window.getRealSurvival(u);
         const dayVal = Math.floor(srv);
+        const statusColor = srv >= 0 ? 'var(--green)' : 'var(--red)';
         const statusText = srv >= 0 ? `${dayVal}d Left` : `Expired (${Math.abs(dayVal)}d)`;
+
         const card = `
           <div class="player-card" onclick="window.openUser('${d.id}')">
             <div style="display:flex; align-items:center;">
                 <img src="${u.photo||''}" class="player-photo">
                 <div><b style="font-size:14px;">${u.name}</b><br><span style="font-size:10px; color:#aaa;">${u.isOnline ? '● Online' : '○ Offline'}</span></div>
             </div>
-            <div style="text-align:right;"><span style="font-size:12px; font-weight:bold; color:${srv>=0?'var(--green)':'var(--red)'}">${statusText}</span></div>
+            <div style="text-align:right;"><span style="font-size:12px; font-weight:bold; color:${statusColor}">${statusText}</span></div>
           </div>`;
+        
         if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } 
         else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
       });
       document.getElementById('admin-survival-list').innerHTML = `
-        <div class="detail-label">🟢 Online Joined</div>${g.onJ || 'Empty'}
-        <div class="detail-label">⚪ Offline Joined</div>${g.offJ || 'Empty'}
-        <div class="detail-label">🔵 Online New/Left</div>${g.onNL || 'Empty'}
-        <div class="detail-label">⚫ Offline New/Left</div>${g.offNL || 'Empty'}`;
+        <div class="detail-label">🟢 Online Joined</div>${g.onJ || '<div style="color:gray; padding:10px; font-size:11px;">Empty</div>'}
+        <div class="detail-label">⚪ Offline Joined</div>${g.offJ || '<div style="color:gray; padding:10px; font-size:11px;">Empty</div>'}
+        <div class="detail-label">🔵 Online New/Left</div>${g.onNL || '<div style="color:gray; padding:10px; font-size:11px;">Empty</div>'}
+        <div class="detail-label">⚫ Offline New/Left</div>${g.offNL || '<div style="color:gray; padding:10px; font-size:11px;">Empty</div>'}`;
     });
   };
 
-  window.openUser = async uid => {
-    const u = (await getDoc(doc(db, "users", uid))).data();
-    const srv = window.getRealSurvival(u);
-    document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:20px; font-weight:bold; color:${srv>=0?'var(--green)':'var(--red)'}">${Math.floor(srv)}d Remaining</div></div>
-      <div class="card"><label class="detail-label">User Info</label><b>${u.name}</b><br>Father: ${u.father}<br>Phone: ${u.phone}<br>Address: ${u.address}</div>
-      <div class="card"><label class="detail-label">Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${window.renderLogs(u.history)}</div></div>
-      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">Force Leave</button>`;
-    document.getElementById('owner-folder-view').classList.add('show');
-  };
-
-  window.adminForceLeave = async uid => {
-    if(confirm("Confirm?")) {
-        const uRef = doc(db, "users", uid);
-        const snap = await getDoc(uRef);
-        await updateDoc(uRef, { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) });
-        document.getElementById('owner-folder-view').classList.remove('show');
-    }
-  };
-
-  window.doPayment = () => {
-    let d = parseInt(document.getElementById('p-days').value);
-    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Rakshapal%20Singh%20Library&am=${amt}&cu=INR`;
-    document.getElementById('pay-modal').style.display = 'flex';
-  };
-
-  window.calcTotal = () => {
-    let d = document.getElementById('p-days').value;
-    const t = Math.round((document.getElementById('p-shift').value/28)*d);
-    document.getElementById('pay-summary').innerText = `Total: ₹${t}`;
-  };
-
-  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
+  // --- Helper Wizards ---
   window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
+  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
+  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
+  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
 </script>
 </body>
 </html>
