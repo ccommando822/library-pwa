@@ -97,6 +97,7 @@
     <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
   </div>
 </section>
+
 <div id="joinWizard" class="wizard-overlay">
     <h2>Admission Wizard</h2>
     <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
@@ -111,10 +112,25 @@
     <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
 </div>
 
+<section id="manage">
+    <div class="admin-nav" style="display:flex; gap:5px; padding:5px; background:#eee; border-radius:10px; margin-bottom:15px;">
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Signals</button>
+        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Survivals</button>
+    </div>
+    <div id="am-pane-otp"><div class="card" id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;"></div></div>
+    <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
+</section>
+
+<div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg);">
+    <div style="max-width:500px; margin:auto; padding:15px;">
+        <button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button>
+        <div id="folder-content"></div>
+    </div>
+</div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc", authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com", projectId: "rakshapal-singh-library-ded2e", storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app", messagingSenderId: "988319651464", appId: "1:988319651464:web:477fa283cddb1d1123713d" };
   const app = initializeApp(firebaseConfig);
@@ -125,28 +141,8 @@
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
 
-  const formatSurv = (days) => {
-    const abs = Math.abs(days), d = Math.floor(abs), h = Math.floor((abs - d) * 24);
-    return `${days < 0 ? '-' : ''}${d}d ${h}h`;
-  };
-
-  const getRealSurvival = (u) => {
-    if(!u.joinDateISO) return u.totalPaidDays || 0;
-    return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
-  };
-
-  const updateGlobalUI = () => {
-    if(currentUserData && currentUserData.joinDateISO) {
-        const srv = getRealSurvival(currentUserData);
-        const el = document.getElementById('status-days'), lbl = document.getElementById('expire-label');
-        if(el) el.innerText = formatSurv(srv);
-        if(lbl) lbl.style.display = srv < -28 ? 'block' : 'none';
-        if(el) el.style.color = srv >= 0 ? "var(--green)" : (srv >= -28 ? "var(--yellow)" : "var(--red)");
-    }
-  };
-  setInterval(updateGlobalUI, 60000);
-
-  const renderLogs = (history) => {
+  // Shared Utility: Log Rendering
+  window.renderLogs = (history) => {
     let logs = "";
     (history || []).slice().reverse().forEach(m => {
       if (typeof m === 'string') {
@@ -161,6 +157,16 @@
       }
     });
     return logs;
+  };
+
+  window.getRealSurvival = (u) => {
+    if(!u.joinDateISO) return u.totalPaidDays || 0;
+    return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
+  };
+
+  const formatSurv = (days) => {
+    const abs = Math.abs(days), d = Math.floor(abs), h = Math.floor((abs - d) * 24);
+    return `${days < 0 ? '-' : ''}${d}d ${h}h`;
   };
 
   onAuthStateChanged(auth, async (user) => {
@@ -181,32 +187,51 @@
             document.getElementById('join-trigger-box').classList.add('hidden');
             document.getElementById('active-tools').classList.remove('hidden');
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
-            updateGlobalUI();
           }
-          document.getElementById('user-pay-log').innerHTML = renderLogs(currentUserData.history);
-          const savedTab = localStorage.getItem('activeTab');
-          if(savedTab) switchMain(savedTab);
+          document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
+          
+          if(user.email === "c.commando822@gmail.com") {
+             document.getElementById('tab-man').classList.remove('hidden');
+             window.loadAdmin();
+          }
         }
       });
-
-      if(user.email === "c.commando822@gmail.com") { 
-          document.getElementById('tab-man').classList.remove('hidden'); 
-          loadAdmin(); 
-      }
-    } else {
-        document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('profilePanel').classList.add('hidden');
     }
   });
+
+  window.doPayment = async () => {
+    let d = parseInt(document.getElementById('p-days').value);
+    let shiftFull = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
+    let reqT = getStamp(), payId = Date.now(), sid = "pay_"+auth.currentUser.uid+"_"+payId;
+    
+    const historyObj = { id: payId, reqT, shift: shiftFull, days: d, amt, status: 'Pending' };
+    await setDoc(doc(db, "signals", sid), { ...historyObj, uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone || "N/A", type: 'PAYMENT' });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(historyObj) });
+    
+    // Corrected UPI Trigger
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Rakshapal%20Singh%20Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'flex';
+  };
+
+  window.calcTotal = () => {
+    let d = document.getElementById('p-days').value;
+    const t = Math.round((document.getElementById('p-shift').value/28)*d);
+    document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`;
+  };
 
   window.saveProfile = async () => {
     const updates = {};
     ['name','father','dob','phone','address'].forEach(k => updates[k] = document.getElementById('p-'+k).value.trim());
-    if(Object.values(updates).some(v => v.length < 3)) return alert("Minimum 3 chars required.");
     await updateDoc(doc(db, "users", auth.currentUser.uid), { ...updates, history: arrayUnion(`Profile updated at ${getStamp()}`) });
     alert("Saved.");
   };
-    window.switchMain = (t) => {
+
+  window.login = () => signInWithPopup(auth, provider);
+  window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
+  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
+    // Navigation
+  window.switchMain = (t) => {
     localStorage.setItem('activeTab', t);
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
@@ -222,86 +247,96 @@
     document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
   };
 
-  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
-    const ref = doc(db, "users", uid), snap = await getDoc(ref);
-    const uData = snap.data();
-    const newTotal = stat == 'OK' ? (uData.totalPaidDays || 0) + days : uData.totalPaidDays;
-    const newHistory = uData.history.map(item => {
-        if(item.id === payId) return { ...item, status: stat == 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newTotal };
-        return item;
-    });
-    await updateDoc(ref, { totalPaidDays: newTotal, history: newHistory });
-    await deleteDoc(doc(db, "signals", sid));
+  // Admin Folder View & Force Leave
+  window.openUser = async (uid) => {
+    const uSnap = await getDoc(doc(db, "users", uid));
+    if(!uSnap.exists()) return;
+    const u = uSnap.data();
+    const srv = window.getRealSurvival(u);
+    
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center;">
+        <img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;">
+        <div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${srv.toFixed(2)}d Remaining</div>
+      </div>
+      <div class="card">
+        <label class="detail-label">Full Profile Details</label>
+        <div style="font-size:14px; line-height:1.8; margin-top:10px;">
+            <b>Name:</b> ${u.name || '---'}<br>
+            <b>Father:</b> ${u.father || '---'}<br>
+            <b>DOB:</b> ${u.dob || '---'}<br>
+            <b>Phone:</b> ${u.phone || '---'}<br>
+            <b>Address:</b> ${u.address || '---'}
+        </div>
+      </div>
+      <div class="card">
+        <label class="detail-label">Activity Logs</label>
+        <div class="log-container" onclick="this.classList.toggle('log-expanded')">${window.renderLogs(u.history)}</div>
+      </div>
+      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">Force Membership Exit</button>`;
+    document.getElementById('owner-folder-view').classList.add('show');
   };
 
-  window.forcedLeave = async (uid) => {
-    if(confirm("Force this user to leave library?")) {
+  window.adminForceLeave = async (uid) => {
+    if(confirm("Confirm: Terminate this user's membership?")) {
         const uRef = doc(db, "users", uid);
         const snap = await getDoc(uRef);
-        await updateDoc(uRef, { totalPaidDays: getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) });
+        await updateDoc(uRef, { 
+            totalPaidDays: window.getRealSurvival(snap.data()), 
+            joinDateISO: null, 
+            history: arrayUnion(`⚠️ MEMBERSHIP TERMINATED BY OWNER at ${getStamp()}`) 
+        });
         document.getElementById('owner-folder-view').classList.remove('show');
     }
   };
 
-  window.openUser = async (uid) => {
-    const u = (await getDoc(doc(db, "users", uid))).data();
-    const srv = getRealSurvival(u);
-    document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</div></div>
-      <div class="card">
-        <label class="detail-label">Full Profile</label>
-        <div style="font-size:14px; line-height:1.6; margin-top:5px;">
-            <b>Name:</b> ${u.name || 'N/A'}<br>
-            <b>Father:</b> ${u.father || 'N/A'}<br>
-            <b>DOB:</b> ${u.dob || 'N/A'}<br>
-            <b>Phone:</b> ${u.phone || 'N/A'}<br>
-            <b>Address:</b> ${u.address || 'N/A'}
-        </div>
-      </div>
-      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${renderLogs(u.history)}</div></div>
-      <button class="btn btn-outline" onclick="forcedLeave('${uid}')">Forced Leave Membership</button>`;
-    document.getElementById('owner-folder-view').classList.add('show');
-  };
-
-  function loadAdmin() {
+  // Main Admin Logic
+  window.loadAdmin = () => {
+    // Signals Listener
     onSnapshot(collection(db, "signals"), s => {
       let h = ""; s.forEach(d => {
         const sig = d.data();
         if(sig.type !== 'PAYMENT') {
             const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
-            if(rem <= 0) { deleteDoc(doc(db, "signals", d.id)); return; }
-            h += `<div class="sig-item"> &nbsp;&nbsp; 📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
+            h += `<div class="sig-item">📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
         } else {
-            h += `<div class="sig-item" style="font-family:monospace; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
-            `=>name :- ${sig.name}\n=>phone :- ${sig.phone}\n=>Shift:- ${sig.shift}\n=>Days:- ${sig.days}\n=>Amount:- ₹${sig.amt}\n\n` + 
-            `<button class="btn btn-green" style="width:45%; padding:5px" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Accept</button>` +
+            h += `<div class="sig-item" style="font-family:monospace; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px;">` +
+            `=>${sig.name} (${sig.phone})\n=>${sig.shift} for ${sig.days} days\n=>Amt: ₹${sig.amt}\n\n` + 
+            `<button class="btn btn-green" style="width:45%; padding:5px" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Verify</button>` +
             `<button class="btn btn-outline" style="width:45%; padding:5px; margin-left:5%" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Reject</button></div>`;
         }
       });
-      document.getElementById('admin-otp-list').innerHTML = h || "No signals.";
+      document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
     });
 
+    // Survivability Categorization Listener
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
       s.forEach(d => {
-        const u = d.data(); const srv = getRealSurvival(u);
-        const card = `<div class="player-card" onclick="openUser('${d.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div><span style="font-size:10px; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</span></div>`;
-        if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } 
-        else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
+        const u = d.data(); const srv = window.getRealSurvival(u);
+        const card = `<div class="player-card" onclick="window.openUser('${d.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div><span>${srv.toFixed(1)}d</span></div>`;
+        
+        if(u.isOnline) {
+          u.joinDateISO ? g.onJ += card : g.onNL += card;
+        } else {
+          u.joinDateISO ? g.offJ += card : g.offNL += card;
+        }
       });
-      document.getElementById('admin-survival-list').innerHTML = `<div class="detail-label">Online Joined</div>${g.onJ}<div class="detail-label">Offline Joined</div>${g.offJ}<div class="detail-label">Online New/Left</div>${g.onNL}<div class="detail-label">Offline New/Left</div>${g.offNL}`;
+      document.getElementById('admin-survival-list').innerHTML = `
+        <div class="detail-label">Online Joined</div>${g.onJ}
+        <div class="detail-label">Offline Joined</div>${g.offJ}
+        <div class="detail-label">Online New/Left</div>${g.onNL}
+        <div class="detail-label">Offline New/Left</div>${g.offNL}`;
     });
-  }
+  };
 
-  window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
-  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
-  window.calcTotal = () => { let d = document.getElementById('p-days').value; const t = Math.round((document.getElementById('p-shift').value/28)*d); document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`; };
+  // Helper Wizards
   window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
+  window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
+
 </script>
 </body>
 </html>
