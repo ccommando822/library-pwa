@@ -199,16 +199,31 @@
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
             updateGlobalUI();
           }
-          let logs = ""; (currentUserData.history || []).forEach(m => {
-              logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
+          
+          let logs = ""; 
+          (currentUserData.history || []).slice().reverse().forEach(m => {
+              if (typeof m === 'string') {
+                  logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
+              } else {
+                  const isPending = m.status === 'Pending';
+                  const isVerified = m.status === 'Verified';
+                  const icon = isPending ? "💰" : (isVerified ? "✅" : "❌");
+                  logs += `<div style="padding:10px 0; border-bottom:1px solid #eee; white-space:pre-wrap; font-size:12px;">` +
+                  `${icon} ${m.status}: Request at ${m.reqT}\n` +
+                  `=>shift:-${m.shift}\n` +
+                  `=>Days to buy:- ${m.days} days.\n` +
+                  `=>Amount to pay:-₹${m.amt}.\n` +
+                  (isPending ? `=> [Status: Pending]` : `\n=>${m.status} at ${m.actionT}.\n=>Net days(updated) :- ${Math.floor(m.finalNet)} days`) +
+                  `</div>`;
+              }
           });
           document.getElementById('user-pay-log').innerHTML = logs;
           
-          // Persistence Check
           const savedTab = localStorage.getItem('activeTab');
           if(savedTab) switchMain(savedTab);
         }
       });
+
       if(user.email === "c.commando822@gmail.com") { 
           document.getElementById('tab-man').classList.remove('hidden'); 
           loadAdmin(); 
@@ -293,41 +308,66 @@
     if(d > 364) return alert("Max 364 days allowed.");
     let shiftFull = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
     let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
-    let reqT = getStamp(), sid = "pay_"+auth.currentUser.uid+"_"+Date.now();
-    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: amt, days: d, time: reqT, shift: shiftFull, type: 'PAYMENT' });
+    let reqT = getStamp(), payId = Date.now(), sid = "pay_"+auth.currentUser.uid+"_"+payId;
+    const historyObj = { id: payId, reqT, shift: shiftFull, days: d, amt, status: 'Pending' };
+    await setDoc(doc(db, "signals", sid), { ...historyObj, uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone || "N/A", type: 'PAYMENT' });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(historyObj) });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&am=${amt}`;
     document.getElementById('pay-modal').style.display = 'flex';
   };
-
-  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift) => {
+  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
     const ref = doc(db, "users", uid), snap = await getDoc(ref);
-    const h = snap.data().history;
-    const msg = stat=='OK' ? `✅ Verified: ₹${amt} for ${days}d at ${getStamp()}` : `❌ Rejected: Payment Request at ${reqT}`;
-    await updateDoc(ref, { totalPaidDays: stat=='OK' ? (snap.data().totalPaidDays||0)+days : snap.data().totalPaidDays, history: arrayUnion(msg) });
+    const userData = snap.data();
+    const newTotal = stat == 'OK' ? (userData.totalPaidDays || 0) + days : (userData.totalPaidDays || 0);
+    
+    const newHistory = userData.history.map(item => {
+      if (item.id === payId) {
+        return { 
+          ...item, 
+          status: stat == 'OK' ? 'Verified' : 'Rejected', 
+          actionT: getStamp(), 
+          finalNet: newTotal 
+        };
+      }
+      return item;
+    });
+
+    await updateDoc(ref, { totalPaidDays: newTotal, history: newHistory });
     await deleteDoc(doc(db, "signals", sid));
   };
 
   window.forcedLeave = async (uid) => {
-      if(confirm("Force this user to leave library?")) {
-          const uRef = doc(db, "users", uid);
-          const snap = await getDoc(uRef);
-          await updateDoc(uRef, { totalPaidDays: getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) });
-          document.getElementById('owner-folder-view').classList.remove('show');
-      }
+    if (confirm("Force this user to leave library?")) {
+      const uRef = doc(db, "users", uid);
+      const snap = await getDoc(uRef);
+      await updateDoc(uRef, { 
+        totalPaidDays: getRealSurvival(snap.data()), 
+        joinDateISO: null, 
+        history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) 
+      });
+      document.getElementById('owner-folder-view').classList.remove('show');
+    }
   };
 
   function loadAdmin() {
     onSnapshot(collection(db, "signals"), s => {
-      let h = ""; s.forEach(d => {
+      let h = ""; 
+      s.forEach(d => {
         const sig = d.data();
-        if(sig.type !== 'PAYMENT') {
-            const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
-            if(rem <= 0) { deleteDoc(doc(db, "signals", d.id)); return; }
-            h += `<div class="sig-item"> &nbsp;&nbsp; 📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
+        if (sig.type !== 'PAYMENT') {
+          const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now()) / 1000));
+          if (rem <= 0) { deleteDoc(doc(db, "signals", d.id)); return; }
+          h += `<div class="sig-item"> &nbsp;&nbsp; 📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
         } else {
-            h += `<div class="sig-item">💰 ${sig.name.toUpperCase()}: ₹${sig.amount} (${sig.days}d)<br>
-            <button class="btn btn-green" style="width:45%; display:inline-block; padding:5px" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">Accept</button>
-            <button class="btn btn-outline" style="width:45%; display:inline-block; padding:5px; margin-left:5%" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amount},'${sig.time}','${sig.shift}')">Reject</button></div>`;
+          h += `<div class="sig-item" style="font-family:monospace; white-space:pre-wrap; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
+          `=>name :- ${sig.name}\n` +
+          `=>phone number:- ${sig.phone}\n` +
+          `=>Shift:- ${sig.shift}\n` +
+          `=>No of days to buy:- ${sig.days}\n` +
+          `=>Total amount:- ₹${sig.amt}\n` +
+          `=>Net days:- ${formatSurv(getRealSurvival(currentUserData))}\n\n` + 
+          `<button class="btn btn-green" style="width:45%; padding:5px; font-size:12px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Accept</button>` +
+          `<button class="btn btn-outline" style="width:45%; padding:5px; margin-left:5%; font-size:12px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Reject</button></div>`;
         }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No signals.";
@@ -349,7 +389,7 @@
   window.openUser = async (uid) => {
     const u = (await getDoc(doc(db, "users", uid))).data();
     const srv = getRealSurvival(u);
-    let logs = (u.history || []).map(m => `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`).join("");
+    let logs = (u.history || []).map(m => `<div style="padding:5px 0; border-bottom:1px solid #eee;">${typeof m === 'string' ? m : (m.status + " " + m.reqT)}</div>`).join("");
     document.getElementById('folder-content').innerHTML = `
       <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${formatSurv(srv)}</div></div>
       <div class="card"><label class="detail-label">Data</label><div>Name: ${u.name}</div><div>Father: ${u.father}</div><div>Phone: ${u.phone}</div></div>
@@ -366,8 +406,7 @@
   window.openLeaveWizard = () => { document.getElementById('leaveWizard').classList.add('show'); };
   window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
   
-  // Timer for Signals
-  setInterval(() => { if(document.getElementById('am-pane-otp').classList.contains('hidden')) return; loadAdmin(); }, 1000);
+  setInterval(() => { if(!document.getElementById('am-pane-otp').classList.contains('hidden')) { /* Periodic refresh logic if needed */ } }, 1000);
 </script>
 </body>
 </html>
