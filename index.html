@@ -16,28 +16,25 @@
     .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
     .detail-content { flex: 1; }
-    .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+    .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
     .detail-content input, .detail-content textarea { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; font-family: inherit; }
     .detail-content input:not([readonly]), .detail-content textarea:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
     .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
     .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }
     .wizard-overlay.show { display: block; overflow-y: auto; }
-    .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; opacity: 0.6; pointer-events: none; }
-    .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
-    .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
     #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
     .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
-    .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); justify-content: space-between; }
-    .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; object-fit: cover; }
-    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
+    .player-card { background: #fff; border-radius: 12px; padding: 12px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border: 1px solid #eee; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+    .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #ddd; object-fit: cover; }
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
     .btn-blue { background: var(--primary); color: white; }
     .btn-green { background: var(--green); color: white; }
     .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
     .log-container { max-height: 100px; overflow-y: hidden; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; cursor: pointer; position: relative; }
     .log-container.log-expanded { max-height: none !important; }
-    .sig-item { padding: 10px; border-bottom: 1px solid #333; position: relative; padding-left: 20px; }
-    .sig-timer { position: absolute; right: 10px; top: 10px; color: var(--yellow); font-size: 10px; }
+    .sig-item { padding: 12px; border-bottom: 1px solid #eee; position: relative; }
+    .sig-timer { float: right; color: var(--yellow); font-size: 11px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -62,70 +59,48 @@
     <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button>
   </div>
   <div id="profilePanel" class="hidden">
-    <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary); position: relative;">
+    <div class="card" style="text-align:center; border-bottom: 4px solid var(--primary);">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
       <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="window.updateUserPhoto(this)">
-      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED YET</div>
-      <div id="expire-label" style="font-size: 28px; font-weight: 900; color: var(--red); display:none; margin-bottom:-5px;">EXPIRED</div>
+      <div id="status-joined" style="font-size: 12px; color: #666; font-weight: bold;">NOT JOINED</div>
       <div id="status-days" style="font-size: 24px; font-weight: 900; color: #ccc;">--</div>
-      <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Survival Remaining</div>
     </div>
-    <div id="details-anchor" class="card">
+    <div class="card">
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
-      <div class="detail-row"><div class="detail-content"><label class="detail-label">Date of Birth</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
-      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile Number</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
-      <button class="btn btn-green" onclick="window.saveProfile()">Save Folder Details</button>
+      <button class="btn btn-green" onclick="window.saveProfile()">Save Details</button>
     </div>
-    <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')"></div></div>
-    <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join the Library</button></div>
+    <div class="card"><label class="detail-label">My Logs</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')"></div></div>
     <div id="active-tools" class="hidden">
         <div class="card" style="background: #f0f7ff;">
-            <label class="detail-label">Renewal Panel</label>
-            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc;">
-                <option value="500">Day Shift (₹500/28d)</option>
-                <option value="400">Night Shift (₹400/28d)</option>
-                <option value="700">Both Shift (₹700/28d)</option>
+            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+                <option value="500">Day Shift (₹500)</option>
+                <option value="400">Night Shift (₹400)</option>
+                <option value="700">Both Shift (₹700)</option>
             </select>
-            <input type="number" id="p-days" value="28" min="1" max="364" oninput="calcTotal()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
-            <div id="pay-summary" style="font-weight:bold; color:var(--primary);">Total Amount: ₹500</div>
-            <button class="btn btn-blue" onclick="window.doPayment()">Secure UPI Payment</button>
+            <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+            <div id="pay-summary" style="font-weight:bold; color:var(--primary);">Total: ₹500</div>
+            <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>
         </div>
-        <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Library Membership</button>
     </div>
-    <button style="width:100%; background:none; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout Account</button>
+    <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
   </div>
 </section>
 
-<div id="joinWizard" class="wizard-overlay">
-    <h2>Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock Details</button></div>
-    <div id="step2" class="step-card"><span class="step-num">2</span> <b>Verify Identity</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
-    <button class="btn" style="background:none; color:gray;" onclick="closeWizard()">Cancel</button>
-</div>
-
-<div id="leaveWizard" class="wizard-overlay">
-    <h2>Membership Exit</h2>
-    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees History</b><div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p><button class="btn btn-blue" onclick="window.payDebtAndExit()">Pay Fees & Exit</button></div><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees Paid</button></div>
-    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Exit Approval</b><input type="number" id="leave-otp" placeholder="6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
-    <button class="btn" style="background:none; color:gray;" onclick="closeLeaveWizard()">Cancel</button>
-</div>
-
 <section id="manage">
-    <div class="admin-nav" style="display:flex; gap:5px; padding:5px; background:#eee; border-radius:10px; margin-bottom:15px;">
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Signals</button>
-        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; border:none; padding:10px; border-radius:8px; font-weight:bold;">Survivals</button>
+    <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border-radius:8px; border:none;">Signals</button>
+        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none;">Survivals</button>
     </div>
-    <div id="am-pane-otp"><div class="card" id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace; min-height:100px;"></div></div>
+    <div id="am-pane-otp"><div id="admin-otp-list"></div></div>
     <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
 </section>
 
-<div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg);">
-    <div style="max-width:500px; margin:auto; padding:15px;">
-        <button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back to List</button>
-        <div id="folder-content"></div>
-    </div>
+<div id="owner-folder-view" class="wizard-overlay">
+    <button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back</button>
+    <div id="folder-content"></div>
 </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -141,7 +116,6 @@
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
 
-  // Shared Utility: Log Rendering
   window.renderLogs = (history) => {
     let logs = "";
     (history || []).slice().reverse().forEach(m => {
@@ -164,32 +138,26 @@
     return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
   };
 
-  const formatSurv = (days) => {
-    const abs = Math.abs(days), d = Math.floor(abs), h = Math.floor((abs - d) * 24);
-    return `${days < 0 ? '-' : ''}${d}d ${h}h`;
-  };
-
   onAuthStateChanged(auth, async (user) => {
     if(user) {
       const uRef = doc(db, "users", user.uid);
       await updateDoc(uRef, { isOnline: true }).catch(async () => {
           await setDoc(uRef, { name: user.displayName, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
       });
-
-      onSnapshot(uRef, (snap) => {
+      onSnapshot(uRef, snap => {
         if(snap.exists()) {
           currentUserData = snap.data();
           document.getElementById('loginPanel').classList.add('hidden');
           document.getElementById('profilePanel').classList.remove('hidden');
           document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
-          ['name','father','dob','phone','address'].forEach(k => document.getElementById('p-'+k).value = currentUserData[k] || "");
+          ['name','father','phone','address'].forEach(k => document.getElementById('p-'+k).value = currentUserData[k] || "");
           if(currentUserData.joinDateISO) {
-            document.getElementById('join-trigger-box').classList.add('hidden');
-            document.getElementById('active-tools').classList.remove('hidden');
-            document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
+             document.getElementById('active-tools').classList.remove('hidden');
+             const srv = window.getRealSurvival(currentUserData);
+             document.getElementById('status-days').innerText = Math.floor(srv) + " Days Left";
+             document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
           }
           document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
-          
           if(user.email === "c.commando822@gmail.com") {
              document.getElementById('tab-man').classList.remove('hidden');
              window.loadAdmin();
@@ -199,40 +167,16 @@
     }
   });
 
-  window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value);
-    let shiftFull = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
-    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
-    let reqT = getStamp(), payId = Date.now(), sid = "pay_"+auth.currentUser.uid+"_"+payId;
-    
-    const historyObj = { id: payId, reqT, shift: shiftFull, days: d, amt, status: 'Pending' };
-    await setDoc(doc(db, "signals", sid), { ...historyObj, uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone || "N/A", type: 'PAYMENT' });
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion(historyObj) });
-    
-    // Corrected UPI Trigger
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Rakshapal%20Singh%20Library&am=${amt}&cu=INR`;
-    document.getElementById('pay-modal').style.display = 'flex';
-  };
-
-  window.calcTotal = () => {
-    let d = document.getElementById('p-days').value;
-    const t = Math.round((document.getElementById('p-shift').value/28)*d);
-    document.getElementById('pay-summary').innerText = `Total Amount: ₹${t}`;
-  };
-
   window.saveProfile = async () => {
     const updates = {};
-    ['name','father','dob','phone','address'].forEach(k => updates[k] = document.getElementById('p-'+k).value.trim());
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { ...updates, history: arrayUnion(`Profile updated at ${getStamp()}`) });
+    ['name','father','phone','address'].forEach(k => updates[k] = document.getElementById('p-'+k).value);
+    await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
     alert("Saved.");
   };
 
   window.login = () => signInWithPopup(auth, provider);
   window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
-  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
-  // Navigation
-  window.switchMain = (t) => {
-    localStorage.setItem('activeTab', t);
+    window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
     document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
@@ -240,103 +184,96 @@
   };
 
   window.switchAdmin = (t) => {
-    localStorage.setItem('adminTab', t);
     document.getElementById('am-pane-otp').classList.toggle('hidden', t !== 'otp');
     document.getElementById('am-pane-user').classList.toggle('hidden', t !== 'user');
     document.getElementById('am-otp-btn').classList.toggle('active', t === 'otp');
     document.getElementById('am-user-btn').classList.toggle('active', t === 'user');
   };
 
-  // Admin Folder View & Force Leave
-  window.openUser = async (uid) => {
-    const uSnap = await getDoc(doc(db, "users", uid));
-    if(!uSnap.exists()) return;
-    const u = uSnap.data();
-    const srv = window.getRealSurvival(u);
-    
-    document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;">
-        <img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;">
-        <div style="font-size:24px; font-weight:900; color:${srv>=0?'var(--green)':'var(--red)'}">${srv.toFixed(2)}d Remaining</div>
-      </div>
-      <div class="card">
-        <label class="detail-label">Full Profile Details</label>
-        <div style="font-size:14px; line-height:1.8; margin-top:10px;">
-            <b>Name:</b> ${u.name || '---'}<br>
-            <b>Father:</b> ${u.father || '---'}<br>
-            <b>DOB:</b> ${u.dob || '---'}<br>
-            <b>Phone:</b> ${u.phone || '---'}<br>
-            <b>Address:</b> ${u.address || '---'}
-        </div>
-      </div>
-      <div class="card">
-        <label class="detail-label">Activity Logs</label>
-        <div class="log-container" onclick="this.classList.toggle('log-expanded')">${window.renderLogs(u.history)}</div>
-      </div>
-      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">Force Membership Exit</button>`;
-    document.getElementById('owner-folder-view').classList.add('show');
-  };
-
-  window.adminForceLeave = async (uid) => {
-    if(confirm("Confirm: Terminate this user's membership?")) {
-        const uRef = doc(db, "users", uid);
-        const snap = await getDoc(uRef);
-        await updateDoc(uRef, { 
-            totalPaidDays: window.getRealSurvival(snap.data()), 
-            joinDateISO: null, 
-            history: arrayUnion(`⚠️ MEMBERSHIP TERMINATED BY OWNER at ${getStamp()}`) 
-        });
-        document.getElementById('owner-folder-view').classList.remove('show');
-    }
-  };
-
-  // Main Admin Logic
   window.loadAdmin = () => {
-    // Signals Listener
     onSnapshot(collection(db, "signals"), s => {
-      let h = ""; s.forEach(d => {
+      let h = ""; 
+      s.forEach(d => {
         const sig = d.data();
         if(sig.type !== 'PAYMENT') {
             const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
-            h += `<div class="sig-item">📡 ${sig.type} | ${sig.name}: <b>${sig.otp}</b> <span class="sig-timer">${rem}s</span></div>`;
+            h += `<div class="sig-item" style="background:#1a1a1a; margin-bottom:5px; border-radius:5px; border-left: 3px solid var(--yellow); color:white;">` +
+                 `&nbsp;&nbsp; 📡 <b>${sig.type}</b> | ${sig.name}<br>` +
+                 `&nbsp;&nbsp; OTP: <span style="color:var(--yellow); font-size:16px;">${sig.otp}</span> ` +
+                 `<span class="sig-timer">${rem}s</span></div>`;
         } else {
-            h += `<div class="sig-item" style="font-family:monospace; background:#111; color:#0f0; padding:10px; border-radius:8px; margin-bottom:10px;">` +
-            `=>${sig.name} (${sig.phone})\n=>${sig.shift} for ${sig.days} days\n=>Amt: ₹${sig.amt}\n\n` + 
-            `<button class="btn btn-green" style="width:45%; padding:5px" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Verify</button>` +
-            `<button class="btn btn-outline" style="width:45%; padding:5px; margin-left:5%" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">Reject</button></div>`;
+            h += `<div class="sig-item" style="font-family:monospace; background:#000; color:#0f0; padding:12px; border:1px solid #333; border-radius:8px; margin-bottom:10px; font-size:12px;">` +
+            `[PAYMENT SIGNAL]\n--------------------------\n` +
+            `NAME   : ${sig.name}\nPHONE  : ${sig.phone}\nSHIFT  : ${sig.shift}\nDAYS   : ${sig.days} Days\nAMOUNT : ₹${sig.amt}\n` +
+            `--------------------------\n\n<div style="display:flex; gap:10px;">` +
+            `<button class="btn btn-green" style="flex:1; padding:8px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">VERIFY</button>` +
+            `<button class="btn btn-outline" style="flex:1; padding:8px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">REJECT</button>` +
+            `</div></div>`;
         }
       });
-      document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
+      document.getElementById('admin-otp-list').innerHTML = h || "No signals.";
     });
 
-    // Survivability Categorization Listener
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
       s.forEach(d => {
         const u = d.data(); const srv = window.getRealSurvival(u);
-        const card = `<div class="player-card" onclick="window.openUser('${d.id}')"><div><img src="${u.photo||''}" class="player-photo"><b>${u.name}</b></div><span>${srv.toFixed(1)}d</span></div>`;
-        
-        if(u.isOnline) {
-          u.joinDateISO ? g.onJ += card : g.onNL += card;
-        } else {
-          u.joinDateISO ? g.offJ += card : g.offNL += card;
-        }
+        const dayVal = Math.floor(srv);
+        const statusText = srv >= 0 ? `${dayVal}d Left` : `Expired (${Math.abs(dayVal)}d)`;
+        const card = `
+          <div class="player-card" onclick="window.openUser('${d.id}')">
+            <div style="display:flex; align-items:center;">
+                <img src="${u.photo||''}" class="player-photo">
+                <div><b style="font-size:14px;">${u.name}</b><br><span style="font-size:10px; color:#aaa;">${u.isOnline ? '● Online' : '○ Offline'}</span></div>
+            </div>
+            <div style="text-align:right;"><span style="font-size:12px; font-weight:bold; color:${srv>=0?'var(--green)':'var(--red)'}">${statusText}</span></div>
+          </div>`;
+        if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } 
+        else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
       });
       document.getElementById('admin-survival-list').innerHTML = `
-        <div class="detail-label">Online Joined</div>${g.onJ}
-        <div class="detail-label">Offline Joined</div>${g.offJ}
-        <div class="detail-label">Online New/Left</div>${g.onNL}
-        <div class="detail-label">Offline New/Left</div>${g.offNL}`;
+        <div class="detail-label">🟢 Online Joined</div>${g.onJ || 'Empty'}
+        <div class="detail-label">⚪ Offline Joined</div>${g.offJ || 'Empty'}
+        <div class="detail-label">🔵 Online New/Left</div>${g.onNL || 'Empty'}
+        <div class="detail-label">⚫ Offline New/Left</div>${g.offNL || 'Empty'}`;
     });
   };
 
-  // Helper Wizards
-  window.openWizard = () => document.getElementById('joinWizard').classList.add('show');
-  window.closeWizard = () => document.getElementById('joinWizard').classList.remove('show');
-  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
-  window.closeLeaveWizard = () => document.getElementById('leaveWizard').classList.remove('show');
-  window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
+  window.openUser = async uid => {
+    const u = (await getDoc(doc(db, "users", uid))).data();
+    const srv = window.getRealSurvival(u);
+    document.getElementById('folder-content').innerHTML = `
+      <div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:60px; height:60px; border-radius:50%;"><div style="font-size:20px; font-weight:bold; color:${srv>=0?'var(--green)':'var(--red)'}">${Math.floor(srv)}d Remaining</div></div>
+      <div class="card"><label class="detail-label">User Info</label><b>${u.name}</b><br>Father: ${u.father}<br>Phone: ${u.phone}<br>Address: ${u.address}</div>
+      <div class="card"><label class="detail-label">Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${window.renderLogs(u.history)}</div></div>
+      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">Force Leave</button>`;
+    document.getElementById('owner-folder-view').classList.add('show');
+  };
 
+  window.adminForceLeave = async uid => {
+    if(confirm("Confirm?")) {
+        const uRef = doc(db, "users", uid);
+        const snap = await getDoc(uRef);
+        await updateDoc(uRef, { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`⚠️ FORCED EXIT BY OWNER at ${getStamp()}`) });
+        document.getElementById('owner-folder-view').classList.remove('show');
+    }
+  };
+
+  window.doPayment = () => {
+    let d = parseInt(document.getElementById('p-days').value);
+    let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Rakshapal%20Singh%20Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'flex';
+  };
+
+  window.calcTotal = () => {
+    let d = document.getElementById('p-days').value;
+    const t = Math.round((document.getElementById('p-shift').value/28)*d);
+    document.getElementById('pay-summary').innerText = `Total: ₹${t}`;
+  };
+
+  window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
+  window.updateUserPhoto = (input) => { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = async (e) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result }); }; reader.readAsDataURL(input.files[0]); } };
 </script>
 </body>
 </html>
