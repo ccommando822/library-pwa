@@ -25,23 +25,29 @@
     .step-card { border: 2px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: 0.3s; opacity: 0.6; pointer-events: none; }
     .step-active { border-color: var(--primary); background: #f0f7ff; opacity: 1; pointer-events: auto; }
     .step-num { background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
+    #pay-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; align-items:center; justify-content:center; }
+    .modal-box { background:white; padding:30px; border-radius:15px; width:80%; max-width:350px; text-align:center; }
     .player-card { background: #242526; color: #e4e6eb; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--primary); justify-content: space-between; }
     .player-photo { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; border: 1px solid #444; object-fit: cover; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
     .btn-blue { background: var(--primary); color: white; }
     .btn-green { background: var(--green); color: white; }
     .btn-red { background: var(--red); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
     .hidden { display: none !important; }
-    .log-container { max-height: 120px; overflow-y: auto; font-size: 11px; margin-top: 8px; border: 1px solid #eee; padding: 8px; border-radius: 8px; cursor: pointer; transition: max-height 0.3s ease; }
-    .log-expanded { max-height: 1000px !important; }
-    .sig-item { padding: 15px; border-bottom: 1px solid #333; position: relative; }
-    .sig-indent { margin-left: 20px; border-left: 2px solid #444; padding-left: 10px; margin-top: 5px; }
-    .sig-timer { position: absolute; top: 10px; right: 10px; color: var(--yellow); font-size: 12px; font-weight: bold; }
+    .log-container { max-height: 120px; overflow-y: auto; font-size: 11px; margin-top: 8px; border: 1px solid #eee; padding: 5px; border-radius: 8px; cursor: pointer; }
+    .log-expanded { max-height: none !important; }
+    .sig-item { padding: 10px; border-bottom: 1px solid #333; position: relative; }
+    .sig-timer { position: absolute; top: 5px; right: 5px; color: #f1c40f; font-size: 10px; }
   </style>
 </head>
 <body>
 
 <header>Rakshapal Singh Library</header>
+
+<div id="pay-modal" onclick="this.style.display='none'">
+    <div class="modal-box"><h3>Payment Request Sent</h3><p>Verify from Owner Tab.</p></div>
+</div>
 
 <nav id="main-nav">
   <button id="tab-acc" onclick="switchMain('account')">Account</button>
@@ -49,72 +55,65 @@
 </nav>
 
 <section id="account">
-  <div id="loginPanel" class="card" style="text-align:center;">
-    <h3>Welcome to Library</h3>
-    <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button>
-  </div>
-
+  <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center;">
       <div style="position:relative; display:inline-block;">
-        <img id="u-img" style="width:80px; height:80px; border-radius:50%; cursor:pointer; border: 2px solid var(--primary);" onclick="triggerPhoto()">
+        <img id="u-img" style="width:80px; height:80px; border-radius:50%; cursor:pointer;" onclick="triggerPhoto()">
         <input type="file" id="photo-input" hidden accept="image/*" onchange="uploadPhoto(this)">
       </div>
-      <div id="status-joined" style="font-size:12px; font-weight:bold; margin-top:5px;"></div>
-      <div id="status-days" style="font-size:24px; font-weight:900; color: var(--green);">--</div>
+      <div id="status-joined" style="font-size:12px; font-weight:bold;"></div>
+      <div id="expire-label" style="font-size:28px; font-weight:900; color:var(--red); display:none;">EXPIRED</div>
+      <div id="status-days" style="font-size:24px; font-weight:900;">--</div>
     </div>
-
-    <div class="card" id="details-anchor">
+    <div class="card" id="details-card">
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">D.O.B</label><input type="date" id="p-dob" readonly></div><span class="pencil-btn" onclick="makeEdit('p-dob')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Phone</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
-      <button class="btn btn-green" onclick="window.saveProfile()">Update Details</button>
+      <button class="btn btn-green" onclick="window.saveProfile()">Save Details</button>
     </div>
-
-    <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')"></div></div>
-    
-    <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join Library Membership</button></div>
+    <div class="card"><label class="detail-label">Logs</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('log-expanded')"></div></div>
+    <div id="join-trigger-box"><button class="btn btn-blue" onclick="openWizard()">Join Library</button></div>
     <div id="active-tools" class="hidden">
         <div class="card">
-            <label class="detail-label">Renewal</label>
-            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-top:5px;"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
+            <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px;"><option value="500">Day</option><option value="400">Night</option><option value="700">Both</option></select>
             <input type="number" id="p-days" value="28" max="364" oninput="calcTotal()" style="width:100%; padding:10px; margin-top:5px;">
-            <div id="pay-summary" style="padding:10px; font-weight:bold;">Total: ₹500</div>
+            <div id="pay-summary" style="padding:10px;">Total: ₹500</div>
             <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>
         </div>
-        <button class="btn btn-red" style="background:none; color:var(--red); border:1px solid var(--red);" onclick="window.openLeaveWizard()">Leave Library</button>
+        <button class="btn btn-outline" onclick="window.openLeaveWizard()">Leave Membership</button>
     </div>
   </div>
 </section>
 
 <div id="joinWizard" class="wizard-overlay">
-    <h2>Admission Wizard</h2>
-    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Verify Folder</b><button class="btn btn-blue" onclick="window.checkStepOne()">Check & Lock</button></div>
-    <div id="step2" class="step-card"><span class="step-num">2</span> <b>OTP</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyJoin()">Proceed</button></div>
-    <button class="btn" style="background:none;" onclick="closeWizard()">Cancel</button>
+    <h2>Admission</h2>
+    <div id="step1" class="step-card step-active"><span class="step-num">1</span> <b>Lock Folder Details</b><button class="btn btn-blue" onclick="window.checkStepOne()">Verify & Scroll</button></div>
+    <div id="step2" class="step-card"><span class="step-num">2</span> <b>OTP</b><input type="number" id="join-otp" placeholder="6-digit OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyJoin()">Join</button></div>
+    <button class="btn" onclick="closeWizard()">Cancel</button>
 </div>
 
 <div id="leaveWizard" class="wizard-overlay">
-    <h2>Exit Wizard</h2>
-    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Check Fees</b><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees</button></div>
-    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>Final OTP</b><input type="number" id="leave-otp" placeholder="OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button></div>
-    <button class="btn" style="background:none;" onclick="closeLeaveWizard()">Cancel</button>
+    <h2>Exit</h2>
+    <div id="lstep1" class="step-card step-active"><span class="step-num">1</span> <b>Fees</b><div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red);"></p></div><button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify</button></div>
+    <div id="lstep2" class="step-card"><span class="step-num">2</span> <b>OTP</b><input type="number" id="leave-otp" placeholder="OTP" style="width:100%; padding:10px;"><button class="btn btn-black" onclick="window.verifyLeave()">Confirm</button></div>
+    <button class="btn" onclick="closeLeaveWizard()">Cancel</button>
 </div>
 
 <section id="manage">
     <div class="admin-nav" style="display:flex; gap:5px; margin-bottom:10px;">
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px;">Signals</button>
-        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px;">Survivals</button>
+        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')">Signals</button>
+        <button id="am-user-btn" onclick="switchAdmin('user')">Survivals</button>
     </div>
-    <div id="am-pane-otp"><div class="card" id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace; min-height:200px;"></div></div>
+    <div id="am-pane-otp"><div class="card" id="admin-otp-list" style="background:#000; color:#0f0; font-family:monospace;"></div></div>
     <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
 </section>
 
-<div id="owner-folder-view" class="wizard-overlay" style="background:var(--bg);">
+<div id="owner-folder-view" class="wizard-overlay">
     <div style="max-width:500px; margin:auto; padding:15px;">
-        <button class="btn btn-black" onclick="closeOwnerView()">← Back to List</button>
+        <button class="btn btn-black" onclick="closeOwnerView()">← Back</button>
         <div id="folder-content"></div>
     </div>
 </div>
@@ -170,21 +169,21 @@
             document.getElementById('join-trigger-box').classList.add('hidden');
             document.getElementById('active-tools').classList.remove('hidden');
             document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
-            document.getElementById('status-days').innerText = formatSurv(getRealSurvival(currentUserData));
+            const srv = getRealSurvival(currentUserData);
+            document.getElementById('status-days').innerText = formatSurv(srv);
+            document.getElementById('expire-label').style.display = srv < -28 ? 'block' : 'none';
           }
-          let logs = ""; (currentUserData.history || []).slice().reverse().forEach(m => logs += `<div>${m}</div>`);
-          document.getElementById('user-pay-log').innerHTML = logs || "No history yet.";
+          let logs = ""; (currentUserData.history || []).reverse().forEach(m => logs += `<div>${m}</div>`);
+          document.getElementById('user-pay-log').innerHTML = logs;
         }
       });
       if(user.email === "c.commando822@gmail.com") document.getElementById('tab-man').classList.remove('hidden');
       
       const savedTab = localStorage.getItem('activeTab') || 'account';
       switchMain(savedTab);
+      if(savedTab === 'manage') switchAdmin(localStorage.getItem('activeAdminPane') || 'otp');
       if(localStorage.getItem('wizJoin') === 'show') openWizard();
       if(localStorage.getItem('wizLeave') === 'show') openLeaveWizard();
-    } else {
-        document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('profilePanel').classList.add('hidden');
     }
   });
 
@@ -193,7 +192,7 @@
     const reader = new FileReader();
     reader.onload = async (e) => {
       await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result });
-      alert("Photo updated successfully!");
+      alert("Photo Updated");
     };
     reader.readAsDataURL(input.files[0]);
   };
@@ -203,13 +202,10 @@
     const updates = {};
     for (let [k, label] of Object.entries(fields)) {
       const val = document.getElementById('p-'+k).value.trim();
-      if(val.length < 6) return alert(label + " must be at least 6 characters.");
+      if(val.length < 6) return alert(label + " min 6 chars");
       if(val !== (currentUserData[k] || "")) updates[k] = val;
     }
-    if(Object.keys(updates).length > 0) {
-        await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
-        alert("Details Saved.");
-    }
+    if(Object.keys(updates).length > 0) await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
   };
 
   window.makeEdit = (id) => { const el = document.getElementById(id); el.readOnly = false; el.focus(); };
@@ -218,13 +214,13 @@
     const otp = Math.floor(100000 + Math.random() * 900000);
     await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Admission', name: document.getElementById('p-name').value, expiresAt: Date.now() + 300000 });
     document.getElementById('step2').classList.add('step-active');
-    document.getElementById('details-anchor').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('details-card').scrollIntoView();
   };
 
   window.verifyJoin = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('join-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), history: arrayUnion(`📈 Membership Joined [${getStamp()}]`) });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: new Date().toLocaleDateString(), joinDateISO: new Date().toISOString(), history: arrayUnion(`📈 Joined [${getStamp()}]`) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeWizard();
     }
@@ -232,16 +228,20 @@
 
   window.checkLeaveFees = async () => {
     const srv = getRealSurvival(currentUserData);
-    if(srv < -1) return alert("You have pending fees. Clear debt first.");
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Exit', name: currentUserData.name, expiresAt: Date.now() + 300000 });
-    document.getElementById('lstep2').classList.add('step-active');
+    if(srv < -1) {
+        document.getElementById('leave-error-msg').innerText = "Clear debt first";
+        document.getElementById('leave-error-box').classList.remove('hidden');
+    } else {
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        await setDoc(doc(db, "signals", auth.currentUser.uid), { otp, type: 'Exit', name: currentUserData.name, expiresAt: Date.now() + 300000 });
+        document.getElementById('lstep2').classList.add('step-active');
+    }
   };
 
   window.verifyLeave = async () => {
     const s = await getDoc(doc(db, "signals", auth.currentUser.uid));
     if(s.exists() && s.data().otp == document.getElementById('leave-otp').value) {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: getRealSurvival(currentUserData), joinDateISO: null, history: arrayUnion(`📉 Membership Left [${getStamp()}]`) });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: getRealSurvival(currentUserData), joinDateISO: null, history: arrayUnion(`📉 Left [${getStamp()}]`) });
       await deleteDoc(doc(db, "signals", auth.currentUser.uid));
       closeLeaveWizard();
       location.reload();
@@ -251,8 +251,9 @@
   window.doPayment = async () => {
     let d = Math.min(parseInt(document.getElementById('p-days').value), 364);
     let amt = Math.round((parseInt(document.getElementById('p-shift').value)/28)*d);
-    await setDoc(doc(db, "signals", "pay_"+auth.currentUser.uid+"_"+Date.now()), { uid: auth.currentUser.uid, name: currentUserData.name, amount: amt, days: d, type: 'PAYMENT' });
-    alert("Payment Signal Sent to Owner.");
+    let sid = "pay_"+auth.currentUser.uid+"_"+Date.now();
+    await setDoc(doc(db, "signals", sid), { uid: auth.currentUser.uid, name: currentUserData.name, amount: amt, days: d, type: 'PAYMENT' });
+    document.getElementById('pay-modal').style.display = 'flex';
   };
 
   function loadAdmin() {
@@ -261,11 +262,11 @@
       s.forEach(d => {
         const sig = d.data();
         if(sig.type === 'PAYMENT') {
-            h += `<div class="sig-item"><b>💰 PAYMENT REQUEST</b><div class="sig-indent">User: ${sig.name}<br>Amount: ₹${sig.amount}<br>Days: ${sig.days}</div><button class="btn btn-green" style="width:auto; padding:5px 15px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days})">Accept</button> <button class="btn btn-red" style="width:auto; padding:5px 15px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',0)">Reject</button></div>`;
+            h += `<div class="sig-item"><b>💰 ${sig.name}</b><br>&nbsp;&nbsp;&nbsp;₹${sig.amount} for ${sig.days} days<br><button class="btn btn-green" style="width:auto; padding:5px 15px;" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days})">Accept</button> <button class="btn btn-red" style="width:auto; padding:5px 15px;" onclick="handlePay('${d.id}','${sig.uid}','REJ',${sig.days})">Reject</button></div>`;
         } else {
             const rem = Math.max(0, Math.floor((sig.expiresAt - Date.now())/1000));
             if(rem <= 0) deleteDoc(doc(db, "signals", d.id));
-            h += `<div class="sig-item"><b>🔑 ${sig.type.toUpperCase()} SIGNAL</b><span class="sig-timer">${rem}s</span><div class="sig-indent">Name: ${sig.name}<br>OTP: ${sig.otp}</div></div>`;
+            h += `<div class="sig-item"><b>🔑 ${sig.type}</b><br>&nbsp;&nbsp;&nbsp;Name: ${sig.name}<br>&nbsp;&nbsp;&nbsp;OTP: ${sig.otp}<span class="sig-timer">${rem}s</span></div>`;
         }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No Active Signals";
@@ -280,41 +281,40 @@
         const card = `<div class="player-card" onclick="openUser('${u.id}')"><div><img src="${u.photo || ''}" class="player-photo"><b>${u.name}</b></div><span>${formatSurv(srv)}</span></div>`;
         if(u.isOnline) { u.joinDateISO ? g.onJ += card : g.onNL += card; } else { u.joinDateISO ? g.offJ += card : g.offNL += card; }
       });
-      document.getElementById('admin-survival-list').innerHTML = `<div class="detail-label">Online Joined</div>${g.onJ}<div class="detail-label">Offline Joined</div>${g.offJ}<div class="detail-label">New/Left Users</div>${g.onNL}${g.offNL}`;
+      document.getElementById('admin-survival-list').innerHTML = `
+        <div class="detail-label">Online Joined</div>${g.onJ}
+        <div class="detail-label">Offline Joined</div>${g.offJ}
+        <div class="detail-label">Online New/Left</div>${g.onNL}
+        <div class="detail-label">Offline New/Left</div>${g.offNL}`;
     });
   }
 
   window.openUser = async (uid) => {
-    const snap = await getDoc(doc(db, "users", uid));
-    const u = snap.data();
+    const u = (await getDoc(doc(db, "users", uid))).data();
     const srv = getRealSurvival(u);
-    let logs = ""; (u.history || []).slice().reverse().forEach(m => logs += `<div style="border-bottom:1px solid #eee; padding:3px;">${m}</div>`);
+    let pLog = "", aLog = ""; (u.history || []).forEach(m => {
+        const row = `<div style="border-bottom:1px solid #eee; padding:3px;">${m}</div>`;
+        if(m.includes("Verified") || m.includes("Joined") || m.includes("Left")) pLog += row; else aLog += row;
+    });
     document.getElementById('folder-content').innerHTML = `
-      <div class="card" style="text-align:center;"><img src="${u.photo || ''}" style="width:80px; height:80px; border-radius:50%;"><br><b>${u.name}</b><br>Current: ${formatSurv(srv)}</div>
-      <div class="card"><label class="detail-label">Logs (Click to Expand)</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${logs}</div></div>
+      <div class="card" style="text-align:center;"><img src="${u.photo || ''}" style="width:60px; height:60px; border-radius:50%;"><br><b>${u.name}</b><br>${formatSurv(srv)}</div>
+      <div class="card"><label class="detail-label">Payment Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${pLog}</div></div>
+      <div class="card"><label class="detail-label">Activity Logs</label><div class="log-container" onclick="this.classList.toggle('log-expanded')">${aLog}</div></div>
       <button class="btn btn-red" onclick="forceRemove('${uid}')">FORCE REMOVE FROM LIBRARY</button>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
   window.forceRemove = async (uid) => { if(confirm("Force leave this user?")) { await updateDoc(doc(db, "users", uid), { totalPaidDays: 0, joinDateISO: null, history: arrayUnion(`🚫 FORCED REMOVAL [${getStamp()}]`) }); closeOwnerView(); } };
-  window.handlePay = async (sid, uid, stat, days) => { 
-    const uRef = doc(db, "users", uid);
-    const uSnap = await getDoc(uRef);
-    if(stat === 'OK') await updateDoc(uRef, { totalPaidDays: (uSnap.data().totalPaidDays || 0) + days, history: arrayUnion(`✅ Payment Accepted: ${days} days [${getStamp()}]`) });
-    else await updateDoc(uRef, { history: arrayUnion(`❌ Payment Rejected [${getStamp()}]`) });
-    await deleteDoc(doc(db, "signals", sid));
-  };
-
+  window.handlePay = async (sid, uid, stat, days) => { await updateDoc(doc(db, "users", uid), { totalPaidDays: stat==='OK' ? (currentUserData.totalPaidDays||0)+days : (currentUserData.totalPaidDays||0), history: arrayUnion(`${stat==='OK'?'✅':'❌'} Payment ${stat} [${getStamp()}]`) }); await deleteDoc(doc(db, "signals", sid)); };
   window.login = () => signInWithPopup(auth, provider);
+  window.logout = async () => { if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); signOut(auth).then(()=>location.reload()); };
   window.calcTotal = () => { let d = document.getElementById('p-days').value; document.getElementById('pay-summary').innerText = `Total: ₹${Math.round((document.getElementById('p-shift').value/28)*d)}`; };
   window.openWizard = () => { document.getElementById('joinWizard').classList.add('show'); localStorage.setItem('wizJoin', 'show'); };
   window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); localStorage.removeItem('wizJoin'); };
   window.openLeaveWizard = () => { document.getElementById('leaveWizard').classList.add('show'); localStorage.setItem('wizLeave', 'show'); };
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); localStorage.removeItem('wizLeave'); };
   window.closeOwnerView = () => document.getElementById('owner-folder-view').classList.remove('show');
-  
-  // Real-time Timer Refresh
-  setInterval(() => { if(document.getElementById('manage').classList.contains('active')) loadAdmin(); }, 1000);
+  setInterval(() => { if(auth.currentUser && auth.currentUser.email === "c.commando822@gmail.com") { /* refresh signals timer UI */ } }, 1000);
 </script>
 </body>
 </html>
