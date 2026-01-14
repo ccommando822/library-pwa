@@ -219,40 +219,51 @@
     // PAYMENT LOGS
     if (h.status === "Pending") {
       out += `
+<pre style="font-family:monospace; margin:0;">
 ⏳Request:
 Request at :- (${h.reqT})
+
 NAME   : ${currentUserData.name}
 PHONE  : ${currentUserData.phone}
 SHIFT  : ${h.shift}
 DAYS   : ${h.days}
 AMOUNT : ₹${h.amt}
---------------------------<br>`;
+--------------------------
+</pre>`;
     }
 
     if (h.status === "Verified") {
       out += `
+<pre style="font-family:monospace; margin:0;">
 ✅Verified:
 Request at :- (${h.reqT})
+
 NAME   : ${currentUserData.name}
 PHONE  : ${currentUserData.phone}
 SHIFT  : ${h.shift}
 DAYS   : ${h.days}
 AMOUNT : ₹${h.amt}
+
 Verified at :- (${h.actionT})
---------------------------<br>`;
+--------------------------
+</pre>`;
     }
 
     if (h.status === "Rejected") {
       out += `
+<pre style="font-family:monospace; margin:0;">
 ❌Rejected:
 Request at :- (${h.reqT})
+
 NAME   : ${currentUserData.name}
 PHONE  : ${currentUserData.phone}
 SHIFT  : ${h.shift}
 DAYS   : ${h.days}
 AMOUNT : ₹${h.amt}
+
 Rejected at :- (${h.actionT})
---------------------------<br>`;
+--------------------------
+</pre>`;
     }
   });
 
