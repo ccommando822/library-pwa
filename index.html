@@ -207,17 +207,57 @@
 
   // --- Reverted Log Renderer (Base Code Layout) ---
   window.renderLogs = (history) => {
-    let logs = "";
-    (history || []).slice().reverse().forEach(m => {
-      if (typeof m === 'string') logs += `<div style="padding:5px 0; border-bottom:1px solid #eee;">${m}</div>`;
-      else {
-        const icon = m.status === 'Pending' ? "💰" : (m.status === 'Verified' ? "✅" : "❌");
-        logs += `<div style="padding:10px 0; border-bottom:1px solid #eee; white-space:pre-wrap; font-size:12px;">` +
-                `${icon} ${m.status}: ${m.reqT}\n=>Shift: ${m.shift} | Days: ${m.days}\n=>₹${m.amt} | Net: ${Math.floor(m.finalNet||0)}d</div>`;
-      }
-    });
-    return logs || "No History";
-  };
+  let out = "";
+  (history || []).slice().reverse().forEach(h => {
+
+    // SIMPLE STRING LOGS (join/leave etc.)
+    if (typeof h === "string") {
+      out += `<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`;
+      return;
+    }
+
+    // PAYMENT LOGS
+    if (h.status === "Pending") {
+      out += `
+⏳Request:
+Request at :- (${h.reqT})
+NAME   : ${currentUserData.name}
+PHONE  : ${currentUserData.phone}
+SHIFT  : ${h.shift}
+DAYS   : ${h.days}
+AMOUNT : ₹${h.amt}
+--------------------------<br>`;
+    }
+
+    if (h.status === "Verified") {
+      out += `
+✅Verified:
+Request at :- (${h.reqT})
+NAME   : ${currentUserData.name}
+PHONE  : ${currentUserData.phone}
+SHIFT  : ${h.shift}
+DAYS   : ${h.days}
+AMOUNT : ₹${h.amt}
+Verified at :- (${h.actionT})
+--------------------------<br>`;
+    }
+
+    if (h.status === "Rejected") {
+      out += `
+❌Rejected:
+Request at :- (${h.reqT})
+NAME   : ${currentUserData.name}
+PHONE  : ${currentUserData.phone}
+SHIFT  : ${h.shift}
+DAYS   : ${h.days}
+AMOUNT : ₹${h.amt}
+Rejected at :- (${h.actionT})
+--------------------------<br>`;
+    }
+  });
+
+  return out || "No payment history.";
+};
 
   // --- Auth & Data Listener ---
   onAuthStateChanged(auth, async (user) => {
@@ -238,7 +278,15 @@
       onSnapshot(uRef, (snap) => {
         if(snap.exists()) {
           currentUserData = snap.data();
-          document.getElementById('loginPanel').classList.add('hidden');
+         // 🔹 LOAD SAVED WI-FI SETTINGS (OWNER ONLY)
+if (user.email === "c.commando822@gmail.com") {
+  getDoc(doc(db, "settings", "wifi")).then(wSnap => {
+    if (wSnap.exists()) {
+      document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
+      document.getElementById('wifi-pass').value = wSnap.data().pass || "";
+    }
+  });
+} document.getElementById('loginPanel').classList.add('hidden');
           document.getElementById('profilePanel').classList.remove('hidden');
           document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
           
@@ -333,7 +381,18 @@
 
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
 
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { name: n, father: f, phone: p, address: a });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+  name: n,
+  father: f,
+  phone: p,
+  address: a,
+  history: arrayUnion(
+    `User updated Name from ${currentUserData.name} →→ to →→ ${n} at ${getStamp()}`,
+    `User updated Father from ${currentUserData.father} →→ to →→ ${f} at ${getStamp()}`,
+    `User updated Phone from ${currentUserData.phone} →→ to →→ ${p} at ${getStamp()}`,
+    `User updated Address from ${currentUserData.address} →→ to →→ ${a} at ${getStamp()}`
+  )
+});
     alert("Profile Saved.");
   };
 
@@ -399,11 +458,16 @@
   window.verifyLeave = async () => {
     if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
         // Stop timer by removing joinDateISO, but keep totalPaidDays (Static Balance)
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            totalPaidDays: window.getRealSurvival(currentUserData),
-            joinDateISO: null,
-            history: arrayUnion(`Left Library on ${getStamp()}`)
-        });
+        const lastBal = window.getRealSurvival(currentUserData);
+
+await updateDoc(doc(db, "users", auth.currentUser.uid), {
+  totalPaidDays: lastBal,
+  joinDateISO: null,
+  history: arrayUnion(
+    `Left Library on ${getStamp()}`,
+    `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
+  )
+});
         await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
         location.reload();
     } else alert("Invalid OTP");
@@ -541,12 +605,32 @@
   };
 
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
-    const ref = doc(db, "users", uid), uData = (await getDoc(ref)).data();
-    const newTotal = stat == 'OK' ? (uData.totalPaidDays || 0) + days : uData.totalPaidDays;
-    const newHistory = uData.history.map(item => (item.id === payId) ? { ...item, status: stat == 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newTotal } : item);
-    await updateDoc(ref, { totalPaidDays: newTotal, history: newHistory });
-    await deleteDoc(doc(db, "signals", sid));
-  };
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+
+  const u = snap.data();
+  const prevBalance = u.totalPaidDays || 0;
+  const newBalance = stat === 'OK' ? prevBalance + days : prevBalance;
+
+  const newHistory = u.history.map(h => {
+    if (h.id !== payId) return h;
+
+    return {
+      ...h,
+      status: stat === 'OK' ? 'Verified' : 'Rejected',
+      actionT: getStamp(),
+      finalNet: newBalance
+    };
+  });
+
+  await updateDoc(ref, {
+    totalPaidDays: newBalance,
+    history: newHistory
+  });
+
+  await deleteDoc(doc(db, "signals", sid));
+};
   
   // Toggles
   window.switchMain = (t) => { document.querySelectorAll('section').forEach(s => s.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active')); document.getElementById(t === 'account' ? 'tab-acc' : 'tab-man').classList.add('active'); };
@@ -556,7 +640,16 @@
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
-  window.calcTotal = () => { document.getElementById('pay-summary').innerText = `Total: ₹${Math.round((document.getElementById('p-shift').value/28)*document.getElementById('p-days').value)}`; };
+  window.calcTotal = () => {
+  const daysInput = document.getElementById('p-days');
+  if (daysInput.value > 364) daysInput.value = 364;
+  if (daysInput.value < 1) daysInput.value = 1;
+
+  const total = Math.round(
+    (document.getElementById('p-shift').value / 28) * daysInput.value
+  );
+  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
+};
   window.updateUserPhoto = (i) => { if(i.files[0]) { let r=new FileReader(); r.onload=(e)=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result}); r.readAsDataURL(i.files[0]); }};
 </script>
 </body>
