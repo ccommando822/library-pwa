@@ -491,54 +491,68 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
       document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
     });
 
-    // 2. Survival List (Fixed Logic & Better UI)
-    onSnapshot(collection(db, "users"), s => {
-      const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
-      
-      s.forEach(d => {
-        const u = d.data(); 
-        const srv = window.getRealSurvival(u);
-        const isJoined = !!u.joinDateISO; // True if joined
-        const isOnline = !!u.isOnline;    // True if online
-        
-        // Counter: Live class only if joined. Static text if left.
-        const counterHtml = isJoined 
-            ? `<span class="admin-live-srv" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'}; font-weight:bold;">${window.formatTime(srv)}</span>` 
-            : `<span style="color:#666; font-weight:bold;">${window.formatTime(srv)} (Static)</span>`;
+    // 2. Survival List (RESET & FIXED)
+onSnapshot(collection(db, "users"), snap => {
 
-        const card = `
-          <div class="player-card" onclick="window.openUser('${d.id}')">
-            <div class="player-header">
-                <div class="player-info">
-                    <img src="${u.photo||''}" class="player-photo">
-                    <div>
-                        <div style="font-weight:bold; font-size:14px;">${u.name}</div>
-                        <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">
-                            ${isOnline ? '● Online' : '○ Offline'}
-                        </div>
-                    </div>
-                </div>
-                ${counterHtml}
+  const g = {
+    onJ_ok: "",   // Online + Joined + Active/Grace
+    onJ_exp: "",  // Online + Joined + Expired
+    offJ: "",     // Offline + Joined
+    onNL: "",     // Online + Not Joined
+    offNL: ""     // Offline + Not Joined
+  };
+
+  snap.forEach(doc => {
+    const u = doc.data();
+
+    const isOnline = !!u.isOnline;
+    const isJoined = !!u.joinDateISO;
+    const remaining = window.getRealSurvival(u);
+
+    const card = `
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-info">
+            <img src="${u.photo || ''}" class="player-photo">
+            <div>
+              <b>${u.name || "No Name"}</b><br>
+              <small>${u.phone || ""}</small>
             </div>
-            <div class="player-details">
-                <span>📞 ${u.phone || 'N/A'}</span>
-                <span>📧 ${u.email || 'N/A'}</span>
-            </div>
-          </div>`;
+          </div>
+          <span class="status-badge"
+            style="background:${remaining >= 0 ? '#2ecc71' : '#e67e22'};color:#fff;">
+            ${remaining >= 0 ? 'ACTIVE' : 'DUE'}
+          </span>
+        </div>
 
-        // Strictly categorized buckets
-        if (isOnline && isJoined) g.onJ += card;
-        else if (!isOnline && isJoined) g.offJ += card;
-        else if (isOnline && !isJoined) g.onNL += card;
-        else g.offNL += card;
-      });
+        <div class="player-details">
+          Remaining:
+          <span class="admin-live-srv"
+                data-iso="${u.joinDateISO || ''}"
+                data-paid="${u.totalPaidDays || 0}">
+            ${window.formatTime(remaining)}
+          </span>
+        </div>
+      </div>
+    `;
 
-      document.getElementById('admin-survival-list').innerHTML = 
-          `<div class="detail-label">🟢 Online & Joined</div>${g.onJ}` +
-          `<div class="detail-label">⚪ Offline & Joined</div>${g.offJ}` +
-          `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}` +
-          `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
-    });
+    // 🔑 CORRECT CATEGORIZATION (NO SHORTCUTS)
+    if (isOnline && isJoined) {
+      if (remaining >= -28) g.onJ_ok += card;
+      else g.onJ_exp += card;
+    }
+    else if (!isOnline && isJoined) g.offJ += card;
+    else if (isOnline && !isJoined) g.onNL += card;
+    else g.offNL += card;
+  });
+
+  document.getElementById("admin-survival-list").innerHTML =
+    `<div class="detail-label">🟢 Online & Joined (Active / Grace ≤ 28 days)</div>${g.onJ_ok || "<i>None</i>"}` +
+    `<div class="detail-label">🔴 Online & Joined (Expired &gt; 28 days)</div>${g.onJ_exp || "<i>None</i>"}` +
+    `<div class="detail-label">⚪ Offline & Joined</div>${g.offJ || "<i>None</i>"}` +
+    `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL || "<i>None</i>"}` +
+    `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL || "<i>None</i>"}`;
+});
   };
 
   // --- Utilities ---
