@@ -143,7 +143,13 @@
     </div>
     
     <div id="am-pane-otp"><div id="admin-otp-list"></div></div>
-    <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
+    <div id="am-pane-user" class="hidden">
+  <h4 style="margin:8px 0;color:var(--green);">🟢 Active / Grace Users</h4>
+  <div id="admin-survival-active"></div>
+
+  <h4 style="margin:12px 0 8px;color:var(--red);">🔴 Expired Users</h4>
+  <div id="admin-survival-expired"></div>
+</div>
     
     <div id="am-pane-wifi" class="hidden">
         <div class="card">
@@ -181,6 +187,55 @@
 
   // --- Core Helpers ---
   
+  // --- Admin: Render Survivals in 2 Categories ---
+window.renderAdminSurvivals = (users) => {
+  let activeHTML = "";
+  let expiredHTML = "";
+
+  users.forEach(u => {
+    if (!u.isOnline || !u.joinDateISO) return;
+
+    const remaining = window.getRealSurvival(u);
+
+    const card = `
+      <div class="player-card">
+        <div class="player-header">
+          <div class="player-info">
+            <img src="${u.photo || ''}" class="player-photo">
+            <div>
+              <b>${u.name || "No Name"}</b><br>
+              <small>${u.phone || ""}</small>
+            </div>
+          </div>
+          <span class="status-badge" style="background:${remaining >= 0 ? '#2ecc71' : '#e67e22'};color:white;">
+            ${remaining >= 0 ? 'ACTIVE' : 'DUE'}
+          </span>
+        </div>
+
+        <div class="player-details">
+          Remaining:
+          <span class="admin-live-srv"
+                data-iso="${u.joinDateISO}"
+                data-paid="${u.totalPaidDays}">
+            ${window.formatTime(remaining)}
+          </span>
+        </div>
+      </div>
+    `;
+
+    if (remaining >= -28) {
+      activeHTML += card;
+    } else {
+      expiredHTML += card;
+    }
+  });
+
+  document.getElementById("admin-survival-active").innerHTML =
+    activeHTML || "<i>No active users</i>";
+
+  document.getElementById("admin-survival-expired").innerHTML =
+    expiredHTML || "<i>No expired users</i>";
+};
   // Convert Decimal to D:H:M:S
   window.formatTime = (decimalDays) => {
     // Show 00... if negative (debt) or empty, but handle negative separately if needed
@@ -511,7 +566,13 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
 
     // 2. Survival List (Fixed Logic & Better UI)
     onSnapshot(collection(db, "users"), s => {
-      const g = { onJ: "", offJ: "", onNL: "", offNL: "" };
+      const g = {
+  onJ_ok: "",      // 🟢 Online + Joined + >= -28
+  onJ_exp: "",     // 🔴 Online + Joined + < -28
+  offJ: "",
+  onNL: "",
+  offNL: ""
+};
       
       s.forEach(d => {
         const u = d.data(); 
@@ -544,18 +605,22 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
             </div>
           </div>`;
 
-        // Strictly categorized buckets
-        if (isOnline && isJoined) g.onJ += card;
-        else if (!isOnline && isJoined) g.offJ += card;
-        else if (isOnline && !isJoined) g.onNL += card;
-        else g.offNL += card;
+        /// Strictly categorized buckets (UPDATED)
+if (isOnline && isJoined) {
+  if (srv >= -28) g.onJ_ok += card;     // Active / Grace
+  else g.onJ_exp += card;               // Expired
+}
+else if (!isOnline && isJoined) g.offJ += card;
+else if (isOnline && !isJoined) g.onNL += card;
+else g.offNL += card;
       });
 
       document.getElementById('admin-survival-list').innerHTML = 
-          `<div class="detail-label">🟢 Online & Joined</div>${g.onJ}` +
-          `<div class="detail-label">⚪ Offline & Joined</div>${g.offJ}` +
-          `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}` +
-          `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
+  `<div class="detail-label">🟢 Online & Joined (Active / Grace ≤ 28 days)</div>${g.onJ_ok}` +
+  `<div class="detail-label">🔴 Online & Joined (Expired > 28 days)</div>${g.onJ_exp}` +
+  `<div class="detail-label">⚪ Offline & Joined</div>${g.offJ}` +
+  `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}` +
+  `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
     });
   };
 
