@@ -512,9 +512,10 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
     // 2. Survival List (Fixed Logic & Better UI)
     onSnapshot(collection(db, "users"), s => {
       const g = {
-  onJ_ok: "",   // Online + Joined + Active/Grace
-  onJ_exp: "",  // Online + Joined + Expired
-  offJ: "",
+  onJ_ok: "",    // Online + Joined + Active
+  onJ_exp: "",   // Online + Joined + Expired
+  offJ_ok: "",   // Offline + Joined + Active
+  offJ_exp: "",  // Offline + Joined + Expired
   onNL: "",
   offNL: ""
 };
@@ -551,11 +552,14 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
           </div>`;
 
         // Strictly categorized buckets (with grace logic)
-if (isOnline && isJoined) {
-  if (srv >= -28) g.onJ_ok += card;   // 🟢 Active / Grace
-  else g.onJ_exp += card;             // 🔴 Expired
+if (isJoined && isOnline) {
+  if (srv >= -28) g.onJ_ok += card;
+  else g.onJ_exp += card;
 }
-else if (!isOnline && isJoined) g.offJ += card;
+else if (isJoined && !isOnline) {
+  if (srv >= -28) g.offJ_ok += card;
+  else g.offJ_exp += card;
+}
 else if (isOnline && !isJoined) g.onNL += card;
 else g.offNL += card;
       });
@@ -563,7 +567,8 @@ else g.offNL += card;
       document.getElementById('admin-survival-list').innerHTML = 
   `<div class="detail-label">🟢 Online & Joined (Active / Grace)</div>${g.onJ_ok || ""}` +
   `<div class="detail-label">🔴 Online & Joined (Expired)</div>${g.onJ_exp || ""}` +
-  `<div class="detail-label">⚪ Offline & Joined</div>${g.offJ || ""}` +
+  `<div class="detail-label">🟢 Offline & Joined (Active / Grace)</div>${g.offJ_ok || ""}` +
+  `<div class="detail-label">🔴 Offline & Joined (Expired)</div>${g.offJ_exp || ""}` +
   `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL || ""}` +
   `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL || ""}`;
     });
