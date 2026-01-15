@@ -181,6 +181,15 @@
 
   // --- Core Helpers ---
   
+  // --- Device Identification (Single Device Login) ---
+function getDeviceId() {
+  let id = localStorage.getItem("DEVICE_ID");
+  if (!id) {
+    id = "dev_" + Math.random().toString(36).slice(2) + Date.now();
+    localStorage.setItem("DEVICE_ID", id);
+  }
+  return id;
+}
   // Convert Decimal to D:H:M:S
   window.formatTime = (decimalDays) => {
     // Show 00... if negative (debt) or empty, but handle negative separately if needed
@@ -296,6 +305,19 @@ if (user.email === "c.commando822@gmail.com") {
       document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
       document.getElementById('wifi-pass').value = wSnap.data().pass || "";
     }
+    // --- STEP 3: Single Device Enforcement (AUTO LOGOUT OLD PHONE) ---
+const myDeviceId = getDeviceId();
+
+onSnapshot(uRef, snap => {
+  if (!snap.exists()) return;
+
+  const u = snap.data();
+
+  if (u.activeDeviceId && u.activeDeviceId !== myDeviceId) {
+    alert("This account was opened on another device.");
+    signOut(auth).then(() => location.reload());
+  }
+});
   });
 } document.getElementById('loginPanel').classList.add('hidden');
           document.getElementById('profilePanel').classList.remove('hidden');
@@ -379,11 +401,29 @@ if (user.email === "c.commando822@gmail.com") {
     });
   }, 1000);
 
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = async () => { 
-    if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); 
-    signOut(auth).then(()=>location.reload()); 
-  };
+  window.login = async () => {
+  const res = await signInWithPopup(auth, provider);
+  const uid = res.user.uid;
+
+  const deviceId = getDeviceId();
+
+  await updateDoc(doc(db, "users", uid), {
+    isOnline: true,
+    activeDeviceId: deviceId,
+    lastLoginAt: getStamp()
+  });
+};
+  window.logout = async () => {
+  if (!auth.currentUser) return;
+
+  await updateDoc(doc(db, "users", auth.currentUser.uid), {
+    isOnline: false,
+    activeDeviceId: null
+  });
+
+  await signOut(auth);
+  location.reload();
+};
     window.saveProfile = async () => {
     const n = document.getElementById('p-name').value.trim();
     const f = document.getElementById('p-father').value.trim();
@@ -512,10 +552,11 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
     // 2. Survival List (Fixed Logic & Better UI)
     onSnapshot(collection(db, "users"), s => {
       const g = {
-  onJ_ok: "",    // Online + Joined + Active
-  onJ_exp: "",   // Online + Joined + Expired
-  offJ_ok: "",   // Offline + Joined + Active
-  offJ_exp: "",  // Offline + Joined + Expired
+  whitelist: "",   // ⭐ Joined + Active (Online OR Offline)
+  onJ_ok: "",
+  onJ_exp: "",
+  offJ_ok: "",
+  offJ_exp: "",
   onNL: "",
   offNL: ""
 };
@@ -523,6 +564,9 @@ await updateDoc(doc(db, "users", auth.currentUser.uid), {
       s.forEach(d => {
         const u = d.data(); 
         const srv = window.getRealSurvival(u);
+        if (isJoined && srv >= -28) {
+  g.whitelist += card;
+}
         const isJoined = !!u.joinDateISO; // True if joined
         const isOnline = !!u.isOnline;    // True if online
         
