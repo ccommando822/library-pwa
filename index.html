@@ -564,11 +564,11 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
 
         // Strictly categorized buckets (with grace logic)
 if (isJoined && isOnline) {
-  if (srv >= -28) g.onJ_ok += card;
+  if (srv >= 0) g.onJ_ok += card;
   else g.onJ_exp += card;
 }
 else if (isJoined && !isOnline) {
-  if (srv >= -28) g.offJ_ok += card;
+  if (srv >= 0) g.offJ_ok += card;
   else g.offJ_exp += card;
 }
 else if (isOnline && !isJoined) g.onNL += card;
