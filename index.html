@@ -2,7 +2,8 @@
 <head>  
   <meta charset="UTF-8">  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-  <title>Rakshapal Singh Library ERP</title>  
+  <title>Rakshapal Singh Library ERP</title> 
+  <script src="capacitor.js"></script> 
   <style>  
     :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #f1c40f; }  
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }  
@@ -323,9 +324,24 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 });
 
 // --- Removed Logic Behind Connect Button ---
-window.connectToWifi = () => {
-// Empty logic as requested
+window.connectToWifi = async () => {
+    try {
+        // 1. Fetch live SSID/Pass from your owner settings in Firebase
+        const wSnap = await getDoc(doc(db, "settings", "wifi"));
+        if (wSnap.exists()) {
+            const { ssid, pass } = wSnap.data();
+
+            // 2. NATIVE COMMAND: Connect using SSID and Secret Password
+            // 'true' ensures the phone stays connected even if internet is slow
+            window.WifiWizard2.connect(ssid, true, pass, 'WPA', false)
+                .then(() => alert("✅ Library Wi-Fi Connected!"))
+                .catch(err => alert("❌ Connection failed: " + err));
+        }
+    } catch (e) {
+        alert("Error fetching Wi-Fi details.");
+    }
 };
+
 
 // Wi-Fi Admin Save (Still works for owner)
 window.saveWifiSettings = async () => {
@@ -450,21 +466,48 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
 
   window.verifyLeave = async () => {
     if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
-        // Stop timer by removing joinDateISO, but keep totalPaidDays (Static Balance)
         const lastBal = window.getRealSurvival(currentUserData);
 
-await updateDoc(doc(db, "users", auth.currentUser.uid), {
-  totalPaidDays: lastBal,
-  joinDateISO: null,
-  history: arrayUnion(
-    `Left Library on ${getStamp()}`,
-    `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
-  )
-});
+        // 1. Update the database (Only once)
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            totalPaidDays: lastBal,
+            joinDateISO: null,
+            history: arrayUnion(
+                `Left Library on ${getStamp()}`,
+                `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
+            )
+        });
+
+        // 2. RUN THE FORGET LOGIC
+        await forgetLibraryWifi();
+
+        // 3. Finalize and Reload
         await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
+        alert("Session Ended & Network Forgotten.");
         location.reload();
-    } else alert("Invalid OTP");
-  };
+    } else {
+        alert("Invalid OTP");
+    }
+};
+
+// Definition of the Forget function (Keep this at bottom)
+const forgetLibraryWifi = async () => {
+    try {
+        const wSnap = await getDoc(doc(db, "settings", "wifi"));
+        if (wSnap.exists()) {
+            const { ssid } = wSnap.data();
+            // This checks if we are in the Native APK environment
+            if (window.WifiWizard2) {
+                await window.WifiWizard2.formatWifiConfig(ssid);
+                await window.WifiWizard2.removeNetwork(ssid);
+                console.log("Library Wi-Fi profile removed.");
+            }
+        }
+    } catch (e) {
+        console.log("Forget logic failed: " + e);
+    }
+};
+
     // --- Admin Logic ---
   window.loadAdmin = () => {
     // 1. Signals (Reverted Payment Layout)
