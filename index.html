@@ -405,6 +405,11 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
 
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
 
+      const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(p)) {
+        return alert("Phone number must be Valid!!!");
+    }
+      
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
   name: n,
   father: f,
@@ -418,6 +423,7 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
   )
 });
     alert("Profile Saved.");
+    return true;
   };
 
   window.checkStepOne = () => {
@@ -445,6 +451,9 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
   };
 
   window.verifyJoin = async () => {
+    const isProfileSaved = await window.saveProfile();
+    if (!isProfileSaved) return;
+    
     if (document.getElementById('join-otp').value == window.currentJoinOtp) {
         const now = new Date();
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
