@@ -405,6 +405,11 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
 
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
 
+      const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(p)) {
+        return alert("Phone number must be Valid!!!");
+    }
+      
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
   name: n,
   father: f,
@@ -418,18 +423,20 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
   )
 });
     alert("Profile Saved.");
+    return true;
   };
 
-  window.checkStepOne = () => {
+  window.checkStepOne = async() => {
+      const isProfileSaved = await window.saveProfile();
+    if (!isProfileSaved) return;
+    
     const n = document.getElementById('p-name').value.trim();
     const p = document.getElementById('p-phone').value.trim();
-
-    if (n.length < 6 || !p) return alert("Name/Phone missing.");
 
     const otp = Math.floor(100000 + Math.random() * 900000);
     const sid = "otp_" + auth.currentUser.uid;
     
-    setDoc(doc(db, "signals", sid), {
+    await setDoc(doc(db, "signals", sid), {
         type: 'ADMISSION',
         otp: otp,
         uid: auth.currentUser.uid,
@@ -444,6 +451,19 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     document.getElementById('step2').classList.add('step-active');
   };
 
+  window.verifyJoin = async () => {
+    
+    if (document.getElementById('join-otp').value == window.currentJoinOtp) {
+        const now = new Date();
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            joinDate: now.toLocaleDateString('en-GB'),
+            joinDateISO: now.toISOString(),
+            history: arrayUnion(`Joined Library on ${getStamp()}`)
+        });
+        await deleteDoc(doc(db, "signals", "otp_" + auth.currentUser.uid));
+        location.reload();
+    } else alert("Invalid OTP");
+  };
   window.verifyJoin = async () => {
     if (document.getElementById('join-otp').value == window.currentJoinOtp) {
         const now = new Date();
