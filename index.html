@@ -426,16 +426,17 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     return true;
   };
 
-  window.checkStepOne = () => {
+  window.checkStepOne = async() => {
+      const isProfileSaved = await window.saveProfile();
+    if (!isProfileSaved) return;
+    
     const n = document.getElementById('p-name').value.trim();
     const p = document.getElementById('p-phone').value.trim();
-
-    if (n.length < 6 || !p) return alert("Name/Phone missing.");
 
     const otp = Math.floor(100000 + Math.random() * 900000);
     const sid = "otp_" + auth.currentUser.uid;
     
-    setDoc(doc(db, "signals", sid), {
+    await setDoc(doc(db, "signals", sid), {
         type: 'ADMISSION',
         otp: otp,
         uid: auth.currentUser.uid,
@@ -451,8 +452,6 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
   };
 
   window.verifyJoin = async () => {
-    const isProfileSaved = await window.saveProfile();
-    if (!isProfileSaved) return;
     
     if (document.getElementById('join-otp').value == window.currentJoinOtp) {
         const now = new Date();
