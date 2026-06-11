@@ -134,7 +134,9 @@
         <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">  
         <label class="detail-label">Wi-Fi Password</label>  
         <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">  
-        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>  
+        <input type="number" id="max-connection-days" placeholder="Enter Max Connection limit in days" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">  
+        <label class="detail-label">Max Connection days</label>
+        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi Settings</button>
     </div>  
 </div>
 
@@ -278,6 +280,7 @@ getDoc(doc(db, "settings", "wifi")).then(wSnap => {
 if (wSnap.exists()) {
 document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
 document.getElementById('wifi-pass').value = wSnap.data().pass || "";
+document.getElementById('max-connection-days').value = wSnap.data()[max-connection-days] || "";
 }
 });
 } document.getElementById('loginPanel').classList.add('hidden');
@@ -326,44 +329,86 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 
   // --- Updated Connect Logic: Fetches fresh data every time ---
   window.connectToWifi = async () => {
-  try {
-    const wSnap = await getDoc(doc(db, "settings", "wifi"));
+    if (!auth.currentUser) return alert("Please log in first.");
+    const uid = auth.currentUser.uid;
+
+    // 1. Fetch user data to verify survival days
+    const snap = await getDoc(doc(db, "users", uid));
+    if (!snap.exists()) return alert("User profile not found.");
+    const u = snap.data();
+    const userTime = window.getRealSurvival(u);
     
+    // 2. Fetch the admin Wi-Fi configurations ONCE from Firestore
+    const wSnap = await getDoc(doc(db, "settings", "wifi"));
     if (!wSnap.exists()) { 
-      alert("Wi-Fi configuration missing in Firestore database path: settings/wifi"); 
-      return; 
+        return alert("Wi-Fi configuration missing in database settings/wifi"); 
     }
     
     const data = wSnap.data();
-    const ssid = data.ssid;
-    const pass = data.pass;
-    
-    if (!ssid || !pass) { 
-      alert("Wi-Fi details are incomplete in the database. Ensure 'ssid' and 'pass' fields are filled."); 
-      return; 
+    const maxAllowedDays = Number(data['max-connection-days']) || 0; 
+
+    // 3. Condition Gate: Checks if user's time is greater than or equal to the negative limit
+    if (userTime >= (-maxAllowedDays)) {
+        try {
+            // --- YOUR REQUIRED CODE BLOCK STARTS HERE (EXACTLY UNCHANGED) ---
+            if (!wSnap.exists()) { 
+              alert("Wi-Fi configuration missing in Firestore database path: settings/wifi"); 
+              return; 
+            }
+            
+            const ssid = data.ssid;
+            const pass = data.pass;
+            
+            if (!ssid || !pass) { 
+              alert("Wi-Fi details are incomplete in the database. Ensure 'ssid' and 'pass' fields are filled."); 
+              return; 
+            }
+            
+            const deepLink = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
+            window.location.href = deepLink;
+            
+            setTimeout(() => {
+              if (document.visibilityState === 'visible') {
+                alert("Please open this in the Library App to connect to Wi-Fi.");
+              }
+            }, 1500);
+            
+          } catch (e) {
+            console.error("Firestore Error:", e); // Check your F12 console to see the real error logs
+            alert("Error fetching Wi-Fi details: " + e.message);
+          }
+          // --- YOUR REQUIRED CODE BLOCK ENDS HERE ---
+          
+    } else {
+        alert("Please pay your fees to access the Wi-Fi network!");
     }
-    
-    const deepLink = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-    window.location.href = deepLink;
-    
-    setTimeout(() => {
-      if (document.visibilityState === 'visible') {
-        alert("Please open this in the Library App to connect to Wi-Fi.");
-      }
-    }, 1500);
-    
-  } catch (e) {
-    console.error("Firestore Error:", e); // Check your F12 console to see the real error logs
-    alert("Error fetching Wi-Fi details: " + e.message);
-  }
 };
+
 
 // Wi-Fi Admin Save (Still works for owner)
 window.saveWifiSettings = async () => {
-const ssid = document.getElementById('wifi-ssid').value;
-const pass = document.getElementById('wifi-pass').value;
-await setDoc(doc(db, "settings", "wifi"), { ssid, pass });
-alert("Saved.");wifi
+    const ssid = document.getElementById('wifi-ssid').value.trim();
+    const pass = document.getElementById('wifi-pass').value.trim();
+    // Changed variable name to camelCase (maxDays) so JavaScript doesn't read it as subtraction
+    const maxDays = document.getElementById('max-connection-days').value.trim();
+
+    if (!ssid || !pass || !maxDays) {
+        return alert("Please fill all fields before saving.");
+    }
+
+    try {
+        // Saving all three fields securely into your "settings/wifi" document
+        await setDoc(doc(db, "settings", "wifi"), { 
+            ssid: ssid, 
+            pass: pass,
+            'max-connection-days': Number(maxDays) // Stores it cleanly as a number in Firestore
+        });
+        
+        alert("Settings Saved Successfully.");
+    } catch (error) {
+        console.error("Error saving settings:", error);
+        alert("Failed to save settings.");
+    }
 };
 
 // --- Live Interval ---
