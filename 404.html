@@ -333,27 +333,22 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
     if (!snap.exists()) return alert("User profile not found.");
     const u = snap.data();
     const userTime = window.getRealSurvival(u);
-    
-    // 2. Fetch the admin Wi-Fi configurations ONCE from Firestore
-    const wSnap = await getDoc(doc(db, "settings", "wifi"));
-    if (!wSnap.exists()) { 
-        return alert("Wi-Fi configuration missing in database settings/wifi"); 
-    }
-    
-    const data = wSnap.data();
-    const maxAllowedDays = Number(data['max-connection-days']) || 30; 
+  
 
     // 3. Condition Gate: Checks if user's time is greater than or equal to the negative limit
     if (userTime >= (-maxAllowedDays)) {
         try {
             // --- YOUR REQUIRED CODE BLOCK STARTS HERE (EXACTLY UNCHANGED) ---
-            if (!wSnap.exists()) { 
-              alert("Wi-Fi configuration missing in Firestore database path: settings/wifi"); 
-              return; 
-            }
+            // 2. Fetch the admin Wi-Fi configurations ONCE from Firestore
+          const wSnap = await getDoc(doc(db, "settings", "wifi"));
+          if (!wSnap.exists()) { 
+          return alert("Wi-Fi configuration missing in database settings/wifi"); 
+    }
             
             const ssid = data.ssid;
             const pass = data.pass;
+            const data = wSnap.data();
+            const maxAllowedDays = window.daysinamonth || 30; 
             
             if (!ssid || !pass) { 
               alert("Wi-Fi details are incomplete in the database. Ensure 'ssid' and 'pass' fields are filled."); 
