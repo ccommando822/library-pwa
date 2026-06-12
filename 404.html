@@ -108,35 +108,13 @@
 
 <div id="active-tools" class="hidden">  
     <div class="card" style="background: #f0f7ff;">  
-        
-        <!-- 1. Shift Selector (Upgraded values to text keys for variable mapping) -->
-        <select id="p-shift" onchange="window.calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
-            <option value="day">Day Shift (₹500)</option>
-            <option value="night">Night Shift (₹400)</option>
-            <option value="both">Both Shifts (₹700)</option>
-        </select>  
-        
-        <!-- 2. Days Input (Kept your original 28 default) -->
-        <input type="number" id="p-days" value="28" oninput="window.calcTotal()" style="width:100%; padding:10px; border-radius:8px; margin-bottom:10px;">  
-        
-        <!-- 3. Dynamic Total Display -->
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹500.00</div>  
-        
-        <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-
-        <!-- 4. NEW: Security Inputs (UTR & Screenshot) -->
-        <label class="detail-label" style="margin-bottom: 5px;">Upload Payment Screenshot</label>
-        <input type="file" id="pay-screenshot" accept="image/*" style="width:100%; margin-bottom:15px; font-size:12px;">
-
-        <label class="detail-label" style="margin-bottom: 5px;">Last 4 Digits of UPI / UTR Ref No.</label>
-        <input type="number" id="pay-ref-tail" placeholder="e.g. 4921" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px; box-sizing:border-box;">
-
-        <!-- 5. Submit Button -->
+        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Both (₹700)</option></select>  
+        <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹500</div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
-</div>
-  
+</div>  
   
 <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>  
 <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
@@ -156,9 +134,7 @@
         <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">  
         <label class="detail-label">Wi-Fi Password</label>  
         <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">  
-        <label class="detail-label">Max Connection days</label> 
-        <input type="number" id="max-connection-days" placeholder="Enter Max Connection limit in days" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">  
-        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi Settings</button>
+        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>  
     </div>  
 </div>
 
@@ -184,58 +160,6 @@ let currentUserData = {};
 const getStamp = () => new Date().toLocaleString('en-GB');
 
 // --- Core Helpers ---
-
-  // You can edit these prices here, and the app will auto-calculate correctly
-const SHIFT_PRICES = {
-    day: 500,
-    night: 400,
-    both: 700
-};
-
-  
-// 1. Safe Signal Deleter (Fixes the HTML click crash)
-window.clearSignal = async (sid) => {
-    if(confirm("Delete this signal?")) {
-        await deleteDoc(doc(db, "signals", sid));
-    }
-};
-
-// 2. Folder Payment Processor
-window.handlePayFolder = async (sid, uid, stat, days, payId) => {
-    try {
-        const ref = doc(db, "users", uid);
-        const snap = await getDoc(ref);
-        if (!snap.exists()) return alert("User not found.");
-
-        const u = snap.data();
-        const prevBalance = Number(u.totalPaidDays) || 0;
-        const newBalance = stat === 'OK' ? prevBalance + Number(days) : prevBalance;
-
-        // A. Update User History
-        const newHistory = (u.history || []).map(h => {
-            // String conversion ensures ID matching works
-            if (String(h.id) !== String(payId)) return h;
-            return { ...h, status: stat === 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newBalance };
-        });
-
-        await updateDoc(ref, { totalPaidDays: newBalance, history: newHistory });
-
-        // B. Update Admin Folder UI Status
-        const sigRef = doc(db, "signals", sid);
-        const sigSnap = await getDoc(sigRef);
-        if (sigSnap.exists()) {
-            const attempts = sigSnap.data().attempts || [];
-            const updatedAttempts = attempts.map(att => {
-                if (String(att.id) !== String(payId)) return att;
-                return { ...att, status: stat === 'OK' ? 'Verified' : 'Rejected' };
-            });
-            await updateDoc(sigRef, { attempts: updatedAttempts });
-        }
-        
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-};
 
 // Convert Decimal to D:H:M:S
 window.formatTime = (decimalDays) => {
@@ -354,7 +278,6 @@ getDoc(doc(db, "settings", "wifi")).then(wSnap => {
 if (wSnap.exists()) {
 document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
 document.getElementById('wifi-pass').value = wSnap.data().pass || "";
-document.getElementById('max-connection-days').value = wSnap.data()['max-connection-days'] || "";
 }
 });
 } document.getElementById('loginPanel').classList.add('hidden');
@@ -387,7 +310,7 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
         
       document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);  
         
-      if(user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {  
+      if(user.email === "c.commando822@gmail.com" || "vishnu.406.39965@gmail.com") {  
          document.getElementById('tab-man').classList.remove('hidden');  
          window.loadAdmin();  
       }  
@@ -401,7 +324,6 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 
 });
 
-  // --- Updated Connect Logic: Fetches fresh data every time ---
   window.connectToWifi = async () => {
     if (!auth.currentUser) return alert("Please log in first.");
     const uid = auth.currentUser.uid;
@@ -457,32 +379,15 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
         alert("Please pay your fees to access the Wi-Fi network!");
     }
 };
-
+  
+  // --- Updated Connect Logic: Fetches fresh data every time ---
 
 // Wi-Fi Admin Save (Still works for owner)
 window.saveWifiSettings = async () => {
-    const ssid = document.getElementById('wifi-ssid').value.trim();
-    const pass = document.getElementById('wifi-pass').value.trim();
-    // Changed variable name to camelCase (maxDays) so JavaScript doesn't read it as subtraction
-    const maxDays = document.getElementById('max-connection-days').value.trim();
-
-    if (!ssid || !pass || !maxDays) {
-        return alert("Please fill all fields before saving.");
-    }
-
-    try {
-        // Saving all three fields securely into your "settings/wifi" document
-        await setDoc(doc(db, "settings", "wifi"), { 
-            ssid: ssid, 
-            pass: pass,
-            'max-connection-days': Number(maxDays) // Stores it cleanly as a number in Firestore
-        });
-        
-        alert("Settings Saved Successfully.");
-    } catch (error) {
-        console.error("Error saving settings:", error);
-        alert("Failed to save settings.");
-    }
+const ssid = document.getElementById('wifi-ssid').value;
+const pass = document.getElementById('wifi-pass').value;
+await setDoc(doc(db, "settings", "wifi"), { ssid, pass });
+alert("Saved.");wifi
 };
 
 // --- Live Interval ---
@@ -583,6 +488,18 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
         location.reload();
     } else alert("Invalid OTP");
   };
+  window.verifyJoin = async () => {
+    if (document.getElementById('join-otp').value == window.currentJoinOtp) {
+        const now = new Date();
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            joinDate: now.toLocaleDateString('en-GB'),
+            joinDateISO: now.toISOString(),
+            history: arrayUnion(`Joined Library on ${getStamp()}`)
+        });
+        await deleteDoc(doc(db, "signals", "otp_" + auth.currentUser.uid));
+        location.reload();
+    } else alert("Invalid OTP");
+  };
 
   window.checkLeaveFees = () => {
     const srv = window.getRealSurvival(currentUserData);
@@ -628,74 +545,27 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     // --- Admin Logic ---
   window.loadAdmin = () => {
     // 1. Signals (Reverted Payment Layout)
-    // 1. Signals Listener
     onSnapshot(collection(db, "signals"), s => {
-        let h = "";
-        s.forEach(d => {
-            const sig = d.data();
-
-            // --- CASE A: NON-PAYMENT SIGNALS (OTP, ADMISSION, EXIT) ---
-            // Keeps your existing card layout for standard signals
-            if (sig.type !== 'PAYMENT_FOLDER' && sig.type !== 'PAYMENT') {
-                h += `<div class="card" style="background:#1a1a1a; color:white; border-left:4px solid var(--yellow); margin-bottom:10px;">` +
-                     `<span class="sig-timer" data-sid="${d.id}" data-expiry="${sig.expiresAt}">--s</span>📡 <b>${sig.type}</b><br>` +
-                     `${sig.name}<br>` +
-                     `<span style="color:var(--green); font-size:12px;">📞 ${sig.phone}</span><br>` +
-                     `<span style="color:#888; font-size:10px;">${sig.timestamp}</span><br>` +
-                     `OTP: <span style="color:var(--yellow); font-size:18px; font-weight:bold;">${sig.otp}</span>` +
-                     // Fixed: Uses global function instead of raw code to prevent crash
-                     `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="window.clearSignal('${d.id}')">CLEAR</button></div>`;
-            } 
-            
-            // --- CASE B: PAYMENT FOLDER (The New Hybrid Logic) ---
-            else if (sig.type === 'PAYMENT_FOLDER') {
-                let attemptRows = "";
-                
-                // Loop through every payment attempt in this user's folder
-                (sig.attempts || []).forEach(attempt => {
-                    let actionButtons = "";
-                    
-                    // Show Buttons only if Pending
-                    if (attempt.status === "Pending") {
-                        actionButtons = `
-                          <div style="display:flex; gap:10px; margin-top:10px;">
-                             <button class="btn btn-green" style="padding:5px; font-size:11px;" onclick="window.handlePayFolder('${d.id}','${sig.uid}','OK',${attempt.days},${attempt.id})">VERIFY</button>
-                             <button class="btn btn-outline" style="padding:5px; font-size:11px;" onclick="window.handlePayFolder('${d.id}','${sig.uid}','REJ',0,${attempt.id})">REJECT</button>
-                          </div>`;
-                    } else {
-                        actionButtons = `<div style="margin-top:5px; font-weight:bold; color:${attempt.status==='Verified'?'#0f0':'#f00'}">[${attempt.status}]</div>`;
-                    }
-
-                    // The Row HTML
-                    attemptRows += `
-                      <div style="border-top:1px dashed #333; padding:10px 0; margin-top:5px;">
-                         <div style="font-size:13px; color:#fff;">
-                            💰 <b>₹${attempt.amt}</b> | 📅 ${attempt.days} Days (${attempt.shift})
-                         </div>
-                         <div style="font-size:12px; color:var(--yellow);">
-                            🔢 UTR: <b>****${attempt.utrTail}</b>
-                         </div>
-                         <div style="font-size:10px; color:#aaa;">${attempt.reqT}</div>
-                         
-                         <!-- SCREENSHOT LINK: Opens the Base64 image in a new tab -->
-                         <a href="${attempt.screenshot}" target="_blank" style="color:#2196F3; font-size:11px; text-decoration:none; display:inline-block; margin-top:5px;">
-                            📷 View Payment Screenshot
-                         </a>
-                         
-                         ${actionButtons}
-                      </div>`;
-                });
-
-                // The Folder Container
-                h += `<div class="card" style="background:#000; color:#fff; border:1px solid #333; font-family:monospace; font-size:12px;">` +
-                     `📁 <b>${sig.name}</b> <span style="font-size:10px; color:#888;">(Payment Folder)</span><br>` +
-                     `📞 ${sig.phone}<br>` +
-                     `<div style="background:#111; padding:5px; margin-top:5px; border-radius:5px;">${attemptRows}</div>` +
-                     `<button class="btn btn-outline" style="margin-top:10px; padding:5px; width:100%;" onclick="window.clearSignal('${d.id}')">DISMISS FOLDER</button>` +
-                     `</div>`;
-            }
-        });
-        document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
+      let h = ""; 
+      s.forEach(d => {
+        const sig = d.data();
+        if(sig.type !== 'PAYMENT') {
+            h += `<div class="card" style="background:#1a1a1a; color:white; border-left:4px solid var(--yellow);">` +
+                 `<span class="sig-timer" data-sid="${d.id}" data-expiry="${sig.expiresAt}">--s</span>📡 <b>${sig.type}</b><br>` +
+                 `${sig.name}<br>` +
+                 `<span style="color:var(--green); font-size:12px;">📞 ${sig.phone}</span><br>` +
+                 `<span style="color:#888; font-size:10px;">${sig.timestamp}</span><br>` +
+                 `OTP: <span style="color:var(--yellow); font-size:18px; font-weight:bold;">${sig.otp}</span>` +
+                 `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="deleteDoc(doc(db,'signals','${d.id}'))">CLEAR</button></div>`;
+        } else {
+            // Reverted to Base Code Monospace Layout
+            h += `<div class="card" style="white-space: pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px;">` +
+            `[PAYMENT SIGNAL]\n--------------------------\nNAME   : ${sig.name}\nPHONE  : ${sig.phone}\nSHIFT  : ${sig.shift}\nDAYS   : ${sig.days}\nAMOUNT : ₹${sig.amt} (${getStamp()})\n--------------------------\n` + 
+            `<div style="display:flex; gap:10px;"><button class="btn btn-green" onclick="handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}', ${sig.id})">VERIFY</button>` +
+            `<button class="btn btn-outline" onclick="handlePay('${d.id}','${sig.uid}','REJ',0,0,'','', ${sig.id})">REJECT</button></div></div>`;
+        }
+      });
+      document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
     });
 
     // 2. Survival List (Fixed Logic & Better UI)
@@ -809,99 +679,15 @@ else g.offNL += card;
     window.openUser(uid);
   };
   
-// --- 💳 HYBRID PAYMENT SUBMISSION (Folder + Screenshot Support) ---
-window.doPayment = async () => {
-    // 1. Get Values
-    let d = parseInt(document.getElementById('p-days').value);
-    let s = document.getElementById('p-shift').value; // Keep raw value "500"/"400"
-    let shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
-    
-    const refInput = document.getElementById('pay-ref-tail');
-    const fileInput = document.getElementById('pay-screenshot');
-    let txnTail = refInput.value.trim();
-
-    // 2. Validations
-    if (isNaN(d) || d < 1) return alert("Invalid Days");
-    if (!txnTail || txnTail.length !== 4) return alert("Enter last 4 digits of UTR");
-    if (!fileInput.files[0]) return alert("Upload Screenshot");
-
-    // 3. Calculate Amount (Hybrid)
-    let amt = Math.floor((parseFloat(s) / 28) * d) + getPaiseModifier();
-    let payId = Date.now(); // Unique ID for this specific transaction
-
-    // 4. Process File & Upload
-    const reader = new FileReader();
-    reader.readAsDataURL(fileInput.files[0]);
-    
-    reader.onload = async (e) => {
-        const imageBase64 = e.target.result;
-        
-        // FOLDER ID: We use a static ID for the user so all payments go to ONE doc
-        const folderId = `pay_folder_${auth.currentUser.uid}`;
-        const sigRef = doc(db, "signals", folderId);
-
-        const newPaymentItem = { 
-            id: payId, 
-            uid: auth.currentUser.uid, 
-            name: currentUserData.name, 
-            phone: currentUserData.phone, 
-            type: 'PAYMENT', 
-            reqT: getStamp(), 
-            shift: shiftName, 
-            days: d, 
-            amt: amt, 
-            utrTail: txnTail,      // New Security Field
-            screenshot: imageBase64, // New Security Field
-            status: 'Pending' 
-        };
-
-        try {
-            // 5. Folder Logic: Append to existing or Create new
-            const existingFolder = await getDoc(sigRef);
-            
-            if (existingFolder.exists()) {
-                await updateDoc(sigRef, {
-                    attempts: arrayUnion(newPaymentItem),
-                    lastUpdated: getStamp()
-                });
-            } else {
-                await setDoc(sigRef, {
-                    type: 'PAYMENT_FOLDER',
-                    uid: auth.currentUser.uid,
-                    name: currentUserData.name,
-                    phone: currentUserData.phone,
-                    lastUpdated: getStamp(),
-                    attempts: [newPaymentItem]
-                });
-            }
-
-            // 6. User History Update (Your existing logic)
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-                history: arrayUnion({ 
-                    id: payId, 
-                    reqT: getStamp(), 
-                    shift: shiftName, 
-                    days: d, 
-                    amt: amt, 
-                    status: 'Pending' 
-                }) 
-            });
-
-            // 7. UPI Redirect & Modal (Your existing logic)
-            // Added 'tn' (Transaction Note) to help you identify it in bank app
-            window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt.toFixed(2)}&cu=INR&tn=Ref_${txnTail}`;
-            
-            // Clear inputs
-            refInput.value = "";
-            fileInput.value = "";
-            document.getElementById('pay-modal').style.display = 'flex';
-
-        } catch (err) {
-            console.error(err);
-            alert("Error: " + err.message);
-        }
-    };
-};
+  // Payment Handlers
+  window.doPayment = async () => {
+    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = Math.round((s/28)*d);
+    let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'flex';
+  };
 
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
   const ref = doc(db, "users", uid);
@@ -939,48 +725,15 @@ window.doPayment = async () => {
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
-  
-  // --- 🛠️ HELPER: Unique Paise Calculator (Security Feature) ---
-// Adds a unique decimal based on phone number so you can identify payments instantly
-const getPaiseModifier = () => {
-    if (!window.currentUserData || !window.currentUserData.phone) return 0.00;
-    const cleanPhone = window.currentUserData.phone.trim();
-    const lastTwo = cleanPhone.slice(-2);
-    return isNaN(lastTwo) ? 0.00 : parseInt(lastTwo) / 100;
-};
-  
-    .readOnly = false; document.getElementById(id).focus(); };
-  
-  // --- 🛠️ HELPER: Unique Paise Calculator (Security Feature) ---
-// Adds a unique decimal based on phone number so you can identify payments instantly
-const getPaiseModifier = () => {
-    if (!window.currentUserData || !window.currentUserData.phone) return 0.00;
-    const cleanPhone = window.currentUserData.phone.trim();
-    const lastTwo = cleanPhone.slice(-2);
-    return isNaN(lastTwo) ? 0.00 : parseInt(lastTwo) / 100;
-};
-  
-    
   window.calcTotal = () => {
-    const daysInput = document.getElementById('p-days');
-    const shiftSelect = document.getElementById('p-shift');
-    
-    // 1. Validation Logic (Preserved from your code)
-    if (daysInput.value > 364) daysInput.value = 364;
-    if (daysInput.value < 1) daysInput.value = 1;
+  const daysInput = document.getElementById('p-days');
+  if (daysInput.value > 364) daysInput.value = 364;
+  if (daysInput.value < 1) daysInput.value = 1;
 
-    let d = parseInt(daysInput.value) || 28;
-    let shiftKey = shiftSelect.value; // Now reads "day", "night", etc.
-    
-    // 2. New Logic: Get price from Variable map
-    let baseMonthlyPrice = SHIFT_PRICES[shiftKey] || 500;
-    
-    // 3. Calculate: (Base / 28) * Days + PhoneDecimal
-    let rawAmount = (baseMonthlyPrice / 28) * d;
-    let finalAmountWithPaise = Math.floor(rawAmount) + getPaiseModifier();
-    
-    // 4. Update UI (Preserved your Element ID)
-    document.getElementById('pay-summary').innerText = `Total: ₹${finalAmountWithPaise.toFixed(2)}`;
+  const total = Math.round(
+    (document.getElementById('p-shift').value / 28) * daysInput.value
+  );
+  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
 };
   window.updateUserPhoto = (i) => { if(i.files[0]) { let r=new FileReader(); r.onload=(e)=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result}); r.readAsDataURL(i.files[0]); }};
 </script>
