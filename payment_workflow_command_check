@@ -1,0 +1,163 @@
+<!-- ========================================== -->
+<script>
+  // Attaching variables to the window object makes them truly global
+  window.dayVal = 700;
+  window.nightVal = 400;
+  window.bothVal = 1000;
+  window.daysinamonth = 30;
+</script>
+
+//active-tools
+  <div id="active-tools" class="hidden">  
+    <div class="card" style="background: #f0f7ff;">  
+        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+            <option value="day">Day (₹<span id="dayPrice"></span>)</option>
+            <option value="night">Night (₹<span id="nightPrice"></span>)</option>
+            <option value="both">Both (₹<span id="bothPrice"></span>)</option>
+        </select>  
+        <input type="number" id="p-month" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹500</div>  
+        <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
+    </div>  
+    <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
+</div> 
+
+
+ 
+//inside script
+  // Update the visible text inside the options using the global window variables
+  document.getElementById('dayPrice').textContent = window.dayVal;
+  document.getElementById('nightPrice').textContent = window.nightVal;
+  document.getElementById('bothPrice').textContent = window.bothVal;
+
+  // Update the actual value attributes to be numbers
+  document.querySelector('option[value="day"]').value = window.dayVal;
+  document.querySelector('option[value="night"]').value = window.nightVal;
+  document.querySelector('option[value="both"]').value = window.bothVal;
+// calcTotal
+  window.calcTotal = () => {
+  const daysInput = document.getElementById('p-month');
+  if (!daysInput.value = 1) daysInput.value = 1;
+  
+    const phoneString = document.getElementById('p-phone').value.trim();
+
+    // Extract last two digits of the phone number
+    const lastTwoDigits = phoneString.slice(-2);
+    
+    // Convert to number and divide by 100
+    const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
+
+  const total = (document.getElementById('p-shift').value  * daysInput.value;
+  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
+};
+
+
+
+
+
+  // Payment Handlers
+  window.doPayment = async () => {
+    let m = parseInt(document.getElementById('p-month').value), s = document.getElementById('p-shift').value, amt = Math.round((s/28)*d);
+    let d = m * window.daysinamonth
+    let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'flex';
+  };
+
+
+
+
+window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+
+  const u = snap.data();
+  const prevBalance = u.totalPaidDays || 0;
+  const newBalance = stat === 'OK' ? prevBalance + days : prevBalance;
+
+  const newHistory = u.history.map(h => {
+    if (h.id !== payId) return h;
+
+    return {
+      ...h,
+      status: stat === 'OK' ? 'Verified' : 'Rejected',
+      actionT: getStamp(),
+      finalNet: newBalance
+    };
+  });
+
+  await updateDoc(ref, {
+    totalPaidDays: newBalance,
+    history: newHistory
+  });
+
+  await deleteDoc(doc(db, "signals", sid));
+};
+
+
+
+
+
+/*preview panel*/
+<div id="pay-modal" onclick="this.style.display='none'">
+<div class="modal-box">
+  <h3>Payment Sent</h3>
+  <p>Waiting for verification...</p>
+  <p style="font-weight:bold; color:var(--red);">Call 7500159996</p>
+</div>  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========================================== -->
+<!-- BODY OF THE PAGE: HTML Elements            -->
+<!-- ========================================== -->
+    
+
+<select id="shiftSelect" onchange="calcTotal()" style="width:100%; padding:10px; border-radius:8px; margin-bottom:15px;">
+  <option value="day">Day (₹<span id="dayPrice"></span>)</option>
+  <option value="night">Night (₹<span id="nightPrice"></span>)</option>
+  <option value="both">Both (₹<span id="bothPrice"></span>)</option>
+</select>
+
+<label for="p-month">Number of Months:</label>
+<input type="number" id="p-month" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px; margin-bottom:15px;">
+
+<h3>Total Amount: ₹<span id="totalDisplay">0</span></h3>
+
+<!-- ========================================== -->
+<!-- END OF THE PAGE: Rest of the Script        -->
+<!-- ========================================== -->
+<script>
+
+  // Calculation Function
+  function calcTotal() {
+    // Read the converted numeric values directly from the dropdown element
+    const selectedPrice = Number(document.getElementById('shiftSelect').value);
+    const days = Number(document.getElementById('p-month').value) || 0;
+    
+
+    // Base total calculation
+    const baseTotal = selectedPrice * days;
+
+    // Add the phone decimal value to the final total
+    const finalTotal = baseTotal + phoneBonus;
+    
+    // Display the final calculation with two decimal places
+    document.getElementById('totalDisplay').textContent = finalTotal.toFixed(2);
+  }
+
+  // Run calculation once at startup to set the initial total
+  calcTotal();
+</script>
