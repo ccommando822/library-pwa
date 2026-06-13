@@ -19,7 +19,22 @@
 .detail-content input:not([readonly]), .detail-content textarea:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }  
 .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }  
   
-.wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; display: none; }  
+.wizard-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: white; 
+    z-index: 99999; /* Higher priority layer stack execution */
+    padding: 20px; 
+    box-sizing: border-box; 
+    display: none; 
+    
+    /* The Missing Core Logic: Enable Scrolling */
+    overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch; /* Smooth inertia scrolling for mobile devices */
+}
 .wizard-overlay.show { display: block; overflow-y: auto; }  
 .step-card { display: none; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin: 15px 0; }  
 .step-active { display: block; border-left: 5px solid var(--primary); }  
