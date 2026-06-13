@@ -122,7 +122,7 @@
             <option value="day">Day (₹<span id="dayPrice"></span>)</option>
             <option value="night">Night (₹<span id="nightPrice"></span>)</option>
             <option value="both">Both (₹<span id="bothPrice"></span>)</option></select>  
-        <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <input type="number" id="p-days" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
         <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">0</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
@@ -740,13 +740,22 @@ else g.offNL += card;
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
   const daysInput = document.getElementById('p-days');
-  if (daysInput.value > 364) daysInput.value = 364;
-  if (daysInput.value < 1) daysInput.value = 1;
+  if (!daysInput.value = 1) daysInput.value = 1;
 
-  const total = Math.round(
-    (document.getElementById('p-shift').value / 28) * daysInput.value
-  );
-  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
+  const baseTotal =(document.getElementById('p-shift').value ) * daysInput.value;
+  
+    const phoneString = document.getElementById('p-phone').value.trim();
+    // Extract last two digits of the phone number
+    const lastTwoDigits = phoneString.slice(-2);
+    // Convert to number and divide by 100
+    const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
+
+    // Add the phone decimal value to the final total
+    const total = baseTotal + phoneBonus;
+    
+    // Display the final calculation with two decimal places
+    document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
+    
 };
   // Update the visible text inside the options using the global window variables
   document.getElementById('dayPrice').textContent = window.dayVal;
