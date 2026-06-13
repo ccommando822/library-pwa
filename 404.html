@@ -50,7 +50,17 @@
 
   </style>  
 </head>  
-<body>  <header>Rakshapal Singh Library</header>  <div id="pay-modal" onclick="this.style.display='none'">  
+<body>  <header>Rakshapal Singh Library</header> 
+  <!-- ========================================== -->
+<script>
+  // Attaching variables to the window object makes them truly global
+  window.dayVal = 600;
+  window.nightVal = 500;
+  window.bothVal = 800;
+  window.daysinamonth = 30;
+</script>
+  
+  <div id="pay-modal" onclick="this.style.display='none'">  
     <div class="modal-box"><h3>Payment Sent</h3><p>Waiting for verification...</p><p style="font-weight:bold; color:var(--red);">Call 7500159996</p></div>  
 </div>  <div id="joinWizard" class="wizard-overlay">  
     <h2>Admission Wizard</h2>  
@@ -108,9 +118,13 @@
 
 <div id="active-tools" class="hidden">  
     <div class="card" style="background: #f0f7ff;">  
-        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Both (₹700)</option></select>  
-        <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹500</div>  
+        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+            <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
+            <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
+            <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option></select>
+        <label class="detail-label">Days</label>
+        <input type="number" id="p-days" value="30" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Click on Shift first</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
@@ -426,6 +440,7 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     const f = document.getElementById('p-father').value.trim();
     const a = document.getElementById('p-address').value.trim();
     const p = document.getElementById('p-phone').value.trim();
+    window.calcTotal()
 
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
 
@@ -681,7 +696,7 @@ else g.offNL += card;
   
   // Payment Handlers
   window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = Math.round((s/28)*d);
+    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
     let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
     await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
     await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
@@ -726,15 +741,35 @@ else g.offNL += card;
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
-  const daysInput = document.getElementById('p-days');
-  if (daysInput.value > 364) daysInput.value = 364;
-  if (daysInput.value < 1) daysInput.value = 1;
+    const monthInput = document.getElementById('p-days');
+    if (!monthInput) return alert("Month not filled");
+    if (monthInput.value < 30) monthInput.value = 30;
+    if (monthInput.value > 30) monthInput.value = 30;
 
-  const total = Math.round(
-    (document.getElementById('p-shift').value / 28) * daysInput.value
-  );
-  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
+    const selectedPrice = Number(document.getElementById('p-shift').value);
+    const days = Number(monthInput.value);
+    const baseTotal = selectedPrice ;
+
+    const phoneString = document.getElementById('p-phone').value.trim();
+    if (!phoneString) return alert("phone number not found");
+    const lastTwoDigits = phoneString.slice(-2);
+    const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
+
+    const total = baseTotal + phoneBonus;
+    window.totalpaymenttodo = total;
+    document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
 };
+
+  // Update the visible text inside the options using the global window variables
+  document.getElementById('dayPrice').textContent = window.dayVal;
+  document.getElementById('nightPrice').textContent = window.nightVal;
+  document.getElementById('bothPrice').textContent = window.bothVal;
+
+  // Update the actual value attributes to be numbers
+  document.querySelector('option[value="day"]').value = window.dayVal;
+  document.querySelector('option[value="night"]').value = window.nightVal;
+  document.querySelector('option[value="both"]').value = window.bothVal;
+  
   window.updateUserPhoto = (i) => { if(i.files[0]) { let r=new FileReader(); r.onload=(e)=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result}); r.readAsDataURL(i.files[0]); }};
 </script>
 </body>
