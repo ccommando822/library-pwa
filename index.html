@@ -738,25 +738,7 @@ else g.offNL += card;
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
-  window.calcTotal = () => {
-  const daysInput = document.getElementById('p-days');
-  if (!daysInput.value = 1) daysInput.value = 1;
-
-  const baseTotal =(document.getElementById('p-shift').value ) * daysInput.value;
   
-    const phoneString = document.getElementById('p-phone').value.trim();
-    // Extract last two digits of the phone number
-    const lastTwoDigits = phoneString.slice(-2);
-    // Convert to number and divide by 100
-    const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
-
-    // Add the phone decimal value to the final total
-    const total = baseTotal + phoneBonus;
-    
-    // Display the final calculation with two decimal places
-    document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
-    
-};
   // Update the visible text inside the options using the global window variables
   document.getElementById('dayPrice').textContent = window.dayVal;
   document.getElementById('nightPrice').textContent = window.nightVal;
