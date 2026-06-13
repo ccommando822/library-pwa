@@ -748,6 +748,16 @@ else g.offNL += card;
   );
   document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
 };
+  // Update the visible text inside the options using the global window variables
+  document.getElementById('dayPrice').textContent = window.dayVal;
+  document.getElementById('nightPrice').textContent = window.nightVal;
+  document.getElementById('bothPrice').textContent = window.bothVal;
+
+  // Update the actual value attributes to be numbers
+  document.querySelector('option[value="day"]').value = window.dayVal;
+  document.querySelector('option[value="night"]').value = window.nightVal;
+  document.querySelector('option[value="both"]').value = window.bothVal;
+  
   window.updateUserPhoto = (i) => { if(i.files[0]) { let r=new FileReader(); r.onload=(e)=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result}); r.readAsDataURL(i.files[0]); }};
 </script>
 </body>
