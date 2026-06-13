@@ -60,9 +60,28 @@
   window.daysinamonth = 30;
 </script>
   
-  <div id="pay-modal" onclick="this.style.display='none'">  
-    <div class="modal-box"><h3>Payment Sent</h3><p>Waiting for verification...</p><p style="font-weight:bold; color:var(--red);">Call 7500159996</p></div>  
-</div>  <div id="joinWizard" class="wizard-overlay">  
+  <div id="pay-modal" class="wizard-overlay">  
+    <h2>Payment Wizard</h2>  
+    <div id="pstep1" class="step-card step-active">  
+        <span class="step-num">1</span> <b>Payment Information Validation</b> 
+        <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
+        <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <p><b>Payment UID</b></p>
+        <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <p><b>ScreenShot</b></p>
+        <input type="number" id="payment-screenshot" placeholder="Attach your Payment ScreenShot here" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>  
+        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>  
+    </div>  
+    <div id="pstep2" class="step-card">  
+        <span class="step-num">2</span> <b>Final OTP</b>  
+        <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
+        <button class="btn btn-black" onclick="window.verifyPayment()">Confirm Payment Successful</button>  
+    </div>  
+    <button class="btn" style="background:none; color:gray;" onclick="window.closePaymentWizard()">Cancel</button>  
+</div>
+  
+  <div id="joinWizard" class="wizard-overlay">  
     <h2>Admission Wizard</h2>  
     <div id="step1" class="step-card step-active">  
         <span class="step-num">1</span> <b>Verify Profile Folder</b>  
@@ -492,18 +511,6 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
 
   window.verifyJoin = async () => {
     
-    if (document.getElementById('join-otp').value == window.currentJoinOtp) {
-        const now = new Date();
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            joinDate: now.toLocaleDateString('en-GB'),
-            joinDateISO: now.toISOString(),
-            history: arrayUnion(`Joined Library on ${getStamp()}`)
-        });
-        await deleteDoc(doc(db, "signals", "otp_" + auth.currentUser.uid));
-        location.reload();
-    } else alert("Invalid OTP");
-  };
-  window.verifyJoin = async () => {
     if (document.getElementById('join-otp').value == window.currentJoinOtp) {
         const now = new Date();
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
