@@ -50,7 +50,16 @@
 
   </style>  
 </head>  
-<body>  <header>Rakshapal Singh Library</header>  <div id="pay-modal" onclick="this.style.display='none'">  
+<body>  <header>Rakshapal Singh Library</header> 
+  <!-- ========================================== -->
+<script>
+  // Attaching variables to the window object makes them truly global
+  window.dayVal = 700;
+  window.nightVal = 400;
+  window.bothVal = 1000;
+  window.daysinamonth = 30;
+</script>
+  <div id="pay-modal" onclick="this.style.display='none'">  
     <div class="modal-box"><h3>Payment Sent</h3><p>Waiting for verification...</p><p style="font-weight:bold; color:var(--red);">Call 7500159996</p></div>  
 </div>  <div id="joinWizard" class="wizard-overlay">  
     <h2>Admission Wizard</h2>  
@@ -108,13 +117,17 @@
 
 <div id="active-tools" class="hidden">  
     <div class="card" style="background: #f0f7ff;">  
-        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;"><option value="500">Day (₹500)</option><option value="400">Night (₹400)</option><option value="700">Both (₹700)</option></select>  
-        <input type="number" id="p-days" value="28" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹500</div>  
+        <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+            <option value="day">Day (₹<span id="dayPrice"></span>)</option>
+            <option value="night">Night (₹<span id="nightPrice"></span>)</option>
+            <option value="both">Both (₹<span id="bothPrice"></span>)</option>
+        </select>  
+        <input type="number" id="p-month" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total: ₹<span id="totalDisplay">0</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
-</div>  
+</div> 
   
 <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>  
 <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
@@ -720,16 +733,37 @@ else g.offNL += card;
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
-  window.calcTotal = () => {
-  const daysInput = document.getElementById('p-days');
-  if (daysInput.value > 364) daysInput.value = 364;
-  if (daysInput.value < 1) daysInput.value = 1;
+  // Update the visible text inside the options using the global window variables
+  document.getElementById('dayPrice').textContent = window.dayVal;
+  document.getElementById('nightPrice').textContent = window.nightVal;
+  document.getElementById('bothPrice').textContent = window.bothVal;
 
-  const total = Math.round(
-    (document.getElementById('p-shift').value / 28) * daysInput.value
-  );
-  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
-};
+  // Update the actual value attributes to be numbers
+  document.querySelector('option[value="day"]').value = window.dayVal;
+  document.querySelector('option[value="night"]').value = window.nightVal;
+  document.querySelector('option[value="both"]').value = window.bothVal;
+
+  window.calcTotal = () => {
+  const monthinput = document.getElementById('p-month');
+  if (!monthinput.value = 1) monthinput.value = 1;
+  const selectedPrice = Number(document.getElementById('p-shift').value);
+  
+    const phoneString = document.getElementById('p-phone').value.trim();
+    // Extract last two digits of the phone number
+    const lastTwoDigits = phoneString.slice(-2);
+    // Convert to number and divide by 100
+    const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
+
+      // Base total calculation
+    const baseTotal = selectedPrice * days;
+    // Add the phone decimal value to the final total
+    const finalTotal = baseTotal + phoneBonus;
+    // Display the final calculation with two decimal places
+    document.getElementById('pay-summary').textContent = finalTotal.toFixed(2);
+  }
+
+  // Run calculation once at startup to set the initial total
+  calcTotal();
   window.updateUserPhoto = (i) => { if(i.files[0]) { let r=new FileReader(); r.onload=(e)=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result}); r.readAsDataURL(i.files[0]); }};
 </script>
 </body>
