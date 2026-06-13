@@ -468,6 +468,7 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
   window.checkStepOne = async() => {
       const isProfileSaved = await window.saveProfile();
     if (!isProfileSaved) return;
+    calcTotal()
     
     const n = document.getElementById('p-name').value.trim();
     const p = document.getElementById('p-phone').value.trim();
