@@ -77,44 +77,66 @@
   
   <div id="pay-modal" class="wizard-overlay" style="padding: 0;">  
     
-    <!-- 1. Pinned Sticky Header (Stays locked at the top) -->
+    <!-- Pinned Sticky Header -->
     <div style="position: sticky; top: 0; left: 0; width: 100%; background: white; padding: 20px; box-sizing: border-box; border-bottom: 1px solid #eee; z-index: 10;">
         <h2 style="margin: 0; font-size: 24px;">Payment Wizard</h2>  
     </div>
     
-    <!-- 2. Naturally Scrollable Body Content -->
+    <!-- Scrollable Body Content -->
     <div style="padding: 20px; padding-bottom: 40px; box-sizing: border-box;">
         
-        <!-- Step 1 Layout Wrapper -->
+        <!-- Step 1: Validation Inputs -->
         <div id="pstep1" class="step-card step-active">  
             <span class="step-num">1</span> <b>Payment Information Validation</b> 
+            
+            <!-- Phone Number Input Group -->
             <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
-            <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px; box-sizing: border-box;">
+            <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
+            <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;">
+                <p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
+            </div>
             
+            <!-- UID Input Group -->
             <p><b>Payment UID</b></p>
-            <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px; box-sizing: border-box;">
+            <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
+            <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;">
+                <p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
+            </div>
             
+            <!-- Screenshot Input Group -->
             <p><b>ScreenShot</b></p>
-            <input type="file" id="payment-screenshot" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px; box-sizing: border-box;">
+            <input type="file" id="payment-screenshot" accept="image/*" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
+            <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;">
+                <p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
+            </div>
             
-            <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>  
-            <button id="leave-verify-btn" class="btn btn-blue" style="width: 100%; padding: 15px; font-size: 18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>  
+            <!-- Global Balance/Dues Error Group -->
+            <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;">
+                <p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
+            </div>  
+            
+            <button id="payment-verify-btn" class="btn btn-blue" style="width: 100%; padding: 15px; font-size: 18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>  
         </div>  
 
-        <!-- Step 2 Layout Wrapper -->
+        <!-- Step 2: OTP Verification -->
         <div id="pstep2" class="step-card" style="display: none;">  
             <span class="step-num">2</span> <b>Final OTP</b>  
-            <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px; box-sizing: border-box;">  
+            <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">  
+            <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;">
+                <p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
+            </div>
+            
             <button class="btn btn-black" style="width: 100%; padding: 15px; font-size: 18px;" onclick="window.verifyPayment()">Confirm Payment Successful</button>  
         </div>  
 
-        <!-- 3. Natural Cancel Button (Scrolls up and down with the step elements) -->
+        <!-- Natural Scrolling Cancel Button -->
         <div style="margin-top: 30px; text-align: center;">
             <button class="btn" style="background: #f5f5f5; color: #666; width: 100%; padding: 15px; font-size: 16px; border-radius: 10px; border: 1px solid #ddd; font-weight: bold; cursor: pointer;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>  
         </div>
 
     </div>
 </div>
+
 
   
   <div id="joinWizard" class="wizard-overlay">  
