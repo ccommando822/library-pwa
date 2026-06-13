@@ -50,15 +50,16 @@
 
   </style>  
 </head>  
-<body>  <header>Rakshapal Singh Library</header> 
-  <!-- ========================================== -->
+<body>  <header>Rakshapal Singh Library</header>
+ <!-- ========================================== -->
 <script>
   // Attaching variables to the window object makes them truly global
   window.dayVal = 700;
   window.nightVal = 400;
   window.bothVal = 1000;
   window.daysinamonth = 30;
-</script>
+</script> 
+  
   <div id="pay-modal" onclick="this.style.display='none'">  
     <div class="modal-box"><h3>Payment Sent</h3><p>Waiting for verification...</p><p style="font-weight:bold; color:var(--red);">Call 7500159996</p></div>  
 </div>  <div id="joinWizard" class="wizard-overlay">  
@@ -127,7 +128,7 @@
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
-</div> 
+</div>  
   
 <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>  
 <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
@@ -346,22 +347,27 @@ document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
     if (!snap.exists()) return alert("User profile not found.");
     const u = snap.data();
     const userTime = window.getRealSurvival(u);
-  
+    
+    // 2. Fetch the admin Wi-Fi configurations ONCE from Firestore
+    const wSnap = await getDoc(doc(db, "settings", "wifi"));
+    if (!wSnap.exists()) { 
+        return alert("Wi-Fi configuration missing in database settings/wifi"); 
+    }
+    
+    const data = wSnap.data();
+    const maxAllowedDays = Number(data['max-connection-days']) || 30; 
 
     // 3. Condition Gate: Checks if user's time is greater than or equal to the negative limit
     if (userTime >= (-maxAllowedDays)) {
         try {
             // --- YOUR REQUIRED CODE BLOCK STARTS HERE (EXACTLY UNCHANGED) ---
-            // 2. Fetch the admin Wi-Fi configurations ONCE from Firestore
-          const wSnap = await getDoc(doc(db, "settings", "wifi"));
-          if (!wSnap.exists()) { 
-          return alert("Wi-Fi configuration missing in database settings/wifi"); 
-    }
+            if (!wSnap.exists()) { 
+              alert("Wi-Fi configuration missing in Firestore database path: settings/wifi"); 
+              return; 
+            }
             
             const ssid = data.ssid;
             const pass = data.pass;
-            const data = wSnap.data();
-            const maxAllowedDays = window.daysinamonth || 30; 
             
             if (!ssid || !pass) { 
               alert("Wi-Fi details are incomplete in the database. Ensure 'ssid' and 'pass' fields are filled."); 
@@ -733,6 +739,7 @@ else g.offNL += card;
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
+  window.calcTotal = () => {
   // Update the visible text inside the options using the global window variables
   document.getElementById('dayPrice').textContent = window.dayVal;
   document.getElementById('nightPrice').textContent = window.nightVal;
@@ -742,7 +749,7 @@ else g.offNL += card;
   document.querySelector('option[value="day"]').value = window.dayVal;
   document.querySelector('option[value="night"]').value = window.nightVal;
   document.querySelector('option[value="both"]').value = window.bothVal;
-
+// calcTotal
   window.calcTotal = () => {
   const monthinput = document.getElementById('p-month');
   if (!monthinput.value = 1) monthinput.value = 1;
