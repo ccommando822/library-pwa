@@ -743,8 +743,8 @@ else g.offNL += card;
   window.calcTotal = () => {
     const monthInput = document.getElementById('p-days');
     if (!monthInput) return alert("Month not filled");
-    if (monthInput.value < daysinamonth()) monthInput.value = daysinamonth();
-    if (monthInput.value > window.daysinamonth) monthInput.value = window.daysinamonth();
+    if (monthInput.value < 30) monthInput.value = 30;
+    if (monthInput.value > 30) monthInput.value = 30;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
     const months = Number(monthInput.value);
