@@ -6,7 +6,7 @@
   window.bothVal = 1000;
   window.daysinamonth = 30;
 </script>
-
+                       
 //active-tools
   <div id="active-tools" class="hidden">  
     <div class="card" style="background: #f0f7ff;">  
@@ -23,7 +23,9 @@
 </div> 
 
 
- 
+----------------------------------------------------------------------------------- 
+                           complete calcTotal  
+-----------------------------------------------------------------------------------
 //inside script
   // Update the visible text inside the options using the global window variables
   document.getElementById('dayPrice').textContent = window.dayVal;
@@ -55,9 +57,91 @@
     window.totalpaymenttodo = total;
     document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
 };
+-----------------------------------------------------------------------------------
 
 
 
+-----------------------------------------------------------------------------------
+                                old
+-----------------------------------------------------------------------------------
+/*preview panel*/
+<div id="pay-modal" onclick="this.style.display='none'">
+<div class="modal-box">
+  <h3>Payment Sent</h3>
+  <p>Waiting for verification...</p>
+  <p style="font-weight:bold; color:var(--red);">Call 7500159996</p>
+</div>  
+</div>
+---------------------------------new------------------------------------------------
+<div id="pay-modal" class="wizard-overlay">  
+    <h2>Payment Wizard</h2>  
+    <div id="pstep1" class="step-card step-active">  
+        <span class="step-num">1</span> <b>Payment Information Validation</b> 
+        <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
+        <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <p><b>Payment UID</b></p>
+        <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <p><b>ScreenShot</b></p>
+        <input type="number" id="payment-screenshot" placeholder="Attach your Payment ScreenShot here" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+        <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>  
+        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>  
+    </div>  
+    <div id="pstep2" class="step-card">  
+        <span class="step-num">2</span> <b>Final OTP</b>  
+        <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
+        <button class="btn btn-black" onclick="window.verifyPayment()">Confirm Exit</button>  
+    </div>  
+    <button class="btn" style="background:none; color:gray;" onclick="window.closeLeaveWizard()">Cancel</button>  
+</div>
+
+
+window.verifyPayment = async () => {
+    if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
+        const lastBal = window.getRealSurvival(currentUserData);
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          totalPaidDays: lastBal,
+          joinDateISO: null,
+          history: arrayUnion(
+            `Left Library on ${getStamp()}`,
+            `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
+          )
+        });
+        // Fire forget deep link — app removes WiFi suggestion silently
+        window.location.href = `mylibraryapp://forgetwifi`;
+        await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
+        setTimeout(() => location.reload(), 1000);
+    } else alert("Invalid OTP");
+  }
+
+
+
+
+window.checkpaymentinfo = () => {
+    const srv = 0;
+    if (srv < 0) {
+        document.getElementById('leave-error-box').classList.remove('hidden');
+        document.getElementById('leave-error-msg').innerText = `Dues: Pay ${Math.abs(Math.floor(srv))} days first.`;
+        return;
+    }
+
+    let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+    let d = m * window.daysinamonth
+    let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
+
+    
+    document.getElementById('pstep1').classList.remove('step-active');
+    document.getElementById('pstep2').classList.add('step-active');
+  };
+
+-----------------------------------------------------------------------------------
+
+
+
+
+-----------------------------------------------------------------------------------
+                        old
+-----------------------------------------------------------------------------------
   // Payment Handlers
   window.doPayment = async () => {
     let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = Math.round((s/28)*d);
@@ -68,10 +152,28 @@
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
     document.getElementById('pay-modal').style.display = 'flex';
   };
+----------------------------------new-----------------------------------------------
+window.doPayment = async () => {
+    let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+    let d = m * window.daysinamonth
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').classList.add('show');
+  };
+
+    
+    let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+    let d = m * window.daysinamonth
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+
+-----------------------------------------------------------------------------------
 
 
 
 
+
+-----------------------------------------------------------------------------------
+                                old
+-----------------------------------------------------------------------------------
 window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
@@ -99,19 +201,9 @@ window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
 
   await deleteDoc(doc(db, "signals", sid));
 };
+-----------------------------------new---------------------------------------------
 
-
-
-
-
-/*preview panel*/
-<div id="pay-modal" onclick="this.style.display='none'">
-<div class="modal-box">
-  <h3>Payment Sent</h3>
-  <p>Waiting for verification...</p>
-  <p style="font-weight:bold; color:var(--red);">Call 7500159996</p>
-</div>  
-</div>
+-----------------------------------------------------------------------------------
 
 
 
@@ -126,25 +218,162 @@ window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
 <!-- ========================================== -->
 <!-- BODY OF THE PAGE: HTML Elements            -->
 <!-- ========================================== -->
+</div>  <div id="joinWizard" class="wizard-overlay">  
+    <h2>Admission Wizard</h2>  
+    <div id="step1" class="step-card step-active">  
+        <span class="step-num">1</span> <b>Verify Profile Folder</b>  
+        <p style="font-size:12px; color:#666;">Name, Father, and Address must have 6+ letters.</p>  
+        <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Send Signal</button>  
+    </div>  
+    <div id="step2" class="step-card">  
+        <span class="step-num">2</span> <b>Verify Identity (OTP)</b>  
+        <input type="number" id="join-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
+        <button class="btn btn-black" onclick="window.verifyJoin()">Complete Admission</button>  
+    </div>  
+    <button class="btn" style="background:none; color:gray;" onclick="window.closeWizard()">Cancel</button>  
+</div>
+
+
+
+window.checkStepOne = async() => {
+      const isProfileSaved = await window.saveProfile();
+    if (!isProfileSaved) return;
     
+    const n = document.getElementById('p-name').value.trim();
+    const p = document.getElementById('p-phone').value.trim();
 
-<select id="shiftSelect" onchange="calcTotal()" style="width:100%; padding:10px; border-radius:8px; margin-bottom:15px;">
-  <option value="day">Day (₹<span id="dayPrice"></span>)</option>
-  <option value="night">Night (₹<span id="nightPrice"></span>)</option>
-  <option value="both">Both (₹<span id="bothPrice"></span>)</option>
-</select>
-
-<label for="p-days">Number of Months:</label>
-<input type="number" id="p-days" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px; margin-bottom:15px;">
-
-<h3>Total Amount: ₹<span id="totalDisplay">0</span></h3>
-
-<!-- ========================================== -->
-<!-- END OF THE PAGE: Rest of the Script        -->
-<!-- ========================================== -->
-<script>
-
-  // Calculation Function
-  function calcTotal() {
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const sid = "otp_" + auth.currentUser.uid;
     
-</script>
+    await setDoc(doc(db, "signals", sid), {
+        type: 'ADMISSION',
+        otp: otp,
+        uid: auth.currentUser.uid,
+        name: n,
+        phone: p,
+        timestamp: getStamp(),
+        expiresAt: Date.now() + 120000
+    });
+    
+    window.currentJoinOtp = otp;
+    document.getElementById('step1').classList.remove('step-active');
+    document.getElementById('step2').classList.add('step-active');
+  };
+
+
+
+
+
+
+
+window.verifyJoin = async () => {
+    
+    if (document.getElementById('join-otp').value == window.currentJoinOtp) {
+        const now = new Date();
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            joinDate: now.toLocaleDateString('en-GB'),
+            joinDateISO: now.toISOString(),
+            history: arrayUnion(`Joined Library on ${getStamp()}`)
+        });
+        await deleteDoc(doc(db, "signals", "otp_" + auth.currentUser.uid));
+        location.reload();
+    } else alert("Invalid OTP");
+  };
+
+
+-----------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="leaveWizard" class="wizard-overlay">  
+    <h2>Membership Exit</h2>  
+    <div id="lstep1" class="step-card step-active">  
+        <span class="step-num">1</span> <b>Check Balance</b>  
+        <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>  
+        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees & Signal</button>  
+    </div>  
+    <div id="lstep2" class="step-card">  
+        <span class="step-num">2</span> <b>Final Approval</b>  
+        <input type="number" id="leave-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
+        <button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button>  
+    </div>  
+    <button class="btn" style="background:none; color:gray;" onclick="window.closeLeaveWizard()">Cancel</button>  
+</div>
+
+
+
+
+
+window.checkLeaveFees = () => {
+    const srv = window.getRealSurvival(currentUserData);
+    if (srv < 0) {
+        document.getElementById('leave-error-box').classList.remove('hidden');
+        document.getElementById('leave-error-msg').innerText = `Dues: Pay ${Math.abs(Math.floor(srv))} days first.`;
+        return;
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    setDoc(doc(db, "signals", "leave_" + auth.currentUser.uid), {
+        type: 'EXIT',
+        otp: otp,
+        uid: auth.currentUser.uid,
+        name: currentUserData.name,
+        phone: currentUserData.phone,
+        timestamp: getStamp(),
+        expiresAt: Date.now() + 120000
+    });
+    window.currentLeaveOtp = otp;
+    document.getElementById('lstep1').classList.remove('step-active');
+    document.getElementById('lstep2').classList.add('step-active');
+  };
+
+
+
+window.verifyLeave = async () => {
+    if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
+        const lastBal = window.getRealSurvival(currentUserData);
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+          totalPaidDays: lastBal,
+          joinDateISO: null,
+          history: arrayUnion(
+            `Left Library on ${getStamp()}`,
+            `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
+          )
+        });
+        // Fire forget deep link — app removes WiFi suggestion silently
+        window.location.href = `mylibraryapp://forgetwifi`;
+        await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
+        setTimeout(() => location.reload(), 1000);
+    } else alert("Invalid OTP");
+  }
+
+
+
+window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
+  window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
