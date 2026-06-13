@@ -741,8 +741,6 @@ else g.offNL += card;
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
-    const maxDays = window.daysinamonth();
-    if (!maxDays) return alert("daysinamonth not found");
     const monthInput = document.getElementById('p-days');
     if (!monthInput) return alert("Month not filled");
     if (monthInput.value < 30) monthInput.value = 30;
