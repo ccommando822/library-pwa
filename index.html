@@ -922,14 +922,37 @@ else g.offNL += card;
   };
   
   // Payment Handlers
-  window.doPayment = async () => {
-    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
-    let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
-    await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
-    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    document.getElementById('pay-modal').style.display = 'block';
-  };
+  window.doPayment = () => {
+    // Exact structural mapping from your business logic definitions
+    let m = parseInt(document.getElementById('p-days').value) || 0;
+    let s = document.getElementById('p-shift').value;
+    let amt = window.totalpaymenttodo || 0; 
+    let d = m; // Assigns directly as requested
+
+    // Cache the exact amt and d parameters globally so step 1 can reuse them
+    window.calculatedPaymentAmt = amt;
+    window.calculatedPaymentDays = d;
+
+    // Present structural choice modal layer option block
+    const userChoice = confirm(
+        "Choose your Payment Action:\n\n" +
+        "👉 Click [ OK ] if you want to OPEN YOUR UPI APP and pay now.\n\n" +
+        "👉 Click [ CANCEL ] if you ALREADY PAID and want to verify your transaction UID / receipt code."
+    );
+
+    if (userChoice) {
+        // Option 1: Redirection app deep-link pipeline engine execution
+        window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+        
+        // Bring up the wizard backdrop automatically so they are ready when they return
+        clearAllPaymentErrors();
+        document.getElementById('pay-modal').style.display = 'block';
+    } else {
+        // Option 2: Skip directly into validation parameter forms overlay
+        clearAllPaymentErrors();
+        document.getElementById('pay-modal').style.display = 'block';
+    }
+};
 
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
   const ref = doc(db, "users", uid);
