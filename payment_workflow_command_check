@@ -14,9 +14,9 @@
             <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
             <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
             <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option></select>
-        <label class="detail-label">Months</label>
-        <input type="number" id="p-days" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">0</span></div>  
+        <label class="detail-label">Days</label>
+        <input type="number" id="p-days" value="30" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Click on Shift first</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
@@ -39,12 +39,12 @@
   window.calcTotal = () => {
     const monthInput = document.getElementById('p-days');
     if (!monthInput) return alert("Month not filled");
-    if (monthInput.value < 1) monthInput.value = 1;
-    if (monthInput.value > 1) monthInput.value = 1;
+    if (monthInput.value < 30) monthInput.value = 30;
+    if (monthInput.value > 30) monthInput.value = 30;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
-    const months = Number(monthInput.value);
-    const baseTotal = selectedPrice * months;
+    const days = Number(monthInput.value);
+    const baseTotal = selectedPrice ;
 
     const phoneString = document.getElementById('p-phone').value.trim();
     if (!phoneString) return alert("phone number not found");
@@ -52,6 +52,7 @@
     const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
 
     const total = baseTotal + phoneBonus;
+    window.totalpaymenttodo = total;
     document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
 };
 
