@@ -715,12 +715,12 @@ window.checkpaymentinfo = async () => {
         }
 
         // Isolate Field 3: File Input Verification Check
-        if (!screenshotInput.files || screenshotInput.files.length === 0) {
+        /* if (!screenshotInput.files || screenshotInput.files.length === 0) {
             const box = document.getElementById('payment-screenshot-error-box');
             document.getElementById('payment-screenshot-error-msg').innerText = "Please select and attach an image copy of your screenshot.";
             box.classList.remove('hidden');
-            hasErrors = true;
-        }
+            hasErrors = true;  
+        }   */
 
         // Halt if any targeted individual field checks failed
         if (hasErrors) return;
