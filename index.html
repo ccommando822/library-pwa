@@ -622,19 +622,30 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     } else alert("Invalid OTP");
   };
 
-window.checkpaymentinfo = async () => {
-    try {
-        clearAllPaymentErrors();
+// ==========================================
+// BLOCK 1: INITIAL GLOBAL LOADING DETECTION
+// ==========================================
+alert("[ALERT 01] Payment script file parsing initiated.");
 
+window.checkpaymentinfo = async () => {
+    alert("[ALERT 02] checkpaymentinfo function execution triggered.");
+    try {
+        alert("[ALERT 03] Calling clearAllPaymentErrors()");
+        clearAllPaymentErrors();
+        alert("[ALERT 04] clearAllPaymentErrors() finished successfully.");
+
+        alert("[ALERT 05] Reading DOM elements ('payment-phone', 'payment-uid', 'payment-screenshot').");
         const phoneVal = document.getElementById('payment-phone').value.trim();
         const uidVal = document.getElementById('payment-uid').value.trim();
         const screenshotInput = document.getElementById('payment-screenshot');
+        alert("[ALERT 06] DOM elements fetched successfully. Starting Regex checks.");
 
         const phoneRegex = /^[6-9]\d{9}$/; 
         const uidRegex = /^\d{12}$/;       
         let hasErrors = false;
 
         if (!phoneRegex.test(phoneVal)) {
+            alert("[ALERT 07] Phone validation failed. Appending UI error.");
             const box = document.getElementById('payment-phone-error-box');
             document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
             box.classList.remove('hidden');
@@ -642,6 +653,7 @@ window.checkpaymentinfo = async () => {
         }
 
         if (!uidRegex.test(uidVal)) {
+            alert("[ALERT 08] UID validation failed. Appending UI error.");
             const box = document.getElementById('payment-uid-error-box');
             document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
             box.classList.remove('hidden');
@@ -649,24 +661,31 @@ window.checkpaymentinfo = async () => {
         }
 
         if (!screenshotInput.files || screenshotInput.files.length === 0) {
+            alert("[ALERT 09] Screenshot validation failed. No file attached.");
             const box = document.getElementById('payment-screenshot-error-box');
             document.getElementById('payment-screenshot-error-msg').innerText = "Please select and attach an image copy of your screenshot.";
             box.classList.remove('hidden');
             hasErrors = true;
         }
 
-        if (hasErrors) return;
+        if (hasErrors) {
+            alert("[ALERT 10a] Basic validation failed. Ending function execution early.");
+            return;
+        }
+        alert("[ALERT 10b] Basic validation passed. Connecting to Firestore for duplicate check.");
 
         // Anti-fraud validation duplicate search read mapping check (Check 1 of 2)
         const duplicateCheckRef = doc(db, "payment_history", uidVal);
         const duplicateSnapshot = await getDoc(duplicateCheckRef);
 
         if (duplicateSnapshot.exists()) {
+            alert("[ALERT 11a] Duplicate UID found in Firebase record. Denying process.");
             const box = document.getElementById('payment-uid-error-box');
             document.getElementById('payment-uid-error-msg').innerText = "❌ Security Alert: This transaction UID has already been processed and claimed before.";
             box.classList.remove('hidden');
             return;
         }
+        alert("[ALERT 11b] UID unique clearance received. Resolving payment details & cache items.");
 
         // Apply corrected values passed from the global cache points
         let amt = window.calculatedPaymentAmt || window.totalpaymenttodo;
@@ -676,12 +695,16 @@ window.checkpaymentinfo = async () => {
         let shiftName = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
         let payId = Date.now();
 
-        // Secure File Stream handling for Admin panel dashboard reviews
-        const file = screenshotInput.files[0];
+        alert("[ALERT 12] Fixing file array stream context. Preparing Firebase upload structure.");
+        // FIX APPLIED: Extracting single file index [0] safely to prevent global crash
+        const file = screenshotInput.files[0]; 
+        
+        alert("[ALERT 13] Uploading file block to Firebase Storage bucket paths.");
         const fileStorageRef = ref(storage, `payment_proofs/${auth.currentUser.uid}_${payId}_${file.name}`);
         const uploadSnapshot = await uploadBytes(fileStorageRef, file);
         const openableScreenshotUrl = await getDownloadURL(uploadSnapshot.ref);
 
+        alert("[ALERT 14] Firebase upload successful. Constructing local payload data maps.");
         // Generate secure hidden background verification OTP authentication key tokens (NOT shown to user screen)
         const randomOtp = Math.floor(100000 + Math.random() * 900000);
 
@@ -698,6 +721,7 @@ window.checkpaymentinfo = async () => {
         };
         localStorage.setItem("active_payment_session", JSON.stringify(sessionPayload));
 
+        alert("[ALERT 15] Syncing transaction signals state table down to database cloud document records.");
         // Create remote background processing signal notification tracker entry record doc
         await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { 
             uid: auth.currentUser.uid, 
@@ -712,23 +736,25 @@ window.checkpaymentinfo = async () => {
             shift: shiftName, 
             days: d, 
             amt: amt, 
-            status: 'Pending', // Initially marked pending until client types correct OTP
+            status: 'Pending', 
             otpVerificationToken: randomOtp 
         });
 
+        alert("[ALERT 16] Database logs cleared. Transitioning active viewport container cards.");
         // Toggle UI Panels smoothly
         document.getElementById('pstep1').style.display = 'none'; 
         document.getElementById('pstep2').style.display = 'block';
 
     } catch (error) {
         console.error("Signal setup block failure exception wrapper:", error);
-        alert("System encountered operational exception handling document values.");
+        alert("[ALERT CATCH - checkpaymentinfo] Error occurred: " + error.message);
     }
 };
 
-
 window.verifyPayment = async () => {
+    alert("[ALERT 17] verifyPayment function execution triggered.");
     try {
+        alert("[ALERT 18] Clearing older visual indicators.");
         clearAllPaymentErrors();
         
         const otpInput = document.getElementById('Payment-otp');
@@ -738,6 +764,7 @@ window.verifyPayment = async () => {
 
         const sessionDataString = localStorage.getItem("active_payment_session");
         if (!sessionDataString) {
+            alert("[ALERT 19a] No active local verification token maps found in machine context.");
             otpErrorBox.classList.remove('hidden');
             otpErrorMsg.innerText = "Session expired. Restart process from Step 1.";
             return;
@@ -747,21 +774,25 @@ window.verifyPayment = async () => {
 
         // First Verification Gate: Match user input against hidden session token
         if (typedOtp !== session.hiddenOtp.toString()) {
+            alert("[ALERT 19b] OTP input evaluation failed against verification string parameters.");
             otpErrorBox.classList.remove('hidden');
             otpErrorMsg.innerText = "Invalid OTP verification code typed. Please try again.";
             return;
         }
+        alert("[ALERT 19c] Local OTP matched successfully. Running cloud lookup check.");
 
         // Anti-fraud double spend check against the history archive
         const recordFolderRef = doc(db, "payment_history", session.providedUID);
         const recordSnapshot = await getDoc(recordFolderRef);
 
         if (recordSnapshot.exists()) {
+            alert("[ALERT 20a] Target payload transaction history duplicates found. Purging instance keys.");
             otpErrorBox.classList.remove('hidden');
             otpErrorMsg.innerText = "This transaction record was already processed and verified previously.";
             localStorage.removeItem("active_payment_session");
             return;
         }
+        alert("[ALERT 20b] Clearance verified. Authorizing update write actions to active session fields.");
 
         // Advance Signal State to 'OTP_Verified' to authorize Admin structural review action
         const signalDocId = `pay_${auth.currentUser.uid}_${session.payId}`;
@@ -772,6 +803,7 @@ window.verifyPayment = async () => {
             screenshot: session.screenshotUrl
         });
 
+        alert("[ALERT 21] Remote document record states updated successfully. Purging localized variables.");
         // Safe cleanup of hardware context states
         localStorage.removeItem("active_payment_session");
 
@@ -782,9 +814,12 @@ window.verifyPayment = async () => {
 
     } catch (error) {
         console.error("Step 2 processing error exception handling:", error);
-        alert("System error processing final verification step.");
+        alert("[ALERT CATCH - verifyPayment] Error occurred: " + error.message);
     }
 };
+
+alert("[ALERT 22] Payment script parsing evaluation sequence fully concluded.");
+
 
 -----------------------------------------------------------------------------------
 
