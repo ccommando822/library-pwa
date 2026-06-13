@@ -708,7 +708,7 @@ else g.offNL += card;
     await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
     await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    document.getElementById('pay-modal').style.display = 'flex';
+    document.getElementById('pay-modal').classList.add('show');
   };
 
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
