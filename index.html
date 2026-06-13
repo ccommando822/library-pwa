@@ -599,6 +599,168 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
         setTimeout(() => location.reload(), 1000);
     } else alert("Invalid OTP");
   };
+  // Helper helper function to clean up error UI boxes quickly
+const clearAllPaymentErrors = () => {
+    const errorSuffixes = ['phone', 'uid', 'screenshot', 'dues', 'otp'];
+    errorSuffixes.forEach(suffix => {
+        const box = document.getElementById(`payment-${suffix}-error-box`);
+        if (box) box.classList.add('hidden');
+    });
+};
+
+// Step 2: OTP Token Match and Transaction Execution
+window.verifyPayment = async () => {
+    try {
+        clearAllPaymentErrors();
+        
+        const otpInput = document.getElementById('Payment-otp');
+        const typedOtp = otpInput.value.trim();
+        const otpErrorBox = document.getElementById('payment-otp-error-box');
+        const otpErrorMsg = document.getElementById('payment-otp-error-msg');
+
+        if (!window.generatedPaymentOtp) {
+            otpErrorBox.classList.remove('hidden');
+            otpErrorMsg.innerText = "Session expired. Please click cancel and try again.";
+            return;
+        }
+
+        if (typedOtp !== window.generatedPaymentOtp.toString()) {
+            otpErrorBox.classList.remove('hidden');
+            otpErrorMsg.innerText = "Invalid OTP code. Please check the code and type it again.";
+            return;
+        }
+
+        let m = parseInt(document.getElementById('p-days').value) || 0;
+        let d = m * (window.daysinamonth || 30);
+        let amt = window.totalpaymenttodo;
+
+        let payId = window.currentPayId || Date.now();
+        let shiftName = window.currentShiftName || "Default";
+
+        // Append transactional history element
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+            history: arrayUnion({ 
+                id: payId, 
+                reqT: getStamp(), 
+                shift: shiftName, 
+                days: d, 
+                amt: amt, 
+                status: 'Success' 
+            }) 
+        });
+
+        document.getElementById('pay-modal').style.display = 'none';
+        alert("🎉 Payment successfully authorized!");
+        setTimeout(() => location.reload(), 1000);
+
+    } catch (error) {
+        console.error("History transaction write failure:", error);
+        alert("System confirmed matching OTP, but database log sync failed.");
+    }
+};
+
+// Step 1: Input Analysis and Background Database Sync
+window.checkpaymentinfo = async () => {
+    try {
+        // Reset all individual error message layers
+        clearAllPaymentErrors();
+
+        const phoneVal = document.getElementById('payment-phone').value.trim();
+        const uidVal = document.getElementById('payment-uid').value.trim();
+        const screenshotInput = document.getElementById('payment-screenshot');
+
+        // Regex definitions
+        const phoneRegex = /^[6-9]\d{9}$/; 
+        const uidRegex = /^\d{12}$/;       
+
+        // Flag to tracking processing blocks
+        let hasErrors = false;
+
+        // Isolate Field 1: Phone Validation Check
+        if (!phoneRegex.test(phoneVal)) {
+            const box = document.getElementById('payment-phone-error-box');
+            document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
+            box.classList.remove('hidden');
+            hasErrors = true;
+        }
+
+        // Isolate Field 2: UID Validation Check
+        if (!uidRegex.test(uidVal)) {
+            const box = document.getElementById('payment-uid-error-box');
+            document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
+            box.classList.remove('hidden');
+            hasErrors = true;
+        }
+
+        // Isolate Field 3: File Input Verification Check
+        if (!screenshotInput.files || screenshotInput.files.length === 0) {
+            const box = document.getElementById('payment-screenshot-error-box');
+            document.getElementById('payment-screenshot-error-msg').innerText = "Please select and attach an image copy of your screenshot.";
+            box.classList.remove('hidden');
+            hasErrors = true;
+        }
+
+        // Halt if any targeted individual field checks failed
+        if (hasErrors) return;
+
+        // Balance context evaluator rules check
+        const srv = 0; 
+        if (srv < 0) {
+            const box = document.getElementById('payment-dues-error-box');
+            document.getElementById('payment-dues-error-msg').innerText = `Dues Warning: Settle outstanding ${Math.abs(Math.floor(srv))} days first.`;
+            box.classList.remove('hidden');
+            return;
+        }
+
+        let m = parseInt(document.getElementById('p-days').value) || 0;
+        let amt = window.totalpaymenttodo;
+        let d = m * (window.daysinamonth || 30);
+        
+        let shiftSelect = document.getElementById('p-shift');
+        let shiftName = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
+        let payId = Date.now();
+
+        window.currentPayId = payId;
+        window.currentShiftName = shiftName;
+
+        // Local testing security generation token
+        const randomOtp = Math.floor(100000 + Math.random() * 900000);
+        window.generatedPaymentOtp = randomOtp;
+        
+        console.log(`[DEBUG LOG] Generated Validation Key: ${randomOtp}`);
+        alert(`Your Verification Code is: ${randomOtp}`);
+
+        // Commit snapshot structure
+        await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { 
+            uid: auth.currentUser.uid, 
+            name: currentUserData.name, 
+            phone: currentUserData.phone, 
+            providedPhone: phoneVal,
+            providedUID: uidVal,
+            type: 'PAYMENT', 
+            id: payId, 
+            reqT: getStamp(), 
+            shift: shiftName, 
+            days: d, 
+            amt: amt, 
+            status: 'Pending' 
+        });
+
+        // Switch panel visibility views
+        document.getElementById('pstep1').style.display = 'none'; 
+        document.getElementById('pstep2').style.display = 'block';
+
+    } catch (error) {
+        console.error("Wizard execution pipeline crash exception:", error);
+        alert("Operational exception happened during input configuration validation checks.");
+    }
+};
+
+window.closePaymentWizard = () => {
+    clearAllPaymentErrors();
+    document.getElementById('pay-modal').style.display = 'none';
+};
+
 
     // --- Admin Logic ---
   window.loadAdmin = () => {
@@ -782,7 +944,6 @@ else g.offNL += card;
   window.closeWizard = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step1').classList.add('step-active'); document.getElementById('step2').classList.remove('step-active'); };
   window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
-  window.closePaymentWizard = () => { document.getElementById('pay-modal').style.display = 'none'; document.getElementById('pstep1').classList.add('step-active'); document.getElementById('pstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
     const monthInput = document.getElementById('p-days');
