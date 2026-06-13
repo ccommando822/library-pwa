@@ -124,7 +124,7 @@
             <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option></select>
         <label class="detail-label">Months</label>
         <input type="number" id="p-days" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">0</span></div>  
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Choose Shift first</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
     </div>  
     <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
@@ -758,7 +758,7 @@ else g.offNL += card;
     const total = baseTotal + phoneBonus;
     document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
 };
-  calcTotal()
+
   // Update the visible text inside the options using the global window variables
   document.getElementById('dayPrice').textContent = window.dayVal;
   document.getElementById('nightPrice').textContent = window.nightVal;
