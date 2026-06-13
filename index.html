@@ -748,7 +748,7 @@ else g.offNL += card;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
     const months = Number(monthInput.value);
-    const baseTotal = selectedPrice * months;
+    const baseTotal = selectedPrice ;
 
     const phoneString = document.getElementById('p-phone').value.trim();
     if (!phoneString) return alert("phone number not found");
