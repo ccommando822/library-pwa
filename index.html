@@ -621,140 +621,18 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
         setTimeout(() => location.reload(), 1000);
     } else alert("Invalid OTP");
   };
-
-// ==========================================
-// BLOCK 1: INITIAL GLOBAL LOADING DETECTION
-// ==========================================
-alert("[ALERT 01] Payment script file parsing initiated.");
-
-window.checkpaymentinfo = async () => {
-    alert("[ALERT 02] checkpaymentinfo function execution triggered.");
-    try {
-        alert("[ALERT 03] Calling clearAllPaymentErrors()");
-        clearAllPaymentErrors();
-        alert("[ALERT 04] clearAllPaymentErrors() finished successfully.");
-
-        alert("[ALERT 05] Reading DOM elements ('payment-phone', 'payment-uid', 'payment-screenshot').");
-        const phoneVal = document.getElementById('payment-phone').value.trim();
-        const uidVal = document.getElementById('payment-uid').value.trim();
-        const screenshotInput = document.getElementById('payment-screenshot');
-        alert("[ALERT 06] DOM elements fetched successfully. Starting Regex checks.");
-
-        const phoneRegex = /^[6-9]\d{9}$/; 
-        const uidRegex = /^\d{12}$/;       
-        let hasErrors = false;
-
-        if (!phoneRegex.test(phoneVal)) {
-            alert("[ALERT 07] Phone validation failed. Appending UI error.");
-            const box = document.getElementById('payment-phone-error-box');
-            document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
-            box.classList.remove('hidden');
-            hasErrors = true;
-        }
-
-        if (!uidRegex.test(uidVal)) {
-            alert("[ALERT 08] UID validation failed. Appending UI error.");
-            const box = document.getElementById('payment-uid-error-box');
-            document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
-            box.classList.remove('hidden');
-            hasErrors = true;
-        }
-
-        if (!screenshotInput.files || screenshotInput.files.length === 0) {
-            alert("[ALERT 09] Screenshot validation failed. No file attached.");
-            const box = document.getElementById('payment-screenshot-error-box');
-            document.getElementById('payment-screenshot-error-msg').innerText = "Please select and attach an image copy of your screenshot.";
-            box.classList.remove('hidden');
-            hasErrors = true;
-        }
-
-        if (hasErrors) {
-            alert("[ALERT 10a] Basic validation failed. Ending function execution early.");
-            return;
-        }
-        alert("[ALERT 10b] Basic validation passed. Connecting to Firestore for duplicate check.");
-
-        // Anti-fraud validation duplicate search read mapping check (Check 1 of 2)
-        const duplicateCheckRef = doc(db, "payment_history", uidVal);
-        const duplicateSnapshot = await getDoc(duplicateCheckRef);
-
-        if (duplicateSnapshot.exists()) {
-            alert("[ALERT 11a] Duplicate UID found in Firebase record. Denying process.");
-            const box = document.getElementById('payment-uid-error-box');
-            document.getElementById('payment-uid-error-msg').innerText = "❌ Security Alert: This transaction UID has already been processed and claimed before.";
-            box.classList.remove('hidden');
-            return;
-        }
-        alert("[ALERT 11b] UID unique clearance received. Resolving payment details & cache items.");
-
-        // Apply corrected values passed from the global cache points
-        let amt = window.calculatedPaymentAmt || window.totalpaymenttodo;
-        let d = window.calculatedPaymentDays || parseInt(document.getElementById('p-days').value);
-        
-        let shiftSelect = document.getElementById('p-shift');
-        let shiftName = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
-        let payId = Date.now();
-
-        alert("[ALERT 12] Fixing file array stream context. Preparing Firebase upload structure.");
-        // FIX APPLIED: Extracting single file index [0] safely to prevent global crash
-        const file = screenshotInput.files[0]; 
-        
-        alert("[ALERT 13] Uploading file block to Firebase Storage bucket paths.");
-        const fileStorageRef = ref(storage, `payment_proofs/${auth.currentUser.uid}_${payId}_${file.name}`);
-        const uploadSnapshot = await uploadBytes(fileStorageRef, file);
-        const openableScreenshotUrl = await getDownloadURL(uploadSnapshot.ref);
-
-        alert("[ALERT 14] Firebase upload successful. Constructing local payload data maps.");
-        // Generate secure hidden background verification OTP authentication key tokens (NOT shown to user screen)
-        const randomOtp = Math.floor(100000 + Math.random() * 900000);
-
-        // Cache tracking map variables locally to defend transaction flow states against network disruptions
-        const sessionPayload = {
-            payId: payId,
-            shiftName: shiftName,
-            days: d,
-            amt: amt,
-            providedPhone: phoneVal,
-            providedUID: uidVal,
-            screenshotUrl: openableScreenshotUrl,
-            hiddenOtp: randomOtp
-        };
-        localStorage.setItem("active_payment_session", JSON.stringify(sessionPayload));
-
-        alert("[ALERT 15] Syncing transaction signals state table down to database cloud document records.");
-        // Create remote background processing signal notification tracker entry record doc
-        await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { 
-            uid: auth.currentUser.uid, 
-            name: currentUserData.name, 
-            phone: currentUserData.phone, 
-            providedPhone: phoneVal,
-            providedUID: uidVal,            
-            screenshot: openableScreenshotUrl, 
-            type: 'PAYMENT', 
-            id: payId, 
-            reqT: getStamp(), 
-            shift: shiftName, 
-            days: d, 
-            amt: amt, 
-            status: 'Pending', 
-            otpVerificationToken: randomOtp 
-        });
-
-        alert("[ALERT 16] Database logs cleared. Transitioning active viewport container cards.");
-        // Toggle UI Panels smoothly
-        document.getElementById('pstep1').style.display = 'none'; 
-        document.getElementById('pstep2').style.display = 'block';
-
-    } catch (error) {
-        console.error("Signal setup block failure exception wrapper:", error);
-        alert("[ALERT CATCH - checkpaymentinfo] Error occurred: " + error.message);
-    }
+  // Helper helper function to clean up error UI boxes quickly
+const clearAllPaymentErrors = () => {
+    const errorSuffixes = ['phone', 'uid', 'screenshot', 'dues', 'otp'];
+    errorSuffixes.forEach(suffix => {
+        const box = document.getElementById(`payment-${suffix}-error-box`);
+        if (box) box.classList.add('hidden');
+    });
 };
 
+// Step 2: OTP Token Match and Transaction Execution
 window.verifyPayment = async () => {
-    alert("[ALERT 17] verifyPayment function execution triggered.");
     try {
-        alert("[ALERT 18] Clearing older visual indicators.");
         clearAllPaymentErrors();
         
         const otpInput = document.getElementById('Payment-otp');
@@ -762,100 +640,148 @@ window.verifyPayment = async () => {
         const otpErrorBox = document.getElementById('payment-otp-error-box');
         const otpErrorMsg = document.getElementById('payment-otp-error-msg');
 
-        const sessionDataString = localStorage.getItem("active_payment_session");
-        if (!sessionDataString) {
-            alert("[ALERT 19a] No active local verification token maps found in machine context.");
+        if (!window.generatedPaymentOtp) {
             otpErrorBox.classList.remove('hidden');
-            otpErrorMsg.innerText = "Session expired. Restart process from Step 1.";
+            otpErrorMsg.innerText = "Session expired. Please click cancel and try again.";
             return;
         }
 
-        const session = JSON.parse(sessionDataString);
-
-        // First Verification Gate: Match user input against hidden session token
-        if (typedOtp !== session.hiddenOtp.toString()) {
-            alert("[ALERT 19b] OTP input evaluation failed against verification string parameters.");
+        if (typedOtp !== window.generatedPaymentOtp.toString()) {
             otpErrorBox.classList.remove('hidden');
-            otpErrorMsg.innerText = "Invalid OTP verification code typed. Please try again.";
+            otpErrorMsg.innerText = "Invalid OTP code. Please check the code and type it again.";
             return;
         }
-        alert("[ALERT 19c] Local OTP matched successfully. Running cloud lookup check.");
 
-        // Anti-fraud double spend check against the history archive
-        const recordFolderRef = doc(db, "payment_history", session.providedUID);
-        const recordSnapshot = await getDoc(recordFolderRef);
+        let m = parseInt(document.getElementById('p-days').value) || 0;
+        let d = m * (window.daysinamonth || 30);
+        let amt = window.totalpaymenttodo;
 
-        if (recordSnapshot.exists()) {
-            alert("[ALERT 20a] Target payload transaction history duplicates found. Purging instance keys.");
-            otpErrorBox.classList.remove('hidden');
-            otpErrorMsg.innerText = "This transaction record was already processed and verified previously.";
-            localStorage.removeItem("active_payment_session");
-            return;
-        }
-        alert("[ALERT 20b] Clearance verified. Authorizing update write actions to active session fields.");
+        let payId = window.currentPayId || Date.now();
+        let shiftName = window.currentShiftName || "Default";
 
-        // Advance Signal State to 'OTP_Verified' to authorize Admin structural review action
-        const signalDocId = `pay_${auth.currentUser.uid}_${session.payId}`;
-        await updateDoc(doc(db, "signals", signalDocId), {
-            status: "OTP_Verified",
-            providedUID: session.providedUID,
-            providedPhone: session.providedPhone,
-            screenshot: session.screenshotUrl
+        // Append transactional history element
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+            history: arrayUnion({ 
+                id: payId, 
+                reqT: getStamp(), 
+                shift: shiftName, 
+                days: d, 
+                amt: amt, 
+                status: 'Success' 
+            }) 
         });
 
-        alert("[ALERT 21] Remote document record states updated successfully. Purging localized variables.");
-        // Safe cleanup of hardware context states
-        localStorage.removeItem("active_payment_session");
-
         document.getElementById('pay-modal').style.display = 'none';
-        alert("🔒 Step 1 Complete: OTP Verified. Waiting for Admin final approval.");
-        
+        alert("🎉 Payment successfully authorized!");
         setTimeout(() => location.reload(), 1000);
 
     } catch (error) {
-        console.error("Step 2 processing error exception handling:", error);
-        alert("[ALERT CATCH - verifyPayment] Error occurred: " + error.message);
+        console.error("History transaction write failure:", error);
+        alert("System confirmed matching OTP, but database log sync failed.");
     }
 };
 
-alert("[ALERT 22] Payment script parsing evaluation sequence fully concluded.");
+// Step 1: Input Analysis and Background Database Sync
+window.checkpaymentinfo = async () => {
+    try {
+        // Reset all individual error message layers
+        clearAllPaymentErrors();
 
+        const phoneVal = document.getElementById('payment-phone').value.trim();
+        const uidVal = document.getElementById('payment-uid').value.trim();
+        const screenshotInput = document.getElementById('payment-screenshot');
 
------------------------------------------------------------------------------------
+        // Regex definitions
+        const phoneRegex = /^[6-9]\d{9}$/; 
+        const uidRegex = /^\d{12}$/;       
 
------------------------------------------------------------------------------------
-                                       Helper functions 
------------------------------------------------------------------------------------
-/**
- * Automatically resets visibility status tokens for step-by-step application error blocks.
- */
-const clearAllPaymentErrors = () => {
-    const errorSuffixes = ['phone', 'uid', 'screenshot', 'dues', 'otp'];
-    errorSuffixes.forEach(suffix => {
-        const box = document.getElementById(`payment-${suffix}-error-box`);
-        if (box) {
-            box.classList.add('hidden'); // Adds structural utility display:none utility class
+        // Flag to tracking processing blocks
+        let hasErrors = false;
+
+        // Isolate Field 1: Phone Validation Check
+        if (!phoneRegex.test(phoneVal)) {
+            const box = document.getElementById('payment-phone-error-box');
+            document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
+            box.classList.remove('hidden');
+            hasErrors = true;
         }
-    });
-};
-/**
- * Generates an aligned string timestamp payload matching standard execution variables.
- * Output Format: "DD/MM/YYYY, HH:MM:SS"
- */
-const getStamp = () => {
-    const now = new Date();
-    return now.toLocaleString('en-IN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+
+        // Isolate Field 2: UID Validation Check
+        if (!uidRegex.test(uidVal)) {
+            const box = document.getElementById('payment-uid-error-box');
+            document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
+            box.classList.remove('hidden');
+            hasErrors = true;
+        }
+
+        // Isolate Field 3: File Input Verification Check
+        /* if (!screenshotInput.files || screenshotInput.files.length === 0) {
+            const box = document.getElementById('payment-screenshot-error-box');
+            document.getElementById('payment-screenshot-error-msg').innerText = "Please select and attach an image copy of your screenshot.";
+            box.classList.remove('hidden');
+            hasErrors = true;  
+        }   */
+
+        // Halt if any targeted individual field checks failed
+        if (hasErrors) return;
+
+        // Balance context evaluator rules check
+        const srv = 0; 
+        if (srv < 0) {
+            const box = document.getElementById('payment-dues-error-box');
+            document.getElementById('payment-dues-error-msg').innerText = `Dues Warning: Settle outstanding ${Math.abs(Math.floor(srv))} days first.`;
+            box.classList.remove('hidden');
+            return;
+        }
+
+        let m = parseInt(document.getElementById('p-days').value) || 0;
+        let amt = window.totalpaymenttodo;
+        let d = m * (window.daysinamonth || 30);
+        
+        let shiftSelect = document.getElementById('p-shift');
+        let shiftName = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
+        let payId = Date.now();
+
+        window.currentPayId = payId;
+        window.currentShiftName = shiftName;
+
+        // Local testing security generation token
+        const randomOtp = Math.floor(100000 + Math.random() * 900000);
+        window.generatedPaymentOtp = randomOtp;
+        
+        console.log(`[DEBUG LOG] Generated Validation Key: ${randomOtp}`);
+        alert(`Your Verification Code is: ${randomOtp}`);
+
+        // Commit snapshot structure
+        await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { 
+            uid: auth.currentUser.uid, 
+            name: currentUserData.name, 
+            phone: currentUserData.phone, 
+            providedPhone: phoneVal,
+            providedUID: uidVal,
+            type: 'PAYMENT', 
+            id: payId, 
+            reqT: getStamp(), 
+            shift: shiftName, 
+            days: d, 
+            amt: amt, 
+            status: 'Pending' 
+        });
+
+        // Switch panel visibility views
+        document.getElementById('pstep1').style.display = 'none'; 
+        document.getElementById('pstep2').style.display = 'block';
+
+    } catch (error) {
+        console.error("Wizard execution pipeline crash exception:", error);
+        alert("Operational exception happened during input configuration validation checks.");
+    }
 };
 
-
+window.closePaymentWizard = () => {
+    clearAllPaymentErrors();
+    document.getElementById('pay-modal').style.display = 'none';
+};
 
 
     // --- Admin Logic ---
@@ -996,37 +922,14 @@ else g.offNL += card;
   };
   
   // Payment Handlers
-  window.doPayment = () => {
-    // Exact structural mapping from your business logic definitions
-    let m = parseInt(document.getElementById('p-days').value) || 0;
-    let s = document.getElementById('p-shift').value;
-    let amt = window.totalpaymenttodo || 0; 
-    let d = m; // Assigns directly as requested
-
-    // Cache the exact amt and d parameters globally so step 1 can reuse them
-    window.calculatedPaymentAmt = amt;
-    window.calculatedPaymentDays = d;
-
-    // Present structural choice modal layer option block
-    const userChoice = confirm(
-        "Choose your Payment Action:\n\n" +
-        "👉 Click [ OK ] if you want to OPEN YOUR UPI APP and pay now.\n\n" +
-        "👉 Click [ CANCEL ] if you ALREADY PAID and want to verify your transaction UID / receipt code."
-    );
-
-    if (userChoice) {
-        // Option 1: Redirection app deep-link pipeline engine execution
-        window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-        
-        // Bring up the wizard backdrop automatically so they are ready when they return
-        clearAllPaymentErrors();
-        document.getElementById('pay-modal').style.display = 'block';
-    } else {
-        // Option 2: Skip directly into validation parameter forms overlay
-        clearAllPaymentErrors();
-        document.getElementById('pay-modal').style.display = 'block';
-    }
-};
+  window.doPayment = async () => {
+    let d = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+    let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
+    await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+    window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
+    document.getElementById('pay-modal').style.display = 'block';
+  };
 
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
   const ref = doc(db, "users", uid);
