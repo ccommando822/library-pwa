@@ -742,10 +742,11 @@ else g.offNL += card;
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
     const maxDays = window.daysinamonth();
+    if (!maxDays) return alert("daysinamonth not found");
     const monthInput = document.getElementById('p-days');
     if (!monthInput) return alert("Month not filled");
-    if (monthInput.value < maxDays) monthInput.value = maxDays;
-    if (monthInput.value > maxDays) monthInput.value = maxDays;
+    if (monthInput.value < 30) monthInput.value = 30;
+    if (monthInput.value > 30) monthInput.value = 30;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
     const days = Number(monthInput.value);
