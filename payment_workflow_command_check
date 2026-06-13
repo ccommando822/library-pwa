@@ -36,8 +36,8 @@
   document.querySelector('option[value="both"]').value = window.bothVal;
 // calcTotal
   window.calcTotal = () => {
-  const daysInput = document.getElementById('p-month');
-  if (!daysInput.value = 1) daysInput.value = 1;
+  const monthInput = document.getElementById('p-month') || 0;
+  if (!monthInput.value = 1) monthInput.value = 1;
   
     const phoneString = document.getElementById('p-phone').value.trim();
 
@@ -47,9 +47,21 @@
     // Convert to number and divide by 100
     const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
 
-  const total = (document.getElementById('p-shift').value  * daysInput.value;
-  document.getElementById('pay-summary').innerText = `Total: ₹${total}`;
-};
+  // Read the converted numeric values directly from the dropdown element
+    const selectedPrice = Number(document.getElementById('p-shift').value); 
+
+    // Base total calculation
+    const baseTotal = selectedPrice * monthInput;
+
+    // Add the phone decimal value to the final total
+    const finalTotal = baseTotal + phoneBonus;
+    
+    // Display the final calculation with two decimal places
+    document.getElementById('pay-summary').textContent = finalTotal.toFixed(2);
+  }
+
+  // Run calculation once at startup to set the initial total
+  calcTotal();
 
 
 
@@ -143,21 +155,5 @@ window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId) => {
 
   // Calculation Function
   function calcTotal() {
-    // Read the converted numeric values directly from the dropdown element
-    const selectedPrice = Number(document.getElementById('shiftSelect').value);
-    const days = Number(document.getElementById('p-month').value) || 0;
     
-
-    // Base total calculation
-    const baseTotal = selectedPrice * days;
-
-    // Add the phone decimal value to the final total
-    const finalTotal = baseTotal + phoneBonus;
-    
-    // Display the final calculation with two decimal places
-    document.getElementById('totalDisplay').textContent = finalTotal.toFixed(2);
-  }
-
-  // Run calculation once at startup to set the initial total
-  calcTotal();
 </script>
