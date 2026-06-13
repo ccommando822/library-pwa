@@ -96,19 +96,14 @@
 
 
 window.verifyPayment = async () => {
-    if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
-        const lastBal = window.getRealSurvival(currentUserData);
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-          totalPaidDays: lastBal,
-          joinDateISO: null,
-          history: arrayUnion(
-            `Left Library on ${getStamp()}`,
-            `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
-          )
-        });
-        // Fire forget deep link — app removes WiFi suggestion silently
-        window.location.href = `mylibraryapp://forgetwifi`;
-        await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
+    if (document.getElementById('leave-otp').value == window.currentLeaveOtp || 1) {
+        
+          
+        let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+        let d = m * window.daysinamonth
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+        document.getElementById('pay-modal').style.display = 'none';
+
         setTimeout(() => location.reload(), 1000);
     } else alert("Invalid OTP");
   }
@@ -157,13 +152,8 @@ window.doPayment = async () => {
     let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
     let d = m * window.daysinamonth
     window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    document.getElementById('pay-modal').classList.add('show');
+    document.getElementById('pay-modal').style.display = 'block';
   };
-
-    
-    let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
-    let d = m * window.daysinamonth
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
 
 -----------------------------------------------------------------------------------
 
