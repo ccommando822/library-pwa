@@ -741,14 +741,15 @@ else g.offNL += card;
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
+    const maxDays = window.daysinamonth();
     const monthInput = document.getElementById('p-days');
     if (!monthInput) return alert("Month not filled");
-    if (monthInput.value < 30) monthInput.value = 30;
-    if (monthInput.value > 30) monthInput.value = 30;
+    if (monthInput.value < maxDays) monthInput.value = maxDays;
+    if (monthInput.value > maxDays) monthInput.value = maxDays;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
-    const months = Number(monthInput.value);
-    const baseTotal = selectedPrice ;
+    const days = Number(monthInput.value);
+    const baseTotal = selectedPrice * days * window.daysinamonth;
 
     const phoneString = document.getElementById('p-phone').value.trim();
     if (!phoneString) return alert("phone number not found");
