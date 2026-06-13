@@ -387,7 +387,7 @@ window.saveWifiSettings = async () => {
 const ssid = document.getElementById('wifi-ssid').value;
 const pass = document.getElementById('wifi-pass').value;
 await setDoc(doc(db, "settings", "wifi"), { ssid, pass });
-alert("Saved.");wifi
+alert("Saved.");
 };
 
 // --- Live Interval ---
