@@ -564,18 +564,6 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     } else alert("Invalid OTP");
   };
 
-  window.verifyPayment = async () => {
-    if (document.getElementById('leave-otp').value == window.currentLeaveOtp || 1) {
-        
-          
-        let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
-        let d = m * window.daysinamonth
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
-        document.getElementById('pay-modal').style.display = 'none';
-
-        setTimeout(() => location.reload(), 1000);
-    } else alert("Invalid OTP");
-  }
   window.checkpaymentinfo = () => {
     const srv = 0;
     if (srv < 0) {
@@ -583,9 +571,9 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
         document.getElementById('leave-error-msg').innerText = `Dues: Pay ${Math.abs(Math.floor(srv))} days first.`;
         return;
     }
-
     let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
-    let d = m * window.daysinamonth
+    let d = m * window.daysinamonth;
+    if (!m || !s || !amt){alert("Values in checkPayment,not found)}
     let payId = Date.now(), shiftName = document.getElementById('p-shift').options[document.getElementById('p-shift').selectedIndex].text;
     await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), { uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone, type: 'PAYMENT', id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' });
 
@@ -593,6 +581,20 @@ document.querySelectorAll('.sig-timer').forEach(async el => {
     document.getElementById('pstep1').classList.remove('step-active');
     document.getElementById('pstep2').classList.add('step-active');
   };
+    
+      window.verifyPayment = async () => {
+    if (document.getElementById('leave-otp').value === window.currentLeaveOtp || 1) {
+        
+          
+        let m = parseInt(document.getElementById('p-days').value), s = document.getElementById('p-shift').value, amt = window.totalpaymenttodo;
+        let d = m * window.daysinamonth;
+        if (!m || !s || !amt){alert("Values in verifyPayment,not found)}
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' }) });
+        document.getElementById('pay-modal').style.display = 'none';
+
+        setTimeout(() => location.reload(), 1000);
+    } else alert("Invalid OTP");
+  }
 
     // --- Admin Logic ---
   window.loadAdmin = () => {
