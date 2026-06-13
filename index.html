@@ -119,9 +119,10 @@
 <div id="active-tools" class="hidden">  
     <div class="card" style="background: #f0f7ff;">  
         <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
-            <option value="day">Day (₹<span id="dayPrice"></span>)</option>
-            <option value="night">Night (₹<span id="nightPrice"></span>)</option>
-            <option value="both">Both (₹<span id="bothPrice"></span>)</option></select>  
+            <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
+            <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
+            <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option></select>
+        <label class="detail-label">Months</label>
         <input type="number" id="p-days" value="1" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
         <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">0</span></div>  
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
@@ -740,16 +741,16 @@ else g.offNL += card;
   window.makeEdit = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
   window.calcTotal = () => {
     const monthInput = document.getElementById('p-days');
-    if (!monthInput) return alert;
+    if (!monthInput) return alert("Month not filled");
     if (monthInput.value < 1) monthInput.value = 1;
     if (monthInput.value > 1) monthInput.value = 1;
 
     const selectedPrice = Number(document.getElementById('p-shift').value);
     const months = Number(monthInput.value);
-    const baseTotal = selectedPrice * months * window.daysinamonth;
+    const baseTotal = selectedPrice * months;
 
     const phoneString = document.getElementById('p-phone').value.trim();
-    if (!phoneString) return alert;
+    if (!phoneString) return alert("phone number not found");
     const lastTwoDigits = phoneString.slice(-2);
     const phoneBonus = (Number(lastTwoDigits) || 0) / 100;
 
