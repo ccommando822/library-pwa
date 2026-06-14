@@ -592,11 +592,39 @@
       }
 
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
-      const file        = screenshotInput.files[0];
-      const payId       = Date.now();
-      const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
-      await uploadBytes(fileRef, file);
-      const screenshotUrl = await getDownloadURL(fileRef);
+      /* ── Free Plan Fix: Compress image then store as Base64 in Firestore ── */
+      const file = screenshotInput.files[0];
+      const payId = Date.now();
+
+      // Compress the image to under 200KB using Canvas
+      const compressedBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                  const canvas = document.createElement('canvas');
+            
+                  // Scale down to max 800px wide while keeping aspect ratio
+                  const maxWidth = 800;
+                  const scale    = Math.min(1, maxWidth / img.width);
+                  canvas.width   = img.width  * scale;
+                  canvas.height  = img.height * scale;
+            
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+                  // Compress to JPEG at 60% quality — typically 50-150KB
+                  const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                  resolve(base64);
+              };
+              img.onerror = reject;
+              img.src = e.target.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+      });
+
+      alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 1024) + "KB");
 
       /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
@@ -621,7 +649,7 @@
         phone:         currentUserData.phone,
         providedPhone: phoneVal,
         providedUID:   uidVal,
-        screenshot:    screenshotUrl,
+        screenshot: compressedBase64,
         id:            payId,
         reqT:          getStamp(),
         shift:         shiftName,
@@ -749,9 +777,9 @@
           const verifyTitle    = !isOtpVerified ? 'title="Waiting for user OTP verification"' : '';
 
           /* ── Screenshot hyperlink ── */
-          const screenshotLink = sig.screenshot
-            ? `<a href="${sig.screenshot}" target="_blank" style="color:#00e5ff; font-size:11px;">📎 View Screenshot</a>`
-            : `<span style="color:#888; font-size:11px;">No screenshot</span>`;
+          const screenshotHtml = sig.screenshot
+           ? `<br><img src="${sig.screenshot}" style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; border:1px solid #333;" onclick="window.open('${sig.screenshot}')">`
+           : `<span style="color:#888; font-size:11px;">No screenshot</span>`;
 
           /* ── 11-argument handlePay call ── FIX 11 */
           h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px;">` +
@@ -858,7 +886,7 @@
         uid:           uid,
         providedUID:   String(providedUID),
         providedPhone: String(providedPhone),
-        screenshotUrl: screenshotUrl || "",
+        screenshotStored: true,
         shift:         shift,
         days:          days,
         amt:           amt,
