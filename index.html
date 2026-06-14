@@ -601,6 +601,11 @@
       const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
       alert('1c');
       await uploadBytes(fileRef, file);
+} catch (uploadError) {
+  alert("Upload failed: " + uploadError.code + " — " + uploadError.message);
+  return;
+}
+      await uploadBytes(fileRef, file);
       alert('1d');
       const screenshotUrl = await getDownloadURL(fileRef);
       alert('1e');
