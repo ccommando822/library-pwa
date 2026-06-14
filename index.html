@@ -584,13 +584,14 @@
 
       /* ── Anti-Fraud Check 1 of 2: duplicate UID in payment_history ── FIX 4 */
       const historyDocRef = doc(db, "payment_history", uidVal);
+      if (!historyDocRef){alert("HistoryDocRef not found");}
       const historySnap   = await getDoc(historyDocRef);
       if (historySnap.exists()) {
         document.getElementById('payment-uid-error-msg').innerText = "This Transaction UID has already been used. Double-spend blocked.";
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
-
+      alert('historyDocREf complete');
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
       const file        = screenshotInput.files[0];
       const payId       = Date.now();
