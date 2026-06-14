@@ -591,14 +591,14 @@
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
-      alert('historyDocREf complete');
+      
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
       const file        = screenshotInput.files[0];
       const payId       = Date.now();
       const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
       await uploadBytes(fileRef, file);
       const screenshotUrl = await getDownloadURL(fileRef);
-
+      alert('1');
       /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
       const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth || 30);
@@ -608,11 +608,11 @@
 
       window.currentPayId      = payId;
       window.currentShiftName  = shiftName;
-
+      alert('2');
       /* ── Hidden OTP generated and stored in signal only ── FIX 6 */
       const randomOtp = Math.floor(100000 + Math.random() * 900000);
       window.generatedPaymentOtp = randomOtp;
-
+      alert('3');
       /* ── Write signal with OTP, screenshot, status = Pending ── */
       await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), {
         type:          'PAYMENT',
@@ -630,7 +630,7 @@
         amt:           amt,
         status:        'Pending'
       });
-
+      alert('4');
       /* ── Write Pending entry to user history ── */
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         history: arrayUnion({
@@ -638,10 +638,10 @@
           days: d, amt: amt, status: 'Pending'
         })
       });
-
+      alert('5');
       document.getElementById('pstep1').style.display = 'none';
       document.getElementById('pstep2').style.display = 'block';
-
+      alert('6');
     } catch (error) {
       console.error("Wizard execution pipeline crash:", error);
       alert("An error occurred during payment validation: " + error.message);
