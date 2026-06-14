@@ -595,11 +595,15 @@
       alert('start');
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
       const file        = screenshotInput.files[0];
+      alert('1a');
       const payId       = Date.now();
+      alert('1b');
       const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
+      alert('1c');
       await uploadBytes(fileRef, file);
+      alert('1d');
       const screenshotUrl = await getDownloadURL(fileRef);
-      alert('1');
+      alert('1e');
       /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
       const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth || 30);
