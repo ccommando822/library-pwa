@@ -637,6 +637,8 @@
                `--------------------------\n` +
                `NAME     : ${sig.name}\nPHONE    : ${sig.phone}\nPAY PHONE: ${sig.providedPhone || 'N/A'}\nPAY UID  : ${sig.providedUID || 'N/A'}\n` +
                `SHIFT    : ${sig.shift}\nDAYS     : ${sig.days}\nAMOUNT   : ₹${sig.amt} (${sig.reqT})\n` +
+               `--------------------------\n` +
+               `OTP      : <span style="color:var(--yellow); font-size:18px; font-weight:bold; letter-spacing:3px;">${sig.otp}</span>\n` +
                `--------------------------\n</div>` +
                `<div style="background:#000; padding:10px; border:1px solid #333; border-top:none;">` +
                screenshotHtml +
