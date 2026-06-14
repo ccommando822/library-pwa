@@ -777,9 +777,14 @@
           const verifyTitle    = !isOtpVerified ? 'title="Waiting for user OTP verification"' : '';
 
           /* ── Screenshot hyperlink ── */
+          /* ── Screenshot render — Base64 safe, no onclick injection ── */
           const screenshotHtml = sig.screenshot
-           ? `<br><img src="${sig.screenshot}" style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; border:1px solid #333;" onclick="window.open('${sig.screenshot}')">`
-           : `<span style="color:#888; font-size:11px;">No screenshot</span>`;
+          ? `<img src="${sig.screenshot}" 
+          style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; 
+                 border:1px solid #333; cursor:zoom-in; display:block;"
+          onclick="document.getElementById('ss-viewer').src=this.src; 
+                   document.getElementById('ss-modal').style.display='flex';">`
+          : `<span style="color:#888; font-size:11px;">No screenshot attached</span>`;
 
           /* ── 11-argument handlePay call ── FIX 11 */
           h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px;">` +
@@ -798,9 +803,17 @@
                `--------------------------\n` +
                `</div>` +
                `<div style="display:flex; gap:10px; background:#000; padding:10px; border:1px solid #333; border-top:none; margin-top:-15px; border-radius:0 0 12px 12px;">` +
-               `<button class="btn btn-green" ${verifyDisabled} ${verifyTitle} onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${sig.screenshot}')">VERIFY</button>` +
-               `<button class="btn btn-outline" onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${sig.screenshot}')">REJECT</button>` +
-               `</div>`;
+               /* ── VERIFY button — never pass Base64 through onclick ── */
+`<button class="btn btn-green" ${verifyDisabled} ${verifyTitle} 
+   onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},
+           '${sig.reqT}','${sig.shift}',${sig.id},
+           '${sig.providedUID}','${sig.providedPhone}','${d.id}')">VERIFY</button>` +
+
+`<button class="btn btn-outline" 
+   onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,
+           '${sig.reqT}','${sig.shift}',${sig.id},
+           '${sig.providedUID}','${sig.providedPhone}','${d.id}')">REJECT</button>`
+          `</div>`;
         }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
@@ -862,58 +875,72 @@
               adds actionT timestamp, updates finalNet.
               Does NOT cause type mismatches.
   ════════════════════════════════════════════════════════════ */
-  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone, screenshotUrl) => {
-    const ref  = doc(db, "users", uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
+  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone, sigDocId) => {
+  const ref  = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
 
-    const u           = snap.data();
-    const prevBalance = u.totalPaidDays || 0;
-    const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
+  /* Fetch screenshot from signal document instead of passing as argument */
+  const sigSnap = await getDoc(doc(db, "signals", sigDocId));
+  const screenshotBase64 = sigSnap.exists() ? (sigSnap.data().screenshot || "") : "";
 
-    if (stat === 'OK') {
-      /* ── Anti-Fraud Check 2 of 2: permanent history duplicate block ── FIX 12 */
-      const histRef  = doc(db, "payment_history", String(providedUID));
-      const histSnap = await getDoc(histRef);
-      if (histSnap.exists()) {
-        alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
-        await deleteDoc(doc(db, "signals", sid));
-        return;
-      }
+  const u           = snap.data();
+  const prevBalance = u.totalPaidDays || 0;
+  const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
 
-      /* ── Permanent history log keyed by 12-digit UPI UID ── FIX 13 */
-      await setDoc(histRef, {
-        uid:           uid,
-        providedUID:   String(providedUID),
-        providedPhone: String(providedPhone),
-        screenshotStored: true,
-        shift:         shift,
-        days:          days,
-        amt:           amt,
-        reqT:          reqT,
-        actionT:       getStamp(),
-        finalNet:      newBalance
-      });
+  if (stat === 'OK') {
+    /* Anti-Fraud Check 2 of 2 */
+    const histRef  = doc(db, "payment_history", String(providedUID));
+    const histSnap = await getDoc(histRef);
+    if (histSnap.exists()) {
+      alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
+      await deleteDoc(doc(db, "signals", sid));
+      return;
     }
 
-    /* ── Clean array map: update matching history entry ── FIX 14 */
-    const newHistory = (u.history || []).map(h => {
-      if (typeof h !== 'object' || h.id !== payId) return h;
-      return {
-        ...h,
-        status:   stat === 'OK' ? 'Verified' : 'Rejected',
-        actionT:  getStamp(),
-        finalNet: newBalance
-      };
+    /* Permanent history log */
+    await setDoc(histRef, {
+      uid:             uid,
+      providedUID:     String(providedUID),
+      providedPhone:   String(providedPhone),
+      screenshotStored: true,
+      shift:           shift,
+      days:            days,
+      amt:             amt,
+      reqT:            reqT,
+      actionT:         getStamp(),
+      finalNet:        newBalance
     });
+  }
 
-    await updateDoc(ref, {
-      totalPaidDays: newBalance,
-      history:       newHistory
-    });
+  /* Clean array map update */
+  const newHistory = (u.history || []).map(h => {
+    if (typeof h !== 'object' || h.id !== payId) return h;
+    return {
+      ...h,
+      status:   stat === 'OK' ? 'Verified' : 'Rejected',
+      actionT:  getStamp(),
+      finalNet: newBalance
+    };
+  });
 
-    await deleteDoc(doc(db, "signals", sid));
-  };
+  await updateDoc(ref, {
+    totalPaidDays: newBalance,
+    history:       newHistory
+  });
+
+  await deleteDoc(doc(db, "signals", sid));
+};
+
+  <!-- Screenshot Fullscreen Viewer -->
+<div id="ss-modal" 
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.92); z-index:999999; 
+            align-items:center; justify-content:center; flex-direction:column;"
+     onclick="this.style.display='none';">
+  <img id="ss-viewer" style="max-width:95%; max-height:90vh; border-radius:8px;">
+  <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
+</div>
 
   window.openUser = async (uid) => {
     const snap = await getDoc(doc(db, "users", uid));
