@@ -235,7 +235,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);      /* ── FIX 1 continued: storage instance ── */
-  
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
@@ -585,48 +584,20 @@
 
       /* ── Anti-Fraud Check 1 of 2: duplicate UID in payment_history ── FIX 4 */
       const historyDocRef = doc(db, "payment_history", uidVal);
-      if (!historyDocRef){alert("HistoryDocRef not found");}
       const historySnap   = await getDoc(historyDocRef);
       if (historySnap.exists()) {
         document.getElementById('payment-uid-error-msg').innerText = "This Transaction UID has already been used. Double-spend blocked.";
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
-      alert('start');
+
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
-      /* ── Free Plan Fix: Compress image then store as Base64 in Firestore ── */
-const file = screenshotInput.files[0];
-const payId = Date.now();
+      const file        = screenshotInput.files[0];
+      const payId       = Date.now();
+      const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
+      await uploadBytes(fileRef, file);
+      const screenshotUrl = await getDownloadURL(fileRef);
 
-// Compress the image to under 200KB using Canvas
-const compressedBase64 = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const img = new Image();      alert('1a');
-        img.onload = () => {
-            const canvas = document.createElement('canvas');      alert('1b');
-            
-            // Scale down to max 800px wide while keeping aspect ratio
-            const maxWidth = 800;
-            const scale    = Math.min(1, maxWidth / img.width);      alert('1c');
-            canvas.width   = img.width  * scale;
-            canvas.height  = img.height * scale;
-            
-            const ctx = canvas.getContext('2d');      alert('1d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);      alert('1e');
-            
-            // Compress to JPEG at 60% quality — typically 50-150KB
-            const base64 = canvas.toDataURL('image/jpeg', 0.6);
-            resolve(base64);
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-});
-
-alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 1024) + "KB");alert('1f');
       /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
       const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth || 30);
@@ -636,11 +607,11 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
 
       window.currentPayId      = payId;
       window.currentShiftName  = shiftName;
-      alert('2');
+
       /* ── Hidden OTP generated and stored in signal only ── FIX 6 */
       const randomOtp = Math.floor(100000 + Math.random() * 900000);
       window.generatedPaymentOtp = randomOtp;
-      alert('3');
+
       /* ── Write signal with OTP, screenshot, status = Pending ── */
       await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), {
         type:          'PAYMENT',
@@ -650,7 +621,7 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
         phone:         currentUserData.phone,
         providedPhone: phoneVal,
         providedUID:   uidVal,
-        screenshot: compressedBase64,
+        screenshot:    screenshotUrl,
         id:            payId,
         reqT:          getStamp(),
         shift:         shiftName,
@@ -658,7 +629,7 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
         amt:           amt,
         status:        'Pending'
       });
-      alert('4');
+
       /* ── Write Pending entry to user history ── */
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         history: arrayUnion({
@@ -666,10 +637,10 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
           days: d, amt: amt, status: 'Pending'
         })
       });
-      alert('5');
+
       document.getElementById('pstep1').style.display = 'none';
       document.getElementById('pstep2').style.display = 'block';
-      alert('6');
+
     } catch (error) {
       console.error("Wizard execution pipeline crash:", error);
       alert("An error occurred during payment validation: " + error.message);
@@ -778,9 +749,9 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
           const verifyTitle    = !isOtpVerified ? 'title="Waiting for user OTP verification"' : '';
 
           /* ── Screenshot hyperlink ── */
-          const screenshotHtml = sig.screenshot
-  ? `<br><img src="${sig.screenshot}" style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; border:1px solid #333;" onclick="window.open('${sig.screenshot}')">`
-  : `<span style="color:#888; font-size:11px;">No screenshot</span>`;
+          const screenshotLink = sig.screenshot
+            ? `<a href="${sig.screenshot}" target="_blank" style="color:#00e5ff; font-size:11px;">📎 View Screenshot</a>`
+            : `<span style="color:#888; font-size:11px;">No screenshot</span>`;
 
           /* ── 11-argument handlePay call ── FIX 11 */
           h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px;">` +
@@ -887,7 +858,7 @@ alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 102
         uid:           uid,
         providedUID:   String(providedUID),
         providedPhone: String(providedPhone),
-        screenshotStored: true,   // Base64 was in the signal, signal is deleted after verify
+        screenshotUrl: screenshotUrl || "",
         shift:         shift,
         days:          days,
         amt:           amt,
