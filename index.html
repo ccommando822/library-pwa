@@ -235,6 +235,10 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);      /* ── FIX 1 continued: storage instance ── */
+// Add this debug line temporarily
+alert("Storage instance: " + (storage ? "OK — " + storage.app.name : "UNDEFINED"));
+window._storage = storage;
+  
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
