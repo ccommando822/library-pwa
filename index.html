@@ -40,6 +40,29 @@
     .log-container.expanded { max-height: none; }
     .sig-timer { float: right; color: var(--yellow); font-size: 12px; font-weight: bold; background: #333; padding: 2px 8px; border-radius: 4px; }
     .live-srv-display { font-family: monospace; font-size: 20px; font-weight: 900; color: var(--primary); display: block; margin: 10px 0; letter-spacing: 1px; }
+
+    /* ── Sub-tab styles for Data Manage ── */
+    .subtab-bar { display: flex; gap: 5px; margin-bottom: 15px; }
+    .subtab-bar button { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #ddd; background: white; font-weight: bold; color: #666; cursor: pointer; font-size: 13px; }
+    .subtab-bar button.active { border-color: var(--primary); color: var(--primary); background: #e3f0fd; }
+
+    /* ── Payment history card (admin Data Manage panel) ── */
+    .ph-card { background: #fff; border: 1px solid #eee; border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+    .ph-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; cursor: pointer; }
+    .ph-header:hover { background: #f9f9f9; }
+    .ph-badge { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; background: #e8f5e9; color: #2e7d32; }
+    .ph-body { display: none; padding: 12px 15px; border-top: 1px dashed #eee; font-size: 13px; font-family: monospace; background: #fafafa; }
+    .ph-body.open { display: block; }
+    .ph-chevron { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+    .ph-chevron.open { transform: rotate(180deg); }
+
+    /* ── Validity display strip ── */
+    .validity-strip {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #e8f5e9; border-radius: 8px; padding: 8px 12px; margin-top: 8px;
+      font-size: 13px; font-weight: bold; color: #2e7d32;
+    }
+    .validity-strip .arr { color: #1976d2; font-size: 16px; }
   </style>
 </head>
 <body>
@@ -47,16 +70,13 @@
 <header>Rakshapal Singh Library</header>
 
 <script>
-  window.dayVal      = 600;
-  window.nightVal    = 500;
-  window.bothVal     = 800;
-  window.daysinamonth = 30;
+  window.dayVal       = 600;
+  window.nightVal     = 500;
+  window.bothVal      = 800;
+  window.daysinamonth = 30;   /* ← single source of truth; all "30" replaced below */
 </script>
 
-<!-- ══════════════════════════════════════════════════════
-     SCREENSHOT FULLSCREEN VIEWER  — lives in HTML, NOT in <script>
-     FIX ERROR 1: Moved outside the module script block
-════════════════════════════════════════════════════════ -->
+<!-- Screenshot Fullscreen Viewer (must stay in HTML body, NOT inside script) -->
 <div id="ss-modal"
      style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.92); z-index:999999;
@@ -67,44 +87,31 @@
 </div>
 
 <!-- Payment Wizard -->
-<div id="pay-modal" class="wizard-overlay" style="padding: 0;">
+<div id="pay-modal" class="wizard-overlay" style="padding:0;">
   <div style="position:sticky; top:0; left:0; width:100%; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
     <h2 style="margin:0; font-size:24px;">Payment Wizard</h2>
   </div>
   <div style="padding:20px; padding-bottom:40px; box-sizing:border-box;">
-
     <div id="pstep1" class="step-card step-active">
       <span class="step-num">1</span> <b>Payment Information Validation</b>
       <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
       <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;">
-        <p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
-      </div>
+      <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <p><b>Payment UID</b></p>
       <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;">
-        <p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
-      </div>
+      <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <p><b>ScreenShot</b></p>
       <input type="file" id="payment-screenshot" accept="image/*" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;">
-        <p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
-      </div>
-      <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;">
-        <p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
-      </div>
+      <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <button id="payment-verify-btn" class="btn btn-blue" style="width:100%; padding:15px; font-size:18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>
     </div>
-
     <div id="pstep2" class="step-card" style="display:none;">
       <span class="step-num">2</span> <b>Final OTP</b>
       <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;">
-        <p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
-      </div>
+      <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <button class="btn" style="background:#1c1e21; color:white; width:100%; padding:15px; font-size:18px;" onclick="window.verifyPayment()">Confirm Payment Successful</button>
     </div>
-
     <div style="margin-top:30px; text-align:center;">
       <button class="btn" style="background:#f5f5f5; color:#666; width:100%; padding:15px; font-size:16px; border-radius:10px; border:1px solid #ddd; font-weight:bold; cursor:pointer;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>
     </div>
@@ -170,40 +177,72 @@
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
       <button class="btn btn-green" onclick="window.saveProfile()">Update Folder Details</button>
     </div>
+
+    <!-- ══ Active Tools: shows total immediately + validity strip ══ -->
     <div id="active-tools" class="hidden">
       <div class="card" style="background:#f0f7ff;">
         <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
-          <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
-          <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
-          <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option>
+          <option value="day">Day Shift (₹<span id="dayPrice"></span>)</option>
+          <option value="night">Night Shift (₹<span id="nightPrice"></span>)</option>
+          <option value="both">Both Shifts (₹<span id="bothPrice"></span>)</option>
         </select>
-        <label class="detail-label">Days</label>
-        <input type="number" id="p-days" value="30" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Click on Shift first</span></div>
+        <label class="detail-label">Months / Days</label>
+        <input type="number" id="p-days" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">
+
+        <!-- Total price — populated immediately by calcTotal() on load -->
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center; font-size:16px;"></div>
+
+        <!-- Validity date strip: today ──► today + daysinamonth -->
+        <div class="validity-strip" id="validity-strip" style="display:none;">
+          <span id="validity-from"></span>
+          <span class="arr">⟶</span>
+          <span id="validity-to"></span>
+        </div>
+
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>
       </div>
       <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>
     </div>
+
     <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>
     <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
   </div>
 </section>
 
 <section id="manage">
+  <!-- ══ 3 main admin tabs — "Wi-Fi" renamed to "Data Manage" ══ -->
   <div style="display:flex; gap:5px; margin-bottom:15px;">
     <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Signals</button>
     <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Survivals</button>
-    <button id="am-wifi-btn" onclick="switchAdmin('wifi')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Wi-Fi</button>
+    <button id="am-wifi-btn" onclick="switchAdmin('wifi')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Data Manage</button>
   </div>
+
   <div id="am-pane-otp"><div id="admin-otp-list"></div></div>
   <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
+
+  <!-- ══ Data Manage pane with two sub-tabs ══ -->
   <div id="am-pane-wifi" class="hidden">
-    <div class="card">
-      <label class="detail-label">Library Wi-Fi SSID</label>
-      <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">
-      <label class="detail-label">Wi-Fi Password</label>
-      <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-      <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>
+    <div class="subtab-bar">
+      <button id="dm-wifi-btn" class="active" onclick="switchDataManage('wifi')">📶 Wi-Fi</button>
+      <button id="dm-pay-btn" onclick="switchDataManage('pay')">💳 Payment History</button>
+    </div>
+
+    <!-- Sub-pane: Wi-Fi settings -->
+    <div id="dm-pane-wifi">
+      <div class="card">
+        <label class="detail-label">Library Wi-Fi SSID</label>
+        <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">
+        <label class="detail-label">Wi-Fi Password</label>
+        <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>
+      </div>
+    </div>
+
+    <!-- Sub-pane: Payment History archive (newest first) -->
+    <div id="dm-pane-pay" class="hidden">
+      <div id="admin-pay-history-list">
+        <p style="color:#aaa; text-align:center; padding:20px;">Loading payment history...</p>
+      </div>
     </div>
   </div>
 </section>
@@ -213,15 +252,12 @@
   <div id="folder-content"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     ALL JAVASCRIPT — one clean module block, nothing outside
-════════════════════════════════════════════════════════ -->
 <script type="module">
-  import { initializeApp }                                        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-                                                                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc }
-                                                                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+                              from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc, orderBy, query }
+                              from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey:            "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
@@ -240,7 +276,7 @@
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
 
-  /* ── Helpers ── */
+  /* ── Format decimal days → DD:HH:MM:SS ── */
   window.formatTime = (decimalDays) => {
     if (decimalDays === undefined) return "00:00:00:00";
     const sign         = decimalDays < 0 ? "-" : "";
@@ -255,6 +291,39 @@
   window.getRealSurvival = (u) => {
     if (!u.joinDateISO) return u.totalPaidDays || 0;
     return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
+  };
+
+  /* ── Format a JS Date as DD/MM/YYYY ── */
+  const fmtDate = (d) => d.toLocaleDateString('en-GB');
+
+  /* ── calcTotal: computes price immediately, shows validity strip ── */
+  window.calcTotal = () => {
+    const monthInput  = document.getElementById('p-days');
+    const shiftEl     = document.getElementById('p-shift');
+    const phoneString = document.getElementById('p-phone').value.trim();
+    if (!monthInput || !shiftEl) return;
+
+    /* Clamp to window.daysinamonth */
+    const dim = window.daysinamonth;                        /* replaces hardcoded 30 */
+    if (Number(monthInput.value) < dim) monthInput.value = dim;
+    if (Number(monthInput.value) > dim) monthInput.value = dim;
+
+    if (!phoneString) return;
+
+    const selectedPrice = Number(shiftEl.value);
+    const phoneBonus    = (Number(phoneString.slice(-2)) || 0) / 100;
+    const total         = selectedPrice + phoneBonus;
+    window.totalpaymenttodo = total;
+
+    document.getElementById('pay-summary').innerHTML =
+      `Total: <span style="font-size:22px; color:var(--primary);">₹${total.toFixed(2)}</span>`;
+
+    /* Validity strip */
+    const today   = new Date();
+    const endDate = new Date(today.getTime() + dim * 86400000);  /* today + daysinamonth days */
+    document.getElementById('validity-from').innerText = fmtDate(today);
+    document.getElementById('validity-to').innerText   = fmtDate(endDate);
+    document.getElementById('validity-strip').style.display = 'flex';
   };
 
   window.renderLogs = (history) => {
@@ -311,6 +380,8 @@
           document.getElementById('active-tools').classList.remove('hidden');
           document.getElementById('wifi-connect-trigger').classList.remove('hidden');
           document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
+          /* Trigger calcTotal immediately so total shows without needing to tap shift */
+          window.calcTotal();
         } else {
           document.getElementById('join-trigger-box').classList.remove('hidden');
           document.getElementById('active-tools').classList.add('hidden');
@@ -340,8 +411,7 @@
     document.querySelectorAll('.admin-live-srv').forEach(el => {
       const iso = el.dataset.iso;
       if (iso && iso !== "null") {
-        const srv = parseFloat(el.dataset.paid) - ((new Date() - new Date(iso)) / 86400000);
-        el.innerText = window.formatTime(srv);
+        el.innerText = window.formatTime(parseFloat(el.dataset.paid) - ((new Date() - new Date(iso)) / 86400000));
       }
     });
     document.querySelectorAll('.sig-timer').forEach(async el => {
@@ -351,14 +421,12 @@
     });
   }, 1000);
 
-  /* ── Auth Actions ── */
   window.login  = () => signInWithPopup(auth, provider);
   window.logout = async () => {
     if (auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false });
     signOut(auth).then(() => location.reload());
   };
 
-  /* ── Profile ── */
   window.saveProfile = async () => {
     const n = document.getElementById('p-name').value.trim();
     const f = document.getElementById('p-father').value.trim();
@@ -380,7 +448,6 @@
     return true;
   };
 
-  /* ── Admission ── */
   window.checkStepOne = async () => {
     if (!await window.saveProfile()) return;
     const n   = document.getElementById('p-name').value.trim();
@@ -402,7 +469,6 @@
     } else alert("Invalid OTP");
   };
 
-  /* ── Leave ── */
   window.checkLeaveFees = () => {
     const srv = window.getRealSurvival(currentUserData);
     if (srv < 0) {
@@ -483,12 +549,12 @@
         return;
       }
 
-      /* Compress screenshot to Base64 via Canvas */
-      const file            = screenshotInput.files[0];
-      const payId           = Date.now();
+      /* Compress screenshot → Base64 via Canvas */
+      const file             = screenshotInput.files[0];
+      const payId            = Date.now();
       const compressedBase64 = await new Promise((resolve, reject) => {
-        const reader  = new FileReader();
-        reader.onload = (e) => {
+        const reader   = new FileReader();
+        reader.onload  = (e) => {
           const img    = new Image();
           img.onload   = () => {
             const canvas  = document.createElement('canvas');
@@ -505,9 +571,9 @@
         reader.readAsDataURL(file);
       });
 
-      /* Use cached checkout values */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
-      const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth || 30);
+      /* Use window.daysinamonth instead of hardcoded 30 */
+      const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth);
       const shiftSelect = document.getElementById('p-shift');
       const shiftName   = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
 
@@ -549,28 +615,20 @@
       const otpErrorMsg = document.getElementById('payment-otp-error-msg');
 
       if (!window.generatedPaymentOtp) {
-        otpErrorBox.classList.remove('hidden');
-        otpErrorMsg.innerText = "Session expired. Please cancel and try again.";
-        return;
+        otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Session expired. Please cancel and try again."; return;
       }
       if (typedOtp !== window.generatedPaymentOtp.toString()) {
-        otpErrorBox.classList.remove('hidden');
-        otpErrorMsg.innerText = "Invalid OTP code. Please check and try again.";
-        return;
+        otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Invalid OTP code. Please check and try again."; return;
       }
 
-      /* Race-condition defense */
-      const providedUID  = document.getElementById('payment-uid').value.trim();
-      const historySnap  = await getDoc(doc(db, "payment_history", providedUID));
+      const providedUID = document.getElementById('payment-uid').value.trim();
+      const historySnap = await getDoc(doc(db, "payment_history", providedUID));
       if (historySnap.exists()) {
-        otpErrorBox.classList.remove('hidden');
-        otpErrorMsg.innerText = "Duplicate UID detected during final check. Transaction blocked.";
-        return;
+        otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Duplicate UID detected during final check. Transaction blocked."; return;
       }
 
       const payId    = window.currentPayId;
       const sigDocId = `pay_${auth.currentUser.uid}_${payId}`;
-
       await updateDoc(doc(db, "signals", sigDocId), { status: 'OTP_Verified' });
 
       const uRef  = doc(db, "users", auth.currentUser.uid);
@@ -585,7 +643,6 @@
 
       document.getElementById('pay-modal').style.display = 'none';
       alert("✅ OTP verified! Please wait for admin to confirm your payment.");
-
     } catch (error) {
       console.error("verifyPayment crash:", error);
       alert("OTP verification failed: " + error.message);
@@ -599,10 +656,10 @@
 
   /* ══════════════════════════════════════════════════════════
      loadAdmin
-     FIX ERROR 2: screenshotHtml (not screenshotLink) used in card
-     FIX ERROR 3: button block properly concatenated into h
   ══════════════════════════════════════════════════════════ */
   window.loadAdmin = () => {
+
+    /* ── 1. Signals live listener ── */
     onSnapshot(collection(db, "signals"), s => {
       let h = "";
       s.forEach(d => {
@@ -610,8 +667,7 @@
         if (sig.type !== 'PAYMENT') {
           h += `<div class="card" style="background:#1a1a1a; color:white; border-left:4px solid var(--yellow);">` +
                `<span class="sig-timer" data-sid="${d.id}" data-expiry="${sig.expiresAt}">--s</span>📡 <b>${sig.type}</b><br>` +
-               `${sig.name}<br>` +
-               `<span style="color:var(--green); font-size:12px;">📞 ${sig.phone}</span><br>` +
+               `${sig.name}<br><span style="color:var(--green); font-size:12px;">📞 ${sig.phone}</span><br>` +
                `<span style="color:#888; font-size:10px;">${sig.timestamp}</span><br>` +
                `OTP: <span style="color:var(--yellow); font-size:18px; font-weight:bold;">${sig.otp}</span>` +
                `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="deleteDoc(doc(db,'signals','${d.id}'))">CLEAR</button></div>`;
@@ -621,17 +677,10 @@
           const statusLabel    = isOtpVerified ? '🔐 OTP_VERIFIED' : '⏳ PENDING';
           const verifyDisabled = isOtpVerified ? '' : 'disabled';
           const verifyOpacity  = isOtpVerified ? '1' : '0.4';
-
-          /* FIX ERROR 2: variable is screenshotHtml, referenced correctly below */
           const screenshotHtml = sig.screenshot
-            ? `<img src="${sig.screenshot}"
-                    style="width:100%; max-width:400px; border-radius:8px; margin-top:8px;
-                           border:1px solid #333; cursor:zoom-in; display:block;"
-                    onclick="document.getElementById('ss-viewer').src=this.src;
-                             document.getElementById('ss-modal').style.display='flex';">`
+            ? `<img src="${sig.screenshot}" style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; border:1px solid #333; cursor:zoom-in; display:block;" onclick="document.getElementById('ss-viewer').src=this.src; document.getElementById('ss-modal').style.display='flex';">`
             : `<span style="color:#888; font-size:11px;">No screenshot attached</span>`;
 
-          /* FIX ERROR 3: all parts concatenated into h in one chain */
           h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px; border-radius:12px 12px 0 0;">` +
                `[PAYMENT SIGNAL]\nSTATUS : <span style="color:${statusColor}; font-weight:bold;">${statusLabel}</span>\n` +
                `--------------------------\n` +
@@ -640,9 +689,7 @@
                `--------------------------\n` +
                `OTP      : <span style="color:var(--yellow); font-size:18px; font-weight:bold; letter-spacing:3px;">${sig.otp}</span>\n` +
                `--------------------------\n</div>` +
-               `<div style="background:#000; padding:10px; border:1px solid #333; border-top:none;">` +
-               screenshotHtml +
-               `</div>` +
+               `<div style="background:#000; padding:10px; border:1px solid #333; border-top:none;">${screenshotHtml}</div>` +
                `<div style="display:flex; gap:10px; background:#111; padding:10px; border:1px solid #333; border-top:none; border-radius:0 0 12px 12px;">` +
                `<button class="btn btn-green" ${verifyDisabled} style="opacity:${verifyOpacity};" onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">VERIFY</button>` +
                `<button class="btn btn-outline" onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">REJECT</button>` +
@@ -652,10 +699,11 @@
       document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
     });
 
+    /* ── 2. Survivals live listener ── */
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ_ok:"", onJ_exp:"", offJ_ok:"", offJ_exp:"", onNL:"", offNL:"" };
       s.forEach(d => {
-        const u        = d.data();
+        const u = d.data();
         const srv      = window.getRealSurvival(u);
         const isJoined = !!u.joinDateISO;
         const isOnline = !!u.isOnline;
@@ -670,8 +718,7 @@
                 <div style="font-weight:bold; font-size:14px;">${u.name}</div>
                 <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">${isOnline ? '● Online' : '○ Offline'}</div>
               </div>
-            </div>
-            ${counterHtml}
+            </div>${counterHtml}
           </div>
           <div class="player-details"><span>📞 ${u.phone||'N/A'}</span><span>📧 ${u.email||'N/A'}</span></div>
         </div>`;
@@ -688,6 +735,58 @@
         `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}` +
         `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
     });
+
+    /* ── 3. Payment History live listener (newest first via actionT) ── */
+    onSnapshot(collection(db, "payment_history"), snap => {
+      /* Collect all docs, sort by actionT descending (newest first) */
+      const records = [];
+      snap.forEach(d => records.push({ id: d.id, ...d.data() }));
+      records.sort((a, b) => {
+        /* actionT is a locale string like "01/06/2026, 14:32:10" — sort by doc ID (timestamp-based UID) as fallback */
+        const ta = new Date(a.actionT || 0).getTime() || 0;
+        const tb = new Date(b.actionT || 0).getTime() || 0;
+        return tb - ta; /* descending */
+      });
+
+      if (records.length === 0) {
+        document.getElementById('admin-pay-history-list').innerHTML = `<p style="color:#aaa; text-align:center; padding:20px;">No verified payments yet.</p>`;
+        return;
+      }
+
+      let html = "";
+      records.forEach((r, i) => {
+        const cardId = `ph-body-${i}`;
+        const chevId = `ph-chev-${i}`;
+        html += `
+          <div class="ph-card">
+            <div class="ph-header" onclick="
+              document.getElementById('${cardId}').classList.toggle('open');
+              document.getElementById('${chevId}').classList.toggle('open');
+            ">
+              <div>
+                <div style="font-weight:bold; font-size:13px;">₹${r.amt} — ${r.shift}</div>
+                <div style="font-size:11px; color:#888;">${r.actionT || '—'}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="ph-badge">✅ Verified</span>
+                <span class="ph-chevron" id="${chevId}">▼</span>
+              </div>
+            </div>
+            <div class="ph-body" id="${cardId}">
+              <b>Name UID (UPI):</b> ${r.providedUID}<br>
+              <b>Pay Phone:</b> ${r.providedPhone}<br>
+              <b>User UID:</b> ${r.uid}<br>
+              <b>Shift:</b> ${r.shift}<br>
+              <b>Days Added:</b> ${r.days}<br>
+              <b>Amount:</b> ₹${r.amt}<br>
+              <b>Requested at:</b> ${r.reqT || '—'}<br>
+              <b>Verified at:</b> ${r.actionT}<br>
+              <b>Final Balance:</b> ${r.finalNet} days
+            </div>
+          </div>`;
+      });
+      document.getElementById('admin-pay-history-list').innerHTML = html;
+    });
   };
 
   /* ══════════════════════════════════════════════════════════
@@ -703,7 +802,6 @@
     const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
 
     if (stat === 'OK') {
-      /* Anti-Fraud Check 2 of 2 */
       const histRef  = doc(db, "payment_history", String(providedUID));
       const histSnap = await getDoc(histRef);
       if (histSnap.exists()) {
@@ -711,7 +809,6 @@
         await deleteDoc(doc(db, "signals", sid));
         return;
       }
-      /* Permanent history log */
       await setDoc(histRef, {
         uid, providedUID: String(providedUID), providedPhone: String(providedPhone),
         screenshotStored: true, shift, days, amt, reqT, actionT: getStamp(), finalNet: newBalance
@@ -727,7 +824,7 @@
     await deleteDoc(doc(db, "signals", sid));
   };
 
-  /* ── User Folder / Admin Tools ── */
+  /* ── User Folder ── */
   window.openUser = async (uid) => {
     const snap = await getDoc(doc(db, "users", uid));
     if (!snap.exists()) return;
@@ -777,7 +874,8 @@
     const wSnap    = await getDoc(doc(db, "settings", "wifi"));
     if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
     const data = wSnap.data();
-    if (userTime >= (-(Number(data['max-connection-days']) || 30))) {
+    /* Use window.daysinamonth instead of hardcoded 30 */
+    if (userTime >= (-(Number(data['max-connection-days']) || window.daysinamonth))) {
       const ssid = data.ssid, pass = data.pass;
       if (!ssid || !pass) return alert("Wi-Fi details incomplete in database.");
       window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
@@ -797,36 +895,38 @@
     document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(t === 'account' ? 'tab-acc' : 'tab-man').classList.add('active');
   };
+
   window.switchAdmin = (t) => {
     ['otp','user','wifi'].forEach(k => {
       document.getElementById('am-pane-'+k).classList.toggle('hidden', k !== t);
       document.getElementById('am-'+k+'-btn').classList.toggle('active', k === t);
     });
   };
+
+  /* ── Data Manage sub-tab switcher ── */
+  window.switchDataManage = (t) => {
+    ['wifi','pay'].forEach(k => {
+      document.getElementById('dm-pane-'+k).classList.toggle('hidden', k !== t);
+      document.getElementById('dm-'+k+'-btn').classList.toggle('active', k === t);
+    });
+  };
+
   window.openWizard       = () => document.getElementById('joinWizard').classList.add('show');
   window.closeWizard      = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step1').classList.add('step-active'); document.getElementById('step2').classList.remove('step-active'); };
   window.openLeaveWizard  = () => document.getElementById('leaveWizard').classList.add('show');
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit         = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
 
-  window.calcTotal = () => {
-    const monthInput = document.getElementById('p-days');
-    if (!monthInput) return;
-    if (monthInput.value < 30) monthInput.value = 30;
-    if (monthInput.value > 30) monthInput.value = 30;
-    const phoneString = document.getElementById('p-phone').value.trim();
-    if (!phoneString) return;
-    const total = Number(document.getElementById('p-shift').value) + ((Number(phoneString.slice(-2)) || 0) / 100);
-    window.totalpaymenttodo = total;
-    document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
-  };
-
+  /* ── Price labels in dropdown ── */
   document.getElementById('dayPrice').textContent   = window.dayVal;
   document.getElementById('nightPrice').textContent  = window.nightVal;
   document.getElementById('bothPrice').textContent   = window.bothVal;
   document.querySelector('option[value="day"]').value   = window.dayVal;
   document.querySelector('option[value="night"]').value = window.nightVal;
   document.querySelector('option[value="both"]').value  = window.bothVal;
+
+  /* Initialise p-days to window.daysinamonth (not hardcoded 30) */
+  document.getElementById('p-days').value = window.daysinamonth;
 
   window.updateUserPhoto = (i) => {
     if (i.files[0]) {
