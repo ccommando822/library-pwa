@@ -591,7 +591,8 @@
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
-      
+      alert('historyDefRef complete');
+      alert('start');
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
       const file        = screenshotInput.files[0];
       const payId       = Date.now();
