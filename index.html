@@ -600,7 +600,8 @@
       alert('1b');
       const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
       alert('1c');
-      await uploadBytes(fileRef, file);
+      try{
+        await uploadBytes(fileRef, file);
 } catch (uploadError) {
   alert("Upload failed: " + uploadError.code + " — " + uploadError.message);
   return;
