@@ -1,424 +1,364 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8">  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-  <title>Rakshapal Singh Library ERP</title>  
-  <style>  
-    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #f1c40f; }  
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }  
-    header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }  
-    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }  
-    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; font-size: 13px; }  
-    nav button.active { border-bottom: 3px solid var(--primary); color: var(--primary); }  
-    section { padding: 15px; display: none; max-width: 500px; margin: auto; }  
-    section.active { display: block; }  .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }  
-.detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }  
-.detail-content { flex: 1; }  
-.detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }  
-.detail-content input, .detail-content textarea { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; font-family: inherit; }  
-.detail-content input:not([readonly]), .detail-content textarea:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }  
-.pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }  
-  
-.wizard-overlay { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: white; 
-    z-index: 99999;
-    padding: 20px; 
-    box-sizing: border-box; 
-    display: none; 
-    overflow-y: auto !important; 
-    -webkit-overflow-scrolling: touch;
-}
-.wizard-overlay.show { display: block; overflow-y: auto; }  
-.step-card { display: none; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin: 15px 0; }  
-.step-active { display: block; border-left: 5px solid var(--primary); }  
-.step-num { display: inline-block; width: 25px; height: 25px; background: var(--primary); color: white; text-align: center; border-radius: 50%; font-size: 14px; margin-right: 10px; }  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rakshapal Singh Library ERP</title>
+  <style>
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #f1c40f; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
+    header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
+    nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+    nav button { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; font-size: 13px; }
+    nav button.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+    section { padding: 15px; display: none; max-width: 500px; margin: auto; }
+    section.active { display: block; }
+    .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .detail-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .detail-content { flex: 1; }
+    .detail-label { font-size: 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .detail-content input, .detail-content textarea { border: none; background: transparent; font-size: 16px; width: 100%; outline: none; padding: 4px 0; font-family: inherit; }
+    .detail-content input:not([readonly]), .detail-content textarea:not([readonly]) { border-bottom: 1.5px solid var(--primary); background: #fffde7; }
+    .pencil-btn { cursor: pointer; color: var(--primary); font-size: 18px; padding-left: 10px; }
+    .wizard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 99999; padding: 20px; box-sizing: border-box; display: none; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+    .wizard-overlay.show { display: block; overflow-y: auto; }
+    .step-card { display: none; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin: 15px 0; }
+    .step-active { display: block; border-left: 5px solid var(--primary); }
+    .step-num { display: inline-block; width: 25px; height: 25px; background: var(--primary); color: white; text-align: center; border-radius: 50%; font-size: 14px; margin-right: 10px; }
+    .player-card { background: #fff; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; margin-bottom: 12px; cursor: pointer; border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }
+    .player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .player-info { display: flex; align-items: center; }
+    .player-photo { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; object-fit: cover; border: 2px solid #eee; }
+    .player-details { display: flex; flex-direction: column; font-size: 12px; color: #555; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 5px; }
+    .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
+    .btn-blue { background: var(--primary); color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }
+    .hidden { display: none !important; }
+    .log-container { max-height: 100px; overflow: hidden; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; cursor: pointer; border-top: 1px dashed #ccc; padding-top: 5px; transition: max-height 0.3s ease-out; }
+    .log-container.expanded { max-height: none; }
+    .sig-timer { float: right; color: var(--yellow); font-size: 12px; font-weight: bold; background: #333; padding: 2px 8px; border-radius: 4px; }
+    .live-srv-display { font-family: monospace; font-size: 20px; font-weight: 900; color: var(--primary); display: block; margin: 10px 0; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
 
-.player-card { background: #fff; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; margin-bottom: 12px; cursor: pointer; border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }  
-.player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }  
-.player-info { display: flex; align-items: center; }  
-.player-photo { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; object-fit: cover; border: 2px solid #eee; }  
-.player-details { display: flex; flex-direction: column; font-size: 12px; color: #555; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 5px; }  
-.status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }  
-  
-.btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }  
-.btn-blue { background: var(--primary); color: white; }  
-.btn-green { background: var(--green); color: white; }  
-.btn-outline { background: transparent; border: 1.5px solid var(--red); color: var(--red); }  
-.hidden { display: none !important; }  
-  
-.log-container { max-height: 100px; overflow: hidden; font-size: 11px; margin-top: 8px; display: flex; flex-direction: column; cursor: pointer; border-top: 1px dashed #ccc; padding-top: 5px; transition: max-height 0.3s ease-out; }  
-.log-container.expanded { max-height: none; }  
-  
-.sig-timer { float: right; color: var(--yellow); font-size: 12px; font-weight: bold; background: #333; padding: 2px 8px; border-radius: 4px; }  
-.live-srv-display { font-family: monospace; font-size: 20px; font-weight: 900; color: var(--primary); display: block; margin: 10px 0; letter-spacing: 1px; }
+<header>Rakshapal Singh Library</header>
 
-  </style>  
-</head>  
-<body>  <header>Rakshapal Singh Library</header> 
-  <!-- ========================================== -->
 <script>
-  window.dayVal = 600;
-  window.nightVal = 500;
-  window.bothVal = 800;
+  window.dayVal      = 600;
+  window.nightVal    = 500;
+  window.bothVal     = 800;
   window.daysinamonth = 30;
 </script>
-  
-  <div id="pay-modal" class="wizard-overlay" style="padding: 0;">  
-    
-    <div style="position: sticky; top: 0; left: 0; width: 100%; background: white; padding: 20px; box-sizing: border-box; border-bottom: 1px solid #eee; z-index: 10;">
-        <h2 style="margin: 0; font-size: 24px;">Payment Wizard</h2>  
-    </div>
-    
-    <div style="padding: 20px; padding-bottom: 40px; box-sizing: border-box;">
-        
-        <div id="pstep1" class="step-card step-active">  
-            <span class="step-num">1</span> <b>Payment Information Validation</b> 
-            
-            <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
-            <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
-            <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;">
-                <p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
-            </div>
-            
-            <p><b>Payment UID</b></p>
-            <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
-            <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;">
-                <p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
-            </div>
-            
-            <p><b>ScreenShot</b></p>
-            <input type="file" id="payment-screenshot" accept="image/*" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">
-            <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;">
-                <p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
-            </div>
-            
-            <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;">
-                <p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
-            </div>  
-            
-            <button id="payment-verify-btn" class="btn btn-blue" style="width: 100%; padding: 15px; font-size: 18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>  
-        </div>  
 
-        <div id="pstep2" class="step-card" style="display: none;">  
-            <span class="step-num">2</span> <b>Final OTP</b>  
-            <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing: border-box;">  
-            <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;">
-                <p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin: 5px 0; font-size: 14px;"></p>
-            </div>
-            
-            <button class="btn btn-black" style="width: 100%; padding: 15px; font-size: 18px;" onclick="window.verifyPayment()">Confirm Payment Successful</button>  
-        </div>  
-
-        <div style="margin-top: 30px; text-align: center;">
-            <button class="btn" style="background: #f5f5f5; color: #666; width: 100%; padding: 15px; font-size: 16px; border-radius: 10px; border: 1px solid #ddd; font-weight: bold; cursor: pointer;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>  
-        </div>
-
-    </div>
+<!-- ══════════════════════════════════════════════════════
+     SCREENSHOT FULLSCREEN VIEWER  — lives in HTML, NOT in <script>
+     FIX ERROR 1: Moved outside the module script block
+════════════════════════════════════════════════════════ -->
+<div id="ss-modal"
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.92); z-index:999999;
+            align-items:center; justify-content:center; flex-direction:column;"
+     onclick="this.style.display='none';">
+  <img id="ss-viewer" style="max-width:95%; max-height:90vh; border-radius:8px;">
+  <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
 </div>
 
+<!-- Payment Wizard -->
+<div id="pay-modal" class="wizard-overlay" style="padding: 0;">
+  <div style="position:sticky; top:0; left:0; width:100%; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
+    <h2 style="margin:0; font-size:24px;">Payment Wizard</h2>
+  </div>
+  <div style="padding:20px; padding-bottom:40px; box-sizing:border-box;">
 
-  
-  <div id="joinWizard" class="wizard-overlay">  
-    <h2>Admission Wizard</h2>  
-    <div id="step1" class="step-card step-active">  
-        <span class="step-num">1</span> <b>Verify Profile Folder</b>  
-        <p style="font-size:12px; color:#666;">Name, Father, and Address must have 6+ letters.</p>  
-        <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Send Signal</button>  
-    </div>  
-    <div id="step2" class="step-card">  
-        <span class="step-num">2</span> <b>Verify Identity (OTP)</b>  
-        <input type="number" id="join-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
-        <button class="btn btn-black" onclick="window.verifyJoin()">Complete Admission</button>  
-    </div>  
-    <button class="btn" style="background:none; color:gray;" onclick="window.closeWizard()">Cancel</button>  
-</div>  <div id="leaveWizard" class="wizard-overlay">  
-    <h2>Membership Exit</h2>  
-    <div id="lstep1" class="step-card step-active">  
-        <span class="step-num">1</span> <b>Check Balance</b>  
-        <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>  
-        <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees & Signal</button>  
-    </div>  
-    <div id="lstep2" class="step-card">  
-        <span class="step-num">2</span> <b>Final Approval</b>  
-        <input type="number" id="leave-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">  
-        <button class="btn btn-black" onclick="window.verifyLeave()">Confirm Exit</button>  
-    </div>  
-    <button class="btn" style="background:none; color:gray;" onclick="window.closeLeaveWizard()">Cancel</button>  
-</div>  <nav id="main-nav">  
-  <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>  
-  <button id="tab-man" class="hidden" onclick="switchMain('manage')">Manage 🛠</button>  
-</nav>  <section id="account" class="active">  
+    <div id="pstep1" class="step-card step-active">
+      <span class="step-num">1</span> <b>Payment Information Validation</b>
+      <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
+      <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
+      <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;">
+        <p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
+      </div>
+      <p><b>Payment UID</b></p>
+      <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
+      <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;">
+        <p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
+      </div>
+      <p><b>ScreenShot</b></p>
+      <input type="file" id="payment-screenshot" accept="image/*" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
+      <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;">
+        <p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
+      </div>
+      <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;">
+        <p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
+      </div>
+      <button id="payment-verify-btn" class="btn btn-blue" style="width:100%; padding:15px; font-size:18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>
+    </div>
+
+    <div id="pstep2" class="step-card" style="display:none;">
+      <span class="step-num">2</span> <b>Final OTP</b>
+      <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
+      <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;">
+        <p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p>
+      </div>
+      <button class="btn" style="background:#1c1e21; color:white; width:100%; padding:15px; font-size:18px;" onclick="window.verifyPayment()">Confirm Payment Successful</button>
+    </div>
+
+    <div style="margin-top:30px; text-align:center;">
+      <button class="btn" style="background:#f5f5f5; color:#666; width:100%; padding:15px; font-size:16px; border-radius:10px; border:1px solid #ddd; font-weight:bold; cursor:pointer;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admission Wizard -->
+<div id="joinWizard" class="wizard-overlay">
+  <h2>Admission Wizard</h2>
+  <div id="step1" class="step-card step-active">
+    <span class="step-num">1</span> <b>Verify Profile Folder</b>
+    <p style="font-size:12px; color:#666;">Name, Father, and Address must have 6+ letters.</p>
+    <button class="btn btn-blue" onclick="window.checkStepOne()">Check & Send Signal</button>
+  </div>
+  <div id="step2" class="step-card">
+    <span class="step-num">2</span> <b>Verify Identity (OTP)</b>
+    <input type="number" id="join-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+    <button class="btn" style="background:#1c1e21; color:white;" onclick="window.verifyJoin()">Complete Admission</button>
+  </div>
+  <button class="btn" style="background:none; color:gray;" onclick="window.closeWizard()">Cancel</button>
+</div>
+
+<!-- Leave Wizard -->
+<div id="leaveWizard" class="wizard-overlay">
+  <h2>Membership Exit</h2>
+  <div id="lstep1" class="step-card step-active">
+    <span class="step-num">1</span> <b>Check Balance</b>
+    <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>
+    <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees & Signal</button>
+  </div>
+  <div id="lstep2" class="step-card">
+    <span class="step-num">2</span> <b>Final Approval</b>
+    <input type="number" id="leave-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:10px;">
+    <button class="btn" style="background:#1c1e21; color:white;" onclick="window.verifyLeave()">Confirm Exit</button>
+  </div>
+  <button class="btn" style="background:none; color:gray;" onclick="window.closeLeaveWizard()">Cancel</button>
+</div>
+
+<nav id="main-nav">
+  <button id="tab-acc" class="active" onclick="switchMain('account')">Account</button>
+  <button id="tab-man" class="hidden" onclick="switchMain('manage')">Manage 🛠</button>
+</nav>
+
+<section id="account" class="active">
   <div id="loginPanel" class="card" style="text-align:center;">
-    
-    <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>  
-  <div id="profilePanel" class="hidden">  
-    <div class="card" style="text-align:center;">  
-      <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">  
-      <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="window.updateUserPhoto(this)">  
-      <div id="status-joined" style="font-size: 11px; font-weight: bold; color: #666;">NOT JOINED</div>  <div id="status-days" class="live-srv-display">00:00:00:00</div>  
-    
-  <div id="join-trigger-box"><button class="btn btn-blue" onclick="window.openWizard()">Start Admission</button></div>  
-    
-  <div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">  
-    <button class="btn btn-green" onclick="window.connectToWifi()">🛜 Connect to Internet</button>  
-  </div>  
-</div>  
-
-<div class="card">  
-  <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>  
-  <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>  
-  <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>  
-  <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>  
-  <button class="btn btn-green" onclick="window.saveProfile()">Update Folder Details</button>  
-</div>  
-
-<div id="active-tools" class="hidden">  
-    <div class="card" style="background: #f0f7ff;">  
+    <button class="btn btn-blue" onclick="window.login()">Sign in with Google</button>
+  </div>
+  <div id="profilePanel" class="hidden">
+    <div class="card" style="text-align:center;">
+      <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
+      <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="window.updateUserPhoto(this)">
+      <div id="status-joined" style="font-size:11px; font-weight:bold; color:#666;">NOT JOINED</div>
+      <div id="status-days" class="live-srv-display">00:00:00:00</div>
+      <div id="join-trigger-box"><button class="btn btn-blue" onclick="window.openWizard()">Start Admission</button></div>
+      <div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">
+        <button class="btn btn-green" onclick="window.connectToWifi()">🛜 Connect to Internet</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label><input type="text" id="p-name" readonly></div><span class="pencil-btn" onclick="makeEdit('p-name')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
+      <button class="btn btn-green" onclick="window.saveProfile()">Update Folder Details</button>
+    </div>
+    <div id="active-tools" class="hidden">
+      <div class="card" style="background:#f0f7ff;">
         <select id="p-shift" onchange="calcTotal()" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
-            <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
-            <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
-            <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option></select>
+          <option value="day">Day Shift(₹<span id="dayPrice"></span>)</option>
+          <option value="night">Night Shift(₹<span id="nightPrice"></span>)</option>
+          <option value="both">Both Shift(₹<span id="bothPrice"></span>)</option>
+        </select>
         <label class="detail-label">Days</label>
-        <input type="number" id="p-days" value="30" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">  
-        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Click on Shift first</span></div>  
-        <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>  
-    </div>  
-    <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>  
-</div>  
-  
-<div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>  
-<button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
+        <input type="number" id="p-days" value="30" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">
+        <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center;">Total Amount: ₹<span id="totalDisplay">Click on Shift first</span></div>
+        <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>
+      </div>
+      <button class="btn btn-outline" onclick="window.openLeaveWizard()">Membership Exit</button>
+    </div>
+    <div class="card"><label class="detail-label">Payment History</label><div id="user-pay-log" class="log-container" onclick="this.classList.toggle('expanded')"></div></div>
+    <button style="width:100%; border:none; color:gray; padding:20px; cursor:pointer;" onclick="window.logout()">Logout</button>
+  </div>
+</section>
 
-  </div>  
-</section>  <section id="manage">  
-    <div style="display:flex; gap:5px; margin-bottom:15px;">  
-        <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Signals</button>  
-        <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Survivals</button>  
-        <button id="am-wifi-btn" onclick="switchAdmin('wifi')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Wi-Fi</button>  
-    </div>  <div id="am-pane-otp"><div id="admin-otp-list"></div></div>  
-<div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>  
-  
-<div id="am-pane-wifi" class="hidden">  
-    <div class="card">  
-        <label class="detail-label">Library Wi-Fi SSID</label>  
-        <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">  
-        <label class="detail-label">Wi-Fi Password</label>  
-        <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">  
-        <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>  
-    </div>  
+<section id="manage">
+  <div style="display:flex; gap:5px; margin-bottom:15px;">
+    <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Signals</button>
+    <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Survivals</button>
+    <button id="am-wifi-btn" onclick="switchAdmin('wifi')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Wi-Fi</button>
+  </div>
+  <div id="am-pane-otp"><div id="admin-otp-list"></div></div>
+  <div id="am-pane-user" class="hidden"><div id="admin-survival-list"></div></div>
+  <div id="am-pane-wifi" class="hidden">
+    <div class="card">
+      <label class="detail-label">Library Wi-Fi SSID</label>
+      <input type="text" id="wifi-ssid" placeholder="Enter Wi-Fi Name" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px;">
+      <label class="detail-label">Wi-Fi Password</label>
+      <input type="text" id="wifi-pass" placeholder="Enter Wi-Fi Password" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+      <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>
+    </div>
+  </div>
+</section>
+
+<div id="owner-folder-view" class="wizard-overlay">
+  <button class="btn" style="background:#1c1e21; color:white;" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back</button>
+  <div id="folder-content"></div>
 </div>
 
-</section>  <div id="owner-folder-view" class="wizard-overlay"><button class="btn btn-black" onclick="document.getElementById('owner-folder-view').classList.remove('show')">← Back</button><div id="folder-content"></div></div>  
-<script type="module">  
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";  
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";  
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  /* ── FIX 1: Import Firebase Storage (was missing entirely) ── */
-  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<!-- ══════════════════════════════════════════════════════
+     ALL JAVASCRIPT — one clean module block, nothing outside
+════════════════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp }                                        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+                                                                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, arrayUnion, updateDoc }
+                                                                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
-    authDomain: "rakshapal-singh-library-ded2e.firebaseapp.com",
-    projectId: "rakshapal-singh-library-ded2e",
-    storageBucket: "rakshapal-singh-library-ded2e.firebasestorage.app",
+    apiKey:            "AIzaSyDjn6u195jqewM53qb2xnrPruFnMOELAcc",
+    authDomain:        "rakshapal-singh-library-ded2e.firebaseapp.com",
+    projectId:         "rakshapal-singh-library-ded2e",
+    storageBucket:     "rakshapal-singh-library-ded2e.firebasestorage.app",
     messagingSenderId: "988319651464",
-    appId: "1:988319651464:web:477fa283cddb1d1123713d"
+    appId:             "1:988319651464:web:477fa283cddb1d1123713d"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const storage = getStorage(app);      /* ── FIX 1 continued: storage instance ── */
+  const app      = initializeApp(firebaseConfig);
+  const auth     = getAuth(app);
+  const db       = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
 
+  /* ── Helpers ── */
   window.formatTime = (decimalDays) => {
     if (decimalDays === undefined) return "00:00:00:00";
-    let sign = decimalDays < 0 ? "-" : "";  
-    let totalSeconds = Math.floor(Math.abs(decimalDays) * 86400);  
-    let d = Math.floor(totalSeconds / 86400);  
-    let h = Math.floor((totalSeconds % 86400) / 3600);  
-    let m = Math.floor((totalSeconds % 3600) / 60);  
-    let s = totalSeconds % 60;  
-    return `${sign}${d.toString().padStart(2, '0')}:${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    const sign         = decimalDays < 0 ? "-" : "";
+    const totalSeconds = Math.floor(Math.abs(decimalDays) * 86400);
+    const d = Math.floor(totalSeconds / 86400);
+    const h = Math.floor((totalSeconds % 86400) / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${sign}${String(d).padStart(2,'0')}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
 
   window.getRealSurvival = (u) => {
-    if(!u.joinDateISO) return u.totalPaidDays || 0;
+    if (!u.joinDateISO) return u.totalPaidDays || 0;
     return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
   };
 
   window.renderLogs = (history) => {
     let out = "";
     (history || []).slice().reverse().forEach(h => {
-      if (typeof h === "string") {  
-        out += `<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`;  
-        return;  
-      }  
-      if (h.status === "Pending") {  
-        out += `<pre style="font-family:monospace; margin:0;">⏳Request:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n--------------------------\n</pre>`;
-      }  
-      if (h.status === "OTP_Verified") {  
-        out += `<pre style="font-family:monospace; margin:0;">🔐 OTP Verified:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nOTP matched at :- (${h.otpT})\n--------------------------\n</pre>`;
-      }
-      if (h.status === "Verified") {  
-        out += `<pre style="font-family:monospace; margin:0;">✅Verified:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nVerified at :- (${h.actionT})\n--------------------------\n</pre>`;
-      }  
-      if (h.status === "Rejected") {  
-        out += `<pre style="font-family:monospace; margin:0;">❌Rejected:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nRejected at :- (${h.actionT})\n--------------------------\n</pre>`;
-      }
+      if (typeof h === "string") { out += `<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`; return; }
+      if (h.status === "Pending")      out += `<pre style="font-family:monospace;margin:0;">⏳Request:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n--------------------------\n</pre>`;
+      if (h.status === "OTP_Verified") out += `<pre style="font-family:monospace;margin:0;">🔐 OTP Verified:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nOTP matched at :- (${h.otpT})\n--------------------------\n</pre>`;
+      if (h.status === "Verified")     out += `<pre style="font-family:monospace;margin:0;">✅Verified:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nVerified at :- (${h.actionT})\n--------------------------\n</pre>`;
+      if (h.status === "Rejected")     out += `<pre style="font-family:monospace;margin:0;">❌Rejected:\nRequest at :- (${h.reqT})\n\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n\nRejected at :- (${h.actionT})\n--------------------------\n</pre>`;
     });
     return out || "No payment history.";
   };
 
+  const clearAllPaymentErrors = () => {
+    ['phone','uid','screenshot','dues','otp'].forEach(s => {
+      const b = document.getElementById(`payment-${s}-error-box`);
+      if (b) b.classList.add('hidden');
+    });
+  };
+
+  /* ── Auth State ── */
   onAuthStateChanged(auth, async (user) => {
-    if(user) {
+    if (user) {
       const uRef = doc(db, "users", user.uid);
       await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
-        await setDoc(uRef, {
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-          isOnline: true,
-          totalPaidDays: 0,
-          history: []
-        });
+        await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
       });
 
-      onSnapshot(uRef, (snap) => {  
-        if(snap.exists()) {  
-          currentUserData = snap.data();
+      onSnapshot(uRef, (snap) => {
+        if (!snap.exists()) return;
+        currentUserData = snap.data();
 
-          if (user.email === "c.commando822@gmail.com") {
-            getDoc(doc(db, "settings", "wifi")).then(wSnap => {
-              if (wSnap.exists()) {
-                document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
-                document.getElementById('wifi-pass').value = wSnap.data().pass || "";
-              }
-            });
-          }
+        if (user.email === "c.commando822@gmail.com") {
+          getDoc(doc(db, "settings", "wifi")).then(wSnap => {
+            if (wSnap.exists()) {
+              document.getElementById('wifi-ssid').value = wSnap.data().ssid || "";
+              document.getElementById('wifi-pass').value = wSnap.data().pass || "";
+            }
+          });
+        }
 
-          document.getElementById('loginPanel').classList.add('hidden');
-          document.getElementById('profilePanel').classList.remove('hidden');
-          document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('profilePanel').classList.remove('hidden');
+        document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
+        ['name','father','phone','address'].forEach(k => { const el = document.getElementById('p-'+k); if (el) el.value = currentUserData[k] || ""; });
 
-          ['name','father','phone','address'].forEach(k => {  
-            const el = document.getElementById('p-'+k);  
-            if(el) el.value = currentUserData[k] || "";  
-          });  
+        const srv = window.getRealSurvival(currentUserData);
+        document.getElementById('status-days').innerText = window.formatTime(srv);
+        document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
 
-          const srv = window.getRealSurvival(currentUserData);  
-          document.getElementById('status-days').innerText = window.formatTime(srv);  
-          document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";  
+        if (currentUserData.joinDateISO) {
+          document.getElementById('join-trigger-box').classList.add('hidden');
+          document.getElementById('active-tools').classList.remove('hidden');
+          document.getElementById('wifi-connect-trigger').classList.remove('hidden');
+          document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
+        } else {
+          document.getElementById('join-trigger-box').classList.remove('hidden');
+          document.getElementById('active-tools').classList.add('hidden');
+          document.getElementById('wifi-connect-trigger').classList.add('hidden');
+          document.getElementById('status-joined').innerText = "NOT JOINED";
+        }
 
-          if(currentUserData.joinDateISO) {  
-            document.getElementById('join-trigger-box').classList.add('hidden');  
-            document.getElementById('active-tools').classList.remove('hidden');  
-            document.getElementById('wifi-connect-trigger').classList.remove('hidden');  
-            document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;  
-          } else {  
-            document.getElementById('join-trigger-box').classList.remove('hidden');  
-            document.getElementById('active-tools').classList.add('hidden');  
-            document.getElementById('wifi-connect-trigger').classList.add('hidden');
-            document.getElementById('status-joined').innerText = "NOT JOINED";  
-          }  
-          
-          document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);  
-          
-          if(user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {  
-            document.getElementById('tab-man').classList.remove('hidden');  
-            window.loadAdmin();  
-          }  
-        }  
-      });  
-    } else {  
-      document.getElementById('loginPanel').classList.remove('hidden');  
-      document.getElementById('profilePanel').classList.add('hidden');  
-      document.getElementById('tab-man').classList.add('hidden');  
+        document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
+
+        if (user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {
+          document.getElementById('tab-man').classList.remove('hidden');
+          window.loadAdmin();
+        }
+      });
+    } else {
+      document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('profilePanel').classList.add('hidden');
+      document.getElementById('tab-man').classList.add('hidden');
     }
   });
 
-  window.connectToWifi = async () => {
-    if (!auth.currentUser) return alert("Please log in first.");
-    const uid = auth.currentUser.uid;
-    const snap = await getDoc(doc(db, "users", uid));
-    if (!snap.exists()) return alert("User profile not found.");
-    const u = snap.data();
-    const userTime = window.getRealSurvival(u);
-    
-    const wSnap = await getDoc(doc(db, "settings", "wifi"));
-    if (!wSnap.exists()) { 
-      return alert("Wi-Fi configuration missing in database settings/wifi"); 
-    }
-    
-    const data = wSnap.data();
-    const maxAllowedDays = Number(data['max-connection-days']) || 30; 
-
-    if (userTime >= (-maxAllowedDays)) {
-      try {
-        const ssid = data.ssid;
-        const pass = data.pass;
-        if (!ssid || !pass) { 
-          alert("Wi-Fi details are incomplete in the database. Ensure 'ssid' and 'pass' fields are filled."); 
-          return; 
-        }
-        const deepLink = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-        window.location.href = deepLink;
-        setTimeout(() => {
-          if (document.visibilityState === 'visible') {
-            alert("Please open this in the Library App to connect to Wi-Fi.");
-          }
-        }, 1500);
-      } catch (e) {
-        console.error("Firestore Error:", e);
-        alert("Error fetching Wi-Fi details: " + e.message);
-      }
-    } else {
-      alert("Please pay your fees to access the Wi-Fi network!");
-    }
-  };
-
-  window.saveWifiSettings = async () => {
-    const ssid = document.getElementById('wifi-ssid').value;
-    const pass = document.getElementById('wifi-pass').value;
-    await setDoc(doc(db, "settings", "wifi"), { ssid, pass });
-    alert("Saved.");
-  };
-
+  /* ── Live Interval ── */
   setInterval(() => {
-    if(currentUserData.joinDateISO) {
-      const srv = window.getRealSurvival(currentUserData);
-      document.getElementById('status-days').innerText = window.formatTime(srv);
+    if (currentUserData.joinDateISO) {
+      document.getElementById('status-days').innerText = window.formatTime(window.getRealSurvival(currentUserData));
     }
-    document.querySelectorAll('.admin-live-srv').forEach(el => {  
-      const iso = el.dataset.iso;  
-      if(iso && iso !== "null") {  
-        const paid = parseFloat(el.dataset.paid);  
-        const srv = paid - ((new Date() - new Date(iso)) / 86400000);  
-        el.innerText = window.formatTime(srv);  
-      }  
-    });  
+    document.querySelectorAll('.admin-live-srv').forEach(el => {
+      const iso = el.dataset.iso;
+      if (iso && iso !== "null") {
+        const srv = parseFloat(el.dataset.paid) - ((new Date() - new Date(iso)) / 86400000);
+        el.innerText = window.formatTime(srv);
+      }
+    });
     document.querySelectorAll('.sig-timer').forEach(async el => {
-      let rem = Math.max(0, Math.floor((parseInt(el.dataset.expiry) - Date.now()) / 1000));
-      if (rem <= 0) { el.innerText = "Expired"; await deleteDoc(doc(db, "signals", el.dataset.sid)).catch(()=>{}); }
+      const rem = Math.max(0, Math.floor((parseInt(el.dataset.expiry) - Date.now()) / 1000));
+      if (rem <= 0) { el.innerText = "Expired"; await deleteDoc(doc(db, "signals", el.dataset.sid)).catch(() => {}); }
       else el.innerText = rem + "s";
     });
   }, 1000);
 
-  window.login = () => signInWithPopup(auth, provider);
-  window.logout = async () => { 
-    if(auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false }); 
-    signOut(auth).then(()=>location.reload()); 
+  /* ── Auth Actions ── */
+  window.login  = () => signInWithPopup(auth, provider);
+  window.logout = async () => {
+    if (auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { isOnline: false });
+    signOut(auth).then(() => location.reload());
   };
 
+  /* ── Profile ── */
   window.saveProfile = async () => {
     const n = document.getElementById('p-name').value.trim();
     const f = document.getElementById('p-father').value.trim();
@@ -426,8 +366,7 @@
     const p = document.getElementById('p-phone').value.trim();
     window.calcTotal();
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(p)) return alert("Phone number must be Valid!!!");
+    if (!/^\d{10}$/.test(p)) return alert("Phone number must be Valid!!!");
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
       name: n, father: f, phone: p, address: a,
       history: arrayUnion(
@@ -441,17 +380,14 @@
     return true;
   };
 
-  window.checkStepOne = async() => {
-    const isProfileSaved = await window.saveProfile();
-    if (!isProfileSaved) return;
-    const n = document.getElementById('p-name').value.trim();
-    const p = document.getElementById('p-phone').value.trim();
+  /* ── Admission ── */
+  window.checkStepOne = async () => {
+    if (!await window.saveProfile()) return;
+    const n   = document.getElementById('p-name').value.trim();
+    const p   = document.getElementById('p-phone').value.trim();
     const otp = Math.floor(100000 + Math.random() * 900000);
     const sid = "otp_" + auth.currentUser.uid;
-    await setDoc(doc(db, "signals", sid), {
-      type: 'ADMISSION', otp: otp, uid: auth.currentUser.uid,
-      name: n, phone: p, timestamp: getStamp(), expiresAt: Date.now() + 120000
-    });
+    await setDoc(doc(db, "signals", sid), { type:'ADMISSION', otp, uid:auth.currentUser.uid, name:n, phone:p, timestamp:getStamp(), expiresAt:Date.now()+120000 });
     window.currentJoinOtp = otp;
     document.getElementById('step1').classList.remove('step-active');
     document.getElementById('step2').classList.add('step-active');
@@ -460,16 +396,13 @@
   window.verifyJoin = async () => {
     if (document.getElementById('join-otp').value == window.currentJoinOtp) {
       const now = new Date();
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        joinDate: now.toLocaleDateString('en-GB'),
-        joinDateISO: now.toISOString(),
-        history: arrayUnion(`Joined Library on ${getStamp()}`)
-      });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { joinDate: now.toLocaleDateString('en-GB'), joinDateISO: now.toISOString(), history: arrayUnion(`Joined Library on ${getStamp()}`) });
       await deleteDoc(doc(db, "signals", "otp_" + auth.currentUser.uid));
       location.reload();
     } else alert("Invalid OTP");
   };
 
+  /* ── Leave ── */
   window.checkLeaveFees = () => {
     const srv = window.getRealSurvival(currentUserData);
     if (srv < 0) {
@@ -478,11 +411,7 @@
       return;
     }
     const otp = Math.floor(100000 + Math.random() * 900000);
-    setDoc(doc(db, "signals", "leave_" + auth.currentUser.uid), {
-      type: 'EXIT', otp: otp, uid: auth.currentUser.uid,
-      name: currentUserData.name, phone: currentUserData.phone,
-      timestamp: getStamp(), expiresAt: Date.now() + 120000
-    });
+    setDoc(doc(db, "signals", "leave_" + auth.currentUser.uid), { type:'EXIT', otp, uid:auth.currentUser.uid, name:currentUserData.name, phone:currentUserData.phone, timestamp:getStamp(), expiresAt:Date.now()+120000 });
     window.currentLeaveOtp = otp;
     document.getElementById('lstep1').classList.remove('step-active');
     document.getElementById('lstep2').classList.add('step-active');
@@ -491,203 +420,131 @@
   window.verifyLeave = async () => {
     if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
       const lastBal = window.getRealSurvival(currentUserData);
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        totalPaidDays: lastBal, joinDateISO: null,
-        history: arrayUnion(
-          `Left Library on ${getStamp()}`,
-          `Membership Left. Last Balance: ${Math.floor(lastBal)} days`
-        )
-      });
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: lastBal, joinDateISO: null, history: arrayUnion(`Left Library on ${getStamp()}`, `Membership Left. Last Balance: ${Math.floor(lastBal)} days`) });
       window.location.href = `mylibraryapp://forgetwifi`;
       await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
       setTimeout(() => location.reload(), 1000);
     } else alert("Invalid OTP");
   };
 
-  const clearAllPaymentErrors = () => {
-    ['phone', 'uid', 'screenshot', 'dues', 'otp'].forEach(suffix => {
-      const box = document.getElementById(`payment-${suffix}-error-box`);
-      if (box) box.classList.add('hidden');
-    });
-  };
-
-  /* ════════════════════════════════════════════════════════════
-     doPayment  — FIX 2: Cache amt and days into window globals
-                  so verifyPayment and checkpaymentinfo always
-                  reference the value locked at checkout time,
-                  even if the user later changes the dropdown.
-  ════════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     doPayment — caches amt and days at checkout time
+  ══════════════════════════════════════════════════════════ */
   window.doPayment = () => {
-    let m   = parseInt(document.getElementById('p-days').value) || 0;
-    let amt = window.totalpaymenttodo || 0;
-    let d   = m;
-
-    /* Cache exact checkout values globally */
+    const m   = parseInt(document.getElementById('p-days').value) || 0;
+    const amt = window.totalpaymenttodo || 0;
     window.calculatedPaymentAmt  = amt;
-    window.calculatedPaymentDays = d;
-
+    window.calculatedPaymentDays = m;
     const userChoice = confirm(
       "Choose your Payment Action:\n\n" +
       "👉 Click [ OK ] if you want to OPEN YOUR UPI APP and pay now.\n\n" +
       "👉 Click [ CANCEL ] if you ALREADY PAID and want to verify your transaction UID / receipt code."
     );
-
     clearAllPaymentErrors();
+    document.getElementById('pstep1').style.display = 'block';
+    document.getElementById('pstep2').style.display = 'none';
     document.getElementById('pay-modal').style.display = 'block';
-
-    if (userChoice) {
-      window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
-    }
+    if (userChoice) window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
   };
 
-  /* ════════════════════════════════════════════════════════════
-     checkpaymentinfo  — Gate 1 Part A
-     FIX 3: Use window.calculatedPaymentAmt / Days (not live input)
-     FIX 4: Anti-Fraud duplicate UID check against payment_history
-     FIX 5: Screenshot file upload to Firebase Storage → screenshotUrl
-     FIX 6: OTP attached to signal document (hidden from user)
-             Signal status starts as "Pending" (not shown to user)
-  ════════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     checkpaymentinfo — Gate 1 Part A
+  ══════════════════════════════════════════════════════════ */
   window.checkpaymentinfo = async () => {
     try {
       clearAllPaymentErrors();
-
-      const phoneVal      = document.getElementById('payment-phone').value.trim();
-      const uidVal        = document.getElementById('payment-uid').value.trim();
+      const phoneVal        = document.getElementById('payment-phone').value.trim();
+      const uidVal          = document.getElementById('payment-uid').value.trim();
       const screenshotInput = document.getElementById('payment-screenshot');
-
-      const phoneRegex = /^[6-9]\d{9}$/;
-      const uidRegex   = /^\d{12}$/;
-
       let hasErrors = false;
 
-      if (!phoneRegex.test(phoneVal)) {
+      if (!/^[6-9]\d{9}$/.test(phoneVal)) {
         document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
         document.getElementById('payment-phone-error-box').classList.remove('hidden');
         hasErrors = true;
       }
-
-      if (!uidRegex.test(uidVal)) {
+      if (!/^\d{12}$/.test(uidVal)) {
         document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         hasErrors = true;
       }
-
-      /* Screenshot is now required — FIX 5 */
       if (!screenshotInput.files || screenshotInput.files.length === 0) {
         document.getElementById('payment-screenshot-error-msg').innerText = "Please attach a screenshot of your payment.";
         document.getElementById('payment-screenshot-error-box').classList.remove('hidden');
         hasErrors = true;
       }
-
       if (hasErrors) return;
 
-      /* ── Anti-Fraud Check 1 of 2: duplicate UID in payment_history ── FIX 4 */
-      const historyDocRef = doc(db, "payment_history", uidVal);
-      const historySnap   = await getDoc(historyDocRef);
+      /* Anti-Fraud Check 1 of 2 */
+      const historySnap = await getDoc(doc(db, "payment_history", uidVal));
       if (historySnap.exists()) {
         document.getElementById('payment-uid-error-msg').innerText = "This Transaction UID has already been used. Double-spend blocked.";
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
 
-      /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
-      /* ── Free Plan Fix: Compress image then store as Base64 in Firestore ── */
-      const file = screenshotInput.files[0];
-      const payId = Date.now();
-
-      // Compress the image to under 200KB using Canvas
+      /* Compress screenshot to Base64 via Canvas */
+      const file            = screenshotInput.files[0];
+      const payId           = Date.now();
       const compressedBase64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-              const img = new Image();
-              img.onload = () => {
-                  const canvas = document.createElement('canvas');
-            
-                  // Scale down to max 800px wide while keeping aspect ratio
-                  const maxWidth = 800;
-                  const scale    = Math.min(1, maxWidth / img.width);
-                  canvas.width   = img.width  * scale;
-                  canvas.height  = img.height * scale;
-            
-                  const ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-                  // Compress to JPEG at 60% quality — typically 50-150KB
-                  const base64 = canvas.toDataURL('image/jpeg', 0.6);
-                  resolve(base64);
-              };
-              img.onerror = reject;
-              img.src = e.target.result;
+        const reader  = new FileReader();
+        reader.onload = (e) => {
+          const img    = new Image();
+          img.onload   = () => {
+            const canvas  = document.createElement('canvas');
+            const scale   = Math.min(1, 800 / img.width);
+            canvas.width  = img.width  * scale;
+            canvas.height = img.height * scale;
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
           };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+          img.onerror  = reject;
+          img.src      = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
 
-      alert("Screenshot compressed. Size: " + Math.round(compressedBase64.length / 1024) + "KB");
-
-      /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
+      /* Use cached checkout values */
       const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
       const d         = (window.calculatedPaymentDays || 0) * (window.daysinamonth || 30);
-
       const shiftSelect = document.getElementById('p-shift');
       const shiftName   = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
 
-      window.currentPayId      = payId;
-      window.currentShiftName  = shiftName;
+      window.currentPayId     = payId;
+      window.currentShiftName = shiftName;
 
-      /* ── Hidden OTP generated and stored in signal only ── FIX 6 */
       const randomOtp = Math.floor(100000 + Math.random() * 900000);
       window.generatedPaymentOtp = randomOtp;
 
-      /* ── Write signal with OTP, screenshot, status = Pending ── */
       await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), {
-        type:          'PAYMENT',
-        otp:           randomOtp,          /* Hidden OTP only admin sees */
-        uid:           auth.currentUser.uid,
-        name:          currentUserData.name,
-        phone:         currentUserData.phone,
-        providedPhone: phoneVal,
-        providedUID:   uidVal,
+        type: 'PAYMENT', otp: randomOtp,
+        uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone,
+        providedPhone: phoneVal, providedUID: uidVal,
         screenshot: compressedBase64,
-        id:            payId,
-        reqT:          getStamp(),
-        shift:         shiftName,
-        days:          d,
-        amt:           amt,
-        status:        'Pending'
+        id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending'
       });
 
-      /* ── Write Pending entry to user history ── */
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        history: arrayUnion({
-          id: payId, reqT: getStamp(), shift: shiftName,
-          days: d, amt: amt, status: 'Pending'
-        })
+        history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' })
       });
 
       document.getElementById('pstep1').style.display = 'none';
       document.getElementById('pstep2').style.display = 'block';
 
     } catch (error) {
-      console.error("Wizard execution pipeline crash:", error);
+      console.error("checkpaymentinfo crash:", error);
       alert("An error occurred during payment validation: " + error.message);
     }
   };
 
-  /* ════════════════════════════════════════════════════════════
-     verifyPayment  — Gate 1 Part B
-     FIX 7: Only escalates signal status to "OTP_Verified".
-             Does NOT touch totalPaidDays — that is Gate 2's job.
-     FIX 8: Race-condition defense: re-checks payment_history
-             right before escalating to block duplicate submissions.
-     FIX 9: Updates user history entry status to "OTP_Verified".
-  ════════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     verifyPayment — Gate 1 Part B
+  ══════════════════════════════════════════════════════════ */
   window.verifyPayment = async () => {
     try {
       clearAllPaymentErrors();
-
-      const typedOtp   = document.getElementById('Payment-otp').value.trim();
+      const typedOtp    = document.getElementById('Payment-otp').value.trim();
       const otpErrorBox = document.getElementById('payment-otp-error-box');
       const otpErrorMsg = document.getElementById('payment-otp-error-msg');
 
@@ -696,16 +553,15 @@
         otpErrorMsg.innerText = "Session expired. Please cancel and try again.";
         return;
       }
-
       if (typedOtp !== window.generatedPaymentOtp.toString()) {
         otpErrorBox.classList.remove('hidden');
         otpErrorMsg.innerText = "Invalid OTP code. Please check and try again.";
         return;
       }
 
-      /* ── Race-condition defense: re-check duplicate before escalating ── FIX 8 */
-      const providedUID   = document.getElementById('payment-uid').value.trim();
-      const historySnap   = await getDoc(doc(db, "payment_history", providedUID));
+      /* Race-condition defense */
+      const providedUID  = document.getElementById('payment-uid').value.trim();
+      const historySnap  = await getDoc(doc(db, "payment_history", providedUID));
       if (historySnap.exists()) {
         otpErrorBox.classList.remove('hidden');
         otpErrorMsg.innerText = "Duplicate UID detected during final check. Transaction blocked.";
@@ -715,12 +571,8 @@
       const payId    = window.currentPayId;
       const sigDocId = `pay_${auth.currentUser.uid}_${payId}`;
 
-      /* ── Escalate signal status to OTP_Verified only ── FIX 7 */
-      await updateDoc(doc(db, "signals", sigDocId), {
-        status: 'OTP_Verified'
-      });
+      await updateDoc(doc(db, "signals", sigDocId), { status: 'OTP_Verified' });
 
-      /* ── Update user history entry status to OTP_Verified ── FIX 9 */
       const uRef  = doc(db, "users", auth.currentUser.uid);
       const uSnap = await getDoc(uRef);
       if (uSnap.exists()) {
@@ -735,7 +587,7 @@
       alert("✅ OTP verified! Please wait for admin to confirm your payment.");
 
     } catch (error) {
-      console.error("OTP verification error:", error);
+      console.error("verifyPayment crash:", error);
       alert("OTP verification failed: " + error.message);
     }
   };
@@ -745,13 +597,11 @@
     document.getElementById('pay-modal').style.display = 'none';
   };
 
-  /* ════════════════════════════════════════════════════════════
-     loadAdmin — FIX 10: Expanded signal card UI
-     - Displays providedUID, providedPhone, screenshot link, status badge
-     - Status badge color: yellow = Pending, cyan = OTP_Verified
-     - VERIFY button only active when status === "OTP_Verified"
-     - Calls handlePay with all 11 required arguments
-  ════════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     loadAdmin
+     FIX ERROR 2: screenshotHtml (not screenshotLink) used in card
+     FIX ERROR 3: button block properly concatenated into h
+  ══════════════════════════════════════════════════════════ */
   window.loadAdmin = () => {
     onSnapshot(collection(db, "signals"), s => {
       let h = "";
@@ -766,54 +616,35 @@
                `OTP: <span style="color:var(--yellow); font-size:18px; font-weight:bold;">${sig.otp}</span>` +
                `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="deleteDoc(doc(db,'signals','${d.id}'))">CLEAR</button></div>`;
         } else {
-          /* ── Status badge color logic ── */
-          const isPending     = sig.status === 'Pending';
-          const isOtpVerified = sig.status === 'OTP_Verified';
-          const statusColor   = isOtpVerified ? '#00e5ff' : '#f1c40f';
-          const statusLabel   = isOtpVerified ? '🔐 OTP_VERIFIED' : '⏳ PENDING';
+          const isOtpVerified  = sig.status === 'OTP_Verified';
+          const statusColor    = isOtpVerified ? '#00e5ff' : '#f1c40f';
+          const statusLabel    = isOtpVerified ? '🔐 OTP_VERIFIED' : '⏳ PENDING';
+          const verifyDisabled = isOtpVerified ? '' : 'disabled';
+          const verifyOpacity  = isOtpVerified ? '1' : '0.4';
 
-          /* ── VERIFY button disabled until OTP_Verified ── */
-          const verifyDisabled = !isOtpVerified ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
-          const verifyTitle    = !isOtpVerified ? 'title="Waiting for user OTP verification"' : '';
-
-          /* ── Screenshot hyperlink ── */
-          /* ── Screenshot render — Base64 safe, no onclick injection ── */
+          /* FIX ERROR 2: variable is screenshotHtml, referenced correctly below */
           const screenshotHtml = sig.screenshot
-          ? `<img src="${sig.screenshot}" 
-          style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; 
-                 border:1px solid #333; cursor:zoom-in; display:block;"
-          onclick="document.getElementById('ss-viewer').src=this.src; 
-                   document.getElementById('ss-modal').style.display='flex';">`
-          : `<span style="color:#888; font-size:11px;">No screenshot attached</span>`;
+            ? `<img src="${sig.screenshot}"
+                    style="width:100%; max-width:400px; border-radius:8px; margin-top:8px;
+                           border:1px solid #333; cursor:zoom-in; display:block;"
+                    onclick="document.getElementById('ss-viewer').src=this.src;
+                             document.getElementById('ss-modal').style.display='flex';">`
+            : `<span style="color:#888; font-size:11px;">No screenshot attached</span>`;
 
-          /* ── 11-argument handlePay call ── FIX 11 */
-          h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px;">` +
-               `[PAYMENT SIGNAL]\n` +
-               `STATUS : <span style="color:${statusColor}; font-weight:bold;">${statusLabel}</span>\n` +
+          /* FIX ERROR 3: all parts concatenated into h in one chain */
+          h += `<div class="card" style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px; border-radius:12px 12px 0 0;">` +
+               `[PAYMENT SIGNAL]\nSTATUS : <span style="color:${statusColor}; font-weight:bold;">${statusLabel}</span>\n` +
                `--------------------------\n` +
-               `NAME   : ${sig.name}\n` +
-               `PHONE  : ${sig.phone}\n` +
-               `PAY PHONE: ${sig.providedPhone || 'N/A'}\n` +
-               `PAY UID  : ${sig.providedUID || 'N/A'}\n` +
-               `SHIFT  : ${sig.shift}\n` +
-               `DAYS   : ${sig.days}\n` +
-               `AMOUNT : ₹${sig.amt} (${sig.reqT})\n` +
-               `--------------------------\n` +
-               `${screenshotLink}\n` +
-               `--------------------------\n` +
+               `NAME     : ${sig.name}\nPHONE    : ${sig.phone}\nPAY PHONE: ${sig.providedPhone || 'N/A'}\nPAY UID  : ${sig.providedUID || 'N/A'}\n` +
+               `SHIFT    : ${sig.shift}\nDAYS     : ${sig.days}\nAMOUNT   : ₹${sig.amt} (${sig.reqT})\n` +
+               `--------------------------\n</div>` +
+               `<div style="background:#000; padding:10px; border:1px solid #333; border-top:none;">` +
+               screenshotHtml +
                `</div>` +
-               `<div style="display:flex; gap:10px; background:#000; padding:10px; border:1px solid #333; border-top:none; margin-top:-15px; border-radius:0 0 12px 12px;">` +
-               /* ── VERIFY button — never pass Base64 through onclick ── */
-`<button class="btn btn-green" ${verifyDisabled} ${verifyTitle} 
-   onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},
-           '${sig.reqT}','${sig.shift}',${sig.id},
-           '${sig.providedUID}','${sig.providedPhone}','${d.id}')">VERIFY</button>` +
-
-`<button class="btn btn-outline" 
-   onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,
-           '${sig.reqT}','${sig.shift}',${sig.id},
-           '${sig.providedUID}','${sig.providedPhone}','${d.id}')">REJECT</button>`
-          `</div>`;
+               `<div style="display:flex; gap:10px; background:#111; padding:10px; border:1px solid #333; border-top:none; border-radius:0 0 12px 12px;">` +
+               `<button class="btn btn-green" ${verifyDisabled} style="opacity:${verifyOpacity};" onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">VERIFY</button>` +
+               `<button class="btn btn-outline" onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">REJECT</button>` +
+               `</div>`;
         }
       });
       document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
@@ -822,36 +653,30 @@
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ_ok:"", onJ_exp:"", offJ_ok:"", offJ_exp:"", onNL:"", offNL:"" };
       s.forEach(d => {
-        const u = d.data();
+        const u        = d.data();
         const srv      = window.getRealSurvival(u);
         const isJoined = !!u.joinDateISO;
         const isOnline = !!u.isOnline;
         const counterHtml = isJoined
           ? `<span class="admin-live-srv" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'}; font-weight:bold;">${window.formatTime(srv)}</span>`
           : `<span style="color:#666; font-weight:bold;">${window.formatTime(srv)} (Static)</span>`;
-        const card = `
-          <div class="player-card" onclick="window.openUser('${d.id}')">
-            <div class="player-header">
-              <div class="player-info">
-                <img src="${u.photo||''}" class="player-photo">
-                <div>
-                  <div style="font-weight:bold; font-size:14px;">${u.name}</div>
-                  <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">
-                    ${isOnline ? '● Online' : '○ Offline'}
-                  </div>
-                </div>
+        const card = `<div class="player-card" onclick="window.openUser('${d.id}')">
+          <div class="player-header">
+            <div class="player-info">
+              <img src="${u.photo||''}" class="player-photo">
+              <div>
+                <div style="font-weight:bold; font-size:14px;">${u.name}</div>
+                <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">${isOnline ? '● Online' : '○ Offline'}</div>
               </div>
-              ${counterHtml}
             </div>
-            <div class="player-details">
-              <span>📞 ${u.phone || 'N/A'}</span>
-              <span>📧 ${u.email || 'N/A'}</span>
-            </div>
-          </div>`;
-        if (isJoined && isOnline)       { srv >= 0 ? g.onJ_ok  += card : g.onJ_exp  += card; }
+            ${counterHtml}
+          </div>
+          <div class="player-details"><span>📞 ${u.phone||'N/A'}</span><span>📧 ${u.email||'N/A'}</span></div>
+        </div>`;
+        if      (isJoined && isOnline)  { srv >= 0 ? g.onJ_ok  += card : g.onJ_exp  += card; }
         else if (isJoined && !isOnline) { srv >= 0 ? g.offJ_ok += card : g.offJ_exp += card; }
-        else if (isOnline && !isJoined) g.onNL  += card;
-        else                            g.offNL += card;
+        else if (isOnline && !isJoined)   g.onNL  += card;
+        else                              g.offNL += card;
       });
       document.getElementById('admin-survival-list').innerHTML =
         `<div class="detail-label">🟢 Online & Joined (Active / Grace)</div>${g.onJ_ok}` +
@@ -863,88 +688,47 @@
     });
   };
 
-  /* ════════════════════════════════════════════════════════════
-     handlePay  — Gate 2  (11-parameter signature)
-     FIX 12: Anti-Fraud Check 2 of 2 — re-checks payment_history
-              at the moment of admin approval. If UID already
-              exists, deletes the malicious signal and aborts.
-     FIX 13: Creates permanent payment_history document keyed
-              by the 12-digit UPI UID.
-     FIX 14: Maps user history array entries cleanly — updates
-              matching payId entry status to Verified/Rejected,
-              adds actionT timestamp, updates finalNet.
-              Does NOT cause type mismatches.
-  ════════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     handlePay — Gate 2 (11-parameter)
+  ══════════════════════════════════════════════════════════ */
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone, sigDocId) => {
-  const ref  = doc(db, "users", uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return;
+    const ref  = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
 
-  /* Fetch screenshot from signal document instead of passing as argument */
-  const sigSnap = await getDoc(doc(db, "signals", sigDocId));
-  const screenshotBase64 = sigSnap.exists() ? (sigSnap.data().screenshot || "") : "";
+    const u           = snap.data();
+    const prevBalance = u.totalPaidDays || 0;
+    const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
 
-  const u           = snap.data();
-  const prevBalance = u.totalPaidDays || 0;
-  const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
-
-  if (stat === 'OK') {
-    /* Anti-Fraud Check 2 of 2 */
-    const histRef  = doc(db, "payment_history", String(providedUID));
-    const histSnap = await getDoc(histRef);
-    if (histSnap.exists()) {
-      alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
-      await deleteDoc(doc(db, "signals", sid));
-      return;
+    if (stat === 'OK') {
+      /* Anti-Fraud Check 2 of 2 */
+      const histRef  = doc(db, "payment_history", String(providedUID));
+      const histSnap = await getDoc(histRef);
+      if (histSnap.exists()) {
+        alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
+        await deleteDoc(doc(db, "signals", sid));
+        return;
+      }
+      /* Permanent history log */
+      await setDoc(histRef, {
+        uid, providedUID: String(providedUID), providedPhone: String(providedPhone),
+        screenshotStored: true, shift, days, amt, reqT, actionT: getStamp(), finalNet: newBalance
+      });
     }
 
-    /* Permanent history log */
-    await setDoc(histRef, {
-      uid:             uid,
-      providedUID:     String(providedUID),
-      providedPhone:   String(providedPhone),
-      screenshotStored: true,
-      shift:           shift,
-      days:            days,
-      amt:             amt,
-      reqT:            reqT,
-      actionT:         getStamp(),
-      finalNet:        newBalance
+    const newHistory = (u.history || []).map(h => {
+      if (typeof h !== 'object' || h.id !== payId) return h;
+      return { ...h, status: stat === 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newBalance };
     });
-  }
 
-  /* Clean array map update */
-  const newHistory = (u.history || []).map(h => {
-    if (typeof h !== 'object' || h.id !== payId) return h;
-    return {
-      ...h,
-      status:   stat === 'OK' ? 'Verified' : 'Rejected',
-      actionT:  getStamp(),
-      finalNet: newBalance
-    };
-  });
+    await updateDoc(ref, { totalPaidDays: newBalance, history: newHistory });
+    await deleteDoc(doc(db, "signals", sid));
+  };
 
-  await updateDoc(ref, {
-    totalPaidDays: newBalance,
-    history:       newHistory
-  });
-
-  await deleteDoc(doc(db, "signals", sid));
-};
-
-  <!-- Screenshot Fullscreen Viewer -->
-<div id="ss-modal" 
-     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-            background:rgba(0,0,0,0.92); z-index:999999; 
-            align-items:center; justify-content:center; flex-direction:column;"
-     onclick="this.style.display='none';">
-  <img id="ss-viewer" style="max-width:95%; max-height:90vh; border-radius:8px;">
-  <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
-</div>
-
+  /* ── User Folder / Admin Tools ── */
   window.openUser = async (uid) => {
     const snap = await getDoc(doc(db, "users", uid));
-    if(!snap.exists()) return;
+    if (!snap.exists()) return;
     const u = snap.data();
     document.getElementById('folder-content').innerHTML = `
       <div class="card" style="text-align:center;">
@@ -952,40 +736,59 @@
         <div class="admin-live-srv live-srv-display" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}">${window.formatTime(window.getRealSurvival(u))}</div>
       </div>
       <div class="card">
-        <p><b>Name:</b> ${u.name}</p>
-        <p><b>Father:</b> ${u.father || '-'}</p>
-        <p><b>Mobile:</b> ${u.phone || '-'}</p>
-        <p><b>Email:</b> ${u.email || '-'}</p>
-        <p><b>Address:</b> ${u.address || '-'}</p>
+        <p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p>
+        <p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p>
+        <p><b>Address:</b> ${u.address||'-'}</p>
       </div>
       <div class="card">
         <label class="detail-label">Manual Adjustment</label>
-        <div style="display:flex; gap:5px;"><input type="number" id="adm-manual-days" placeholder="+/- days" style="flex:1; padding:10px;"><button class="btn btn-blue" onclick="window.adminEditDays('${uid}')">Set</button></div>
+        <div style="display:flex; gap:5px;">
+          <input type="number" id="adm-manual-days" placeholder="+/- days" style="flex:1; padding:10px;">
+          <button class="btn btn-blue" onclick="window.adminEditDays('${uid}')">Set</button>
+        </div>
       </div>
       <div class="card"><div class="log-container" onclick="this.classList.toggle('expanded')">${window.renderLogs(u.history)}</div></div>
-      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>
-    `;
+      <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
   window.adminForceLeave = async (uid) => {
-    if(confirm("Force Stop Session?")) {
+    if (confirm("Force Stop Session?")) {
       const snap = await getDoc(doc(db, "users", uid));
-      await updateDoc(doc(db, "users", uid), {
-        totalPaidDays: window.getRealSurvival(snap.data()),
-        joinDateISO: null,
-        history: arrayUnion(`Force Exit by Admin at ${getStamp()}`)
-      });
+      await updateDoc(doc(db, "users", uid), { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`Force Exit by Admin at ${getStamp()}`) });
       document.getElementById('owner-folder-view').classList.remove('show');
     }
   };
 
   window.adminEditDays = async (uid) => {
     const val = parseFloat(document.getElementById('adm-manual-days').value);
-    await updateDoc(doc(db, "users", uid), { totalPaidDays: (await getDoc(doc(db,"users",uid))).data().totalPaidDays + val });
+    const cur = (await getDoc(doc(db, "users", uid))).data().totalPaidDays;
+    await updateDoc(doc(db, "users", uid), { totalPaidDays: cur + val });
     window.openUser(uid);
   };
 
+  window.connectToWifi = async () => {
+    if (!auth.currentUser) return alert("Please log in first.");
+    const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    if (!snap.exists()) return alert("User profile not found.");
+    const userTime = window.getRealSurvival(snap.data());
+    const wSnap    = await getDoc(doc(db, "settings", "wifi"));
+    if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
+    const data = wSnap.data();
+    if (userTime >= (-(Number(data['max-connection-days']) || 30))) {
+      const ssid = data.ssid, pass = data.pass;
+      if (!ssid || !pass) return alert("Wi-Fi details incomplete in database.");
+      window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
+      setTimeout(() => { if (document.visibilityState === 'visible') alert("Please open this in the Library App."); }, 1500);
+    } else alert("Please pay your fees to access the Wi-Fi network!");
+  };
+
+  window.saveWifiSettings = async () => {
+    await setDoc(doc(db, "settings", "wifi"), { ssid: document.getElementById('wifi-ssid').value, pass: document.getElementById('wifi-pass').value });
+    alert("Saved.");
+  };
+
+  /* ── UI Toggles ── */
   window.switchMain = (t) => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(t).classList.add('active');
@@ -993,43 +796,40 @@
     document.getElementById(t === 'account' ? 'tab-acc' : 'tab-man').classList.add('active');
   };
   window.switchAdmin = (t) => {
-    ['otp', 'user', 'wifi'].forEach(k => {
+    ['otp','user','wifi'].forEach(k => {
       document.getElementById('am-pane-'+k).classList.toggle('hidden', k !== t);
       document.getElementById('am-'+k+'-btn').classList.toggle('active', k === t);
     });
   };
-  window.openWizard      = () => document.getElementById('joinWizard').classList.add('show');
-  window.closeWizard     = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step1').classList.add('step-active'); document.getElementById('step2').classList.remove('step-active'); };
-  window.openLeaveWizard = () => document.getElementById('leaveWizard').classList.add('show');
-  window.closeLeaveWizard= () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
-  window.makeEdit        = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
+  window.openWizard       = () => document.getElementById('joinWizard').classList.add('show');
+  window.closeWizard      = () => { document.getElementById('joinWizard').classList.remove('show'); document.getElementById('step1').classList.add('step-active'); document.getElementById('step2').classList.remove('step-active'); };
+  window.openLeaveWizard  = () => document.getElementById('leaveWizard').classList.add('show');
+  window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
+  window.makeEdit         = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
 
   window.calcTotal = () => {
     const monthInput = document.getElementById('p-days');
-    if (!monthInput) return alert("Month not filled");
+    if (!monthInput) return;
     if (monthInput.value < 30) monthInput.value = 30;
     if (monthInput.value > 30) monthInput.value = 30;
-    const selectedPrice = Number(document.getElementById('p-shift').value);
-    const phoneString   = document.getElementById('p-phone').value.trim();
-    if (!phoneString) return alert("phone number not found");
-    const lastTwoDigits = phoneString.slice(-2);
-    const phoneBonus    = (Number(lastTwoDigits) || 0) / 100;
-    const total         = selectedPrice + phoneBonus;
+    const phoneString = document.getElementById('p-phone').value.trim();
+    if (!phoneString) return;
+    const total = Number(document.getElementById('p-shift').value) + ((Number(phoneString.slice(-2)) || 0) / 100);
     window.totalpaymenttodo = total;
     document.getElementById('pay-summary').innerText = `Total: ₹${total.toFixed(2)}`;
   };
 
-  document.getElementById('dayPrice').textContent  = window.dayVal;
-  document.getElementById('nightPrice').textContent = window.nightVal;
-  document.getElementById('bothPrice').textContent  = window.bothVal;
+  document.getElementById('dayPrice').textContent   = window.dayVal;
+  document.getElementById('nightPrice').textContent  = window.nightVal;
+  document.getElementById('bothPrice').textContent   = window.bothVal;
   document.querySelector('option[value="day"]').value   = window.dayVal;
   document.querySelector('option[value="night"]').value = window.nightVal;
   document.querySelector('option[value="both"]').value  = window.bothVal;
 
   window.updateUserPhoto = (i) => {
-    if(i.files[0]) {
-      let r = new FileReader();
-      r.onload = (e) => updateDoc(doc(db,"users",auth.currentUser.uid), { photo: e.target.result });
+    if (i.files[0]) {
+      const r = new FileReader();
+      r.onload = (e) => updateDoc(doc(db, "users", auth.currentUser.uid), { photo: e.target.result });
       r.readAsDataURL(i.files[0]);
     }
   };
