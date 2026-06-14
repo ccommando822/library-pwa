@@ -606,8 +606,9 @@
   alert("Upload failed: " + uploadError.code + " — " + uploadError.message);
   return;
 }
+      alert('1da');
       await uploadBytes(fileRef, file);
-      alert('1d');
+      alert('1db');
       const screenshotUrl = await getDownloadURL(fileRef);
       alert('1e');
       /* ── Use cached checkout values (not live DOM) ── FIX 2 / FIX 3 */
