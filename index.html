@@ -591,22 +591,18 @@
         document.getElementById('payment-uid-error-box').classList.remove('hidden');
         return;
       }
-      alert('historyDefRef complete');
       alert('start');
       /* ── Screenshot Upload to Firebase Storage ── FIX 5 */
-      const file        = screenshotInput.files[0];
-      alert('1a');
-      const payId       = Date.now();
-      alert('1b');
-      const fileRef     = storageRef(storage, `payment_screenshots/${auth.currentUser.uid}_${payId}`);
-      alert('1c');
-      try{
-        await uploadBytes(fileRef, file);
-} catch (uploadError) {
-  alert("Upload failed: " + uploadError.code + " — " + uploadError.message);
-  return;
-}
-      alert('1da');
+      const file  = screenshotInput.files[0];
+      alert("File name: " + file.name + " | Size: " + file.size + " | Type: " + file.type);
+
+      const payId   = Date.now();
+      const filePath = `payment_screenshots/${auth.currentUser.uid}_${payId}`;
+      alert("Storage path: " + filePath);
+
+      const fileRef = storageRef(window._storage, filePath);
+      alert("fileRef created: " + fileRef.fullPath);
+
       await uploadBytes(fileRef, file);
       alert('1db');
       const screenshotUrl = await getDownloadURL(fileRef);
