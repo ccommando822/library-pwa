@@ -1101,10 +1101,10 @@
     const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
     if (!snap.exists()) return alert("User profile not found.");
     const userTime = window.getRealSurvival(snap.data());
-    const wSnap    = await getDoc(doc(db, "settings", "wifi"));
-    if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
-    const data = wSnap.data();
-    if (userTime >= (-(Number(data['max-connection-days']) || window.daysinamonth))) {
+    if (userTime >= 0) {
+      const wSnap    = await getDoc(doc(db, "settings", "wifi"));
+      const data = wSnap.data();
+      if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
       const ssid = data.ssid, pass = data.pass;
       if (!ssid || !pass) return alert("Wi-Fi details incomplete.");
       window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
