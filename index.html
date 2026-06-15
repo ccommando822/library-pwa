@@ -981,7 +981,7 @@
 
       <!-- Alarm-style survival editor -->
       <div class="card">
-        <label class="detail-label">⏱ Set Survival Time (like setting an alarm)</label>
+        <label class="detail-label">⏱ Set Survival Time </label>
         <p style="font-size:12px; color:#888; margin:4px 0 14px;">Tap ▲/▼ to change each unit. Current value pre-filled.</p>
         <div class="alarm-editor">
           <div class="alarm-unit">
@@ -1099,16 +1099,6 @@
       await updateDoc(doc(db, "users", uid), { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`Force Exit by Admin at ${getStamp()}`) });
       document.getElementById('owner-folder-view').classList.remove('show');
     }
-  };
-
-  window.adminEditDays = async (uid) => {
-    const val = parseFloat(document.getElementById('adm-manual-days').value);
-    if (!val <= 0){return alert('value is not an integer.');}
-    if (val === 0){return alert('value is Zero. Nothing Added.')}
-    if (!val >= 0){return alert('value is not an integer.');}
-    const cur = (await getDoc(doc(db, "users", uid))).data().totalPaidDays;
-    await updateDoc(doc(db, "users", uid), { totalPaidDays: cur + val });
-    window.openUser(uid);
   };
 
   window.clearSignal = async (sid) => { await deleteDoc(doc(db, "signals", sid)).catch(() => {}); };
