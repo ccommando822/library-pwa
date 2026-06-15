@@ -1092,15 +1092,6 @@
     alert(`✅ Survival time updated to ${newFmt}`);
     window.openUser(uid);
   };
-  window.adminEditDays = async (uid) => {
-    const val = parseFloat(document.getElementById('adm-manual-days').value);
-    if (!val <= 0){return alert('value is not an integer.');}
-    if (val === 0){return alert('value is is Zero.Nothing Added.')}
-    if (!val >= 0){return alert('value is not an integer.');}
-    const cur = (await getDoc(doc(db, "users", uid))).data().totalPaidDays;
-    await updateDoc(doc(db, "users", uid), { totalPaidDays: cur + val });
-    window.openUser(uid);
-  };
 
   window.adminForceLeave = async (uid) => {
     if (confirm("Force stop this member's session?")) {
@@ -1108,6 +1099,16 @@
       await updateDoc(doc(db, "users", uid), { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`Force Exit by Admin at ${getStamp()}`) });
       document.getElementById('owner-folder-view').classList.remove('show');
     }
+  };
+
+  window.adminEditDays = async (uid) => {
+    const val = parseFloat(document.getElementById('adm-manual-days').value);
+    if (!val <= 0){return alert('value is not an integer.');}
+    if (val === 0){return alert('value is Zero. Nothing Added.')}
+    if (!val >= 0){return alert('value is not an integer.');}
+    const cur = (await getDoc(doc(db, "users", uid))).data().totalPaidDays;
+    await updateDoc(doc(db, "users", uid), { totalPaidDays: cur + val });
+    window.openUser(uid);
   };
 
   window.clearSignal = async (sid) => { await deleteDoc(doc(db, "signals", sid)).catch(() => {}); };
