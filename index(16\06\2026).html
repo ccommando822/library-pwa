@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rakshapal Singh Library ERP</title>
   <style>
-    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --black: #000000; --yellow: #f1c40f; }
+    :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --yellow: #f1c40f; }
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
     header { background: var(--primary); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
     nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
@@ -25,7 +25,7 @@
     .step-card { display: none; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin: 15px 0; }
     .step-active { display: block; border-left: 5px solid var(--primary); }
     .step-num { display: inline-block; width: 25px; height: 25px; background: var(--primary); color: white; text-align: center; border-radius: 50%; font-size: 14px; margin-right: 10px; }
-    .player-card { background: #fff; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; margin-bottom: 12px; cursor: pointer; border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }
+    .player-card { background: #fff; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; margin-bottom: 12px; cursor: pointer; border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
     .player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }
     .player-info { display: flex; align-items: center; }
     .player-photo { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; object-fit: cover; border: 2px solid #eee; }
@@ -40,8 +40,8 @@
     .log-container.expanded { max-height: none; }
     .sig-timer { float: right; color: var(--yellow); font-size: 12px; font-weight: bold; background: #333; padding: 2px 8px; border-radius: 4px; }
     .live-srv-display { font-family: monospace; font-size: 20px; font-weight: 900; color: var(--primary); display: block; margin: 10px 0; letter-spacing: 1px; }
-    .subtab-bar { display: flex; gap: 5px; margin-bottom: 15px; }
-    .subtab-bar button { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #ddd; background: white; font-weight: bold; color: #666; cursor: pointer; font-size: 13px; }
+    .subtab-bar { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+    .subtab-bar button { flex: 1; min-width: 80px; padding: 10px 6px; border-radius: 8px; border: 2px solid #ddd; background: white; font-weight: bold; color: #666; cursor: pointer; font-size: 12px; }
     .subtab-bar button.active { border-color: var(--primary); color: var(--primary); background: #e3f0fd; }
     .ph-card { background: #fff; border: 1px solid #eee; border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
     .ph-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; cursor: pointer; }
@@ -53,9 +53,24 @@
     .ph-chevron.open { transform: rotate(180deg); }
     .validity-strip { display: flex; align-items: center; justify-content: center; gap: 8px; background: #e8f5e9; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 13px; font-weight: bold; color: #2e7d32; }
     .validity-strip .arr { color: #1976d2; font-size: 16px; }
-    /* Screenshot toggle section inside signal card */
-    .sig-ss-section { background:#000; border:1px solid #333; border-top:none; overflow:hidden; transition: max-height 0.3s ease; }
-    .sig-ss-section.collapsed { max-height: 0 !important; padding: 0; }
+    /* Screenshot section: collapsed by default */
+    .sig-ss-section { background:#000; border:1px solid #333; border-top:none; overflow:hidden; max-height:0; padding:0; transition: max-height 0.3s ease; }
+    .sig-ss-section.open { max-height: 600px; padding: 10px; }
+    /* Alarm-style time editor */
+    .alarm-editor { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .alarm-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .alarm-unit label { font-size: 10px; color: #888; font-weight: bold; text-transform: uppercase; }
+    .alarm-spin { display: flex; flex-direction: column; align-items: center; border: 2px solid var(--primary); border-radius: 10px; overflow: hidden; }
+    .alarm-spin button { background: var(--primary); color: white; border: none; width: 44px; height: 28px; font-size: 16px; cursor: pointer; font-weight: bold; line-height: 1; }
+    .alarm-spin button:active { opacity: 0.7; }
+    .alarm-spin input { width: 44px; height: 36px; text-align: center; border: none; font-size: 18px; font-weight: bold; font-family: monospace; outline: none; background: #f9f9ff; color: var(--dark); }
+    .alarm-sep { font-size: 22px; font-weight: bold; color: var(--primary); margin-bottom: 18px; }
+    /* Rates editor */
+    .rate-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .rate-row label { font-size: 12px; font-weight: bold; color: #555; min-width: 90px; }
+    .rate-row input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: center; }
+    /* Validity last-date display */
+    .last-date-strip { background: linear-gradient(135deg,#e3f0fd,#e8f5e9); border-radius: 10px; padding: 8px 14px; margin-top: 6px; text-align: center; font-size: 13px; font-weight: bold; color: #1976d2; }
   </style>
 </head>
 <body>
@@ -63,6 +78,7 @@
 <header>Rakshapal Singh Library</header>
 
 <script>
+  /* ── Single source of truth for all global pricing / timing ── */
   window.dayVal       = 600;
   window.nightVal     = 500;
   window.bothVal      = 800;
@@ -70,11 +86,7 @@
 </script>
 
 <!-- Screenshot Fullscreen Viewer -->
-<div id="ss-modal"
-     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.92); z-index:999999;
-            align-items:center; justify-content:center; flex-direction:column;"
-     onclick="this.style.display='none';">
+<div id="ss-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:999999; align-items:center; justify-content:center; flex-direction:column;" onclick="this.style.display='none';">
   <img id="ss-viewer" style="max-width:95%; max-height:90vh; border-radius:8px;">
   <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
 </div>
@@ -89,24 +101,24 @@
       <span class="step-num">1</span> <b>Payment Information Validation</b>
       <p><b>Phone Number</b> (Enter the no. by which you paid the fees)</p>
       <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-phone-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <div id="payment-phone-error-box" class="hidden"><p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <p><b>Payment UID</b></p>
-      <input type="number" id="payment-uid" placeholder="Enter Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-uid-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
-      <p><b>ScreenShot</b></p>
+      <input type="number" id="payment-uid" placeholder="Enter 12-digit Payment UID" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
+      <div id="payment-uid-error-box" class="hidden"><p id="payment-uid-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <p><b>Screenshot</b></p>
       <input type="file" id="payment-screenshot" accept="image/*" style="width:100%; padding:15px; font-size:16px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-screenshot-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
-      <div id="payment-dues-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
-      <button id="payment-verify-btn" class="btn btn-blue" style="width:100%; padding:15px; font-size:18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>
+      <div id="payment-screenshot-error-box" class="hidden"><p id="payment-screenshot-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <div id="payment-dues-error-box" class="hidden"><p id="payment-dues-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <button class="btn btn-blue" style="width:100%; padding:15px; font-size:18px;" onclick="window.checkpaymentinfo()">Verify Payment Info and Get OTP</button>
     </div>
     <div id="pstep2" class="step-card" style="display:none;">
       <span class="step-num">2</span> <b>Final OTP</b>
       <input type="number" id="Payment-otp" placeholder="Enter 6-digit OTP" style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
-      <div id="payment-otp-error-box" class="hidden" style="margin-bottom:15px;"><p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
+      <div id="payment-otp-error-box" class="hidden"><p id="payment-otp-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <button class="btn" style="background:#1c1e21; color:white; width:100%; padding:15px; font-size:18px;" onclick="window.verifyPayment()">Confirm Payment Successful</button>
     </div>
-    <div style="margin-top:30px; text-align:center;">
-      <button class="btn" style="background:#f5f5f5; color:#666; width:100%; padding:15px; font-size:16px; border-radius:10px; border:1px solid #ddd; font-weight:bold; cursor:pointer;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>
+    <div style="margin-top:30px;">
+      <button class="btn" style="background:#f5f5f5; color:#666; border:1px solid #ddd;" onclick="window.closePaymentWizard()">Cancel & Go Back</button>
     </div>
   </div>
 </div>
@@ -133,7 +145,7 @@
   <div id="lstep1" class="step-card step-active">
     <span class="step-num">1</span> <b>Check Balance</b>
     <div id="leave-error-box" class="hidden"><p id="leave-error-msg" style="color:var(--red); font-weight:bold;"></p></div>
-    <button id="leave-verify-btn" class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees & Signal</button>
+    <button class="btn btn-blue" onclick="window.checkLeaveFees()">Verify Fees & Signal</button>
   </div>
   <div id="lstep2" class="step-card">
     <span class="step-num">2</span> <b>Final Approval</b>
@@ -158,6 +170,8 @@
       <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="window.updateUserPhoto(this)">
       <div id="status-joined" style="font-size:11px; font-weight:bold; color:#666;">NOT JOINED</div>
       <div id="status-days" class="live-srv-display">00:00:00:00</div>
+      <!-- Dynamic last-valid-date shown under survival timer -->
+      <div id="user-last-date" class="last-date-strip" style="display:none;"></div>
       <div id="join-trigger-box"><button class="btn btn-blue" onclick="window.openWizard()">Start Admission</button></div>
       <div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">
         <button class="btn btn-green" onclick="window.connectToWifi()">🛜 Connect to Internet</button>
@@ -181,9 +195,7 @@
         <input type="number" id="p-days" oninput="calcTotal()" style="width:100%; padding:10px; border-radius:8px;">
         <div id="pay-summary" style="padding:10px; font-weight:bold; color:var(--primary); text-align:center; font-size:16px;"></div>
         <div class="validity-strip" id="validity-strip" style="display:none;">
-          <span id="validity-from"></span>
-          <span class="arr">⟶</span>
-          <span id="validity-to"></span>
+          <span id="validity-from"></span><span class="arr">⟶</span><span id="validity-to"></span>
         </div>
         <button class="btn btn-blue" onclick="window.doPayment()">Pay Now</button>
       </div>
@@ -197,7 +209,7 @@
 <section id="manage">
   <div style="display:flex; gap:5px; margin-bottom:15px;">
     <button id="am-otp-btn" class="active" onclick="switchAdmin('otp')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Signals</button>
-    <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Survivals</button>
+    <button id="am-user-btn" onclick="switchAdmin('user')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Members</button>
     <button id="am-wifi-btn" onclick="switchAdmin('wifi')" style="flex:1; padding:10px; border-radius:8px; border:none; font-weight:bold;">Data Manage</button>
   </div>
   <div id="am-pane-otp"><div id="admin-otp-list"></div></div>
@@ -205,8 +217,10 @@
   <div id="am-pane-wifi" class="hidden">
     <div class="subtab-bar">
       <button id="dm-wifi-btn" class="active" onclick="switchDataManage('wifi')">📶 Wi-Fi</button>
-      <button id="dm-pay-btn" onclick="switchDataManage('pay')">💳 Payment History</button>
+      <button id="dm-pay-btn" onclick="switchDataManage('pay')">💳 History</button>
+      <button id="dm-rates-btn" onclick="switchDataManage('rates')">⚙️ Rates</button>
     </div>
+    <!-- Wi-Fi sub-pane -->
     <div id="dm-pane-wifi">
       <div class="card">
         <label class="detail-label">Library Wi-Fi SSID</label>
@@ -216,8 +230,20 @@
         <button class="btn btn-blue" onclick="window.saveWifiSettings()">Update Wi-Fi</button>
       </div>
     </div>
+    <!-- Payment History sub-pane -->
     <div id="dm-pane-pay" class="hidden">
       <div id="admin-pay-history-list"><p style="color:#aaa; text-align:center; padding:20px;">Loading...</p></div>
+    </div>
+    <!-- Rates & Days editor sub-pane -->
+    <div id="dm-pane-rates" class="hidden">
+      <div class="card">
+        <label class="detail-label">Shift Prices & Validity Days</label>
+        <div class="rate-row"><label>☀️ Day Shift (₹)</label><input type="number" id="rate-day" min="0"></div>
+        <div class="rate-row"><label>🌙 Night Shift (₹)</label><input type="number" id="rate-night" min="0"></div>
+        <div class="rate-row"><label>🌓 Both Shifts (₹)</label><input type="number" id="rate-both" min="0"></div>
+        <div class="rate-row"><label>📅 Days/Month</label><input type="number" id="rate-dim" min="1"></div>
+        <button class="btn btn-blue" onclick="window.saveRates()">💾 Save Rate Changes</button>
+      </div>
     </div>
   </div>
 </section>
@@ -249,10 +275,32 @@
   const provider = new GoogleAuthProvider();
 
   let currentUserData = {};
-  const getStamp  = () => new Date().toLocaleString('en-GB');
-  const fmtDate   = (d) => d.toLocaleDateString('en-GB');
+  const getStamp = () => new Date().toLocaleString('en-GB');
+  const fmtDate  = (d) => d.toLocaleDateString('en-GB');
 
-  /* ── DD:HH:MM:SS formatter ── */
+  /* ════════════════════════════════════════════════════════
+     ROOT CAUSE OF SIGNAL REAPPEARING — EXPLANATION & FIX
+     ────────────────────────────────────────────────────────
+     The old code had an async auto-delete block INSIDE the
+     onSnapshot callback. When handlePay called deleteDoc on
+     the signal, Firestore fired onSnapshot again. The async
+     block then called deleteDoc AGAIN on a doc that no longer
+     existed, causing Firestore to emit another snapshot event
+     with pending local writes, which re-rendered the signal
+     card momentarily. Also, the auto-delete block iterated
+     the snapshot BEFORE the deletes settled, so the render
+     loop below it still saw the signal and drew it.
+
+     FIX: Use a client-side Set called `processingSignals`
+     to track signal IDs that are currently being acted on.
+     Any signal whose ID is in that set is SKIPPED during
+     rendering immediately — so the card vanishes the instant
+     the admin clicks VERIFY or REJECT, without waiting for
+     Firestore round-trip. The set entry is cleared after the
+     operation completes (or fails).
+  ════════════════════════════════════════════════════════ */
+  const processingSignals = new Set();
+
   window.formatTime = (decimalDays) => {
     if (decimalDays === undefined) return "00:00:00:00";
     const sign = decimalDays < 0 ? "-" : "";
@@ -265,43 +313,37 @@
     return (u.totalPaidDays || 0) - ((new Date() - new Date(u.joinDateISO)) / 86400000);
   };
 
-  /* ══════════════════════════════════════════════════
-     Dynamic date helper used in logs and history cards
-     Returns:  "DD/MM/YYYY  ⟶  DD/MM/YYYY"
-     based on actionT (verified date) + window.daysinamonth
-  ══════════════════════════════════════════════════ */
+  /* Compute "last valid date" = now + survivalDays */
+  const lastValidDate = (survivalDays) => {
+    if (survivalDays <= 0) return null;
+    const d = new Date(Date.now() + survivalDays * 86400000);
+    return fmtDate(d);
+  };
+
   const validityRange = (fromStamp) => {
-    const dim   = window.daysinamonth;
-    /* fromStamp is a locale string like "14/06/2026, 21:50:21"
-       We parse it safely or fall back to now */
+    const dim = window.daysinamonth;
     let from;
     try {
-      /* en-GB locale strings are DD/MM/YYYY, HH:MM:SS — reformat for Date() */
       const [datePart, timePart] = fromStamp.split(', ');
       const [dd, mm, yyyy]       = datePart.split('/');
       from = new Date(`${yyyy}-${mm}-${dd}T${timePart}`);
       if (isNaN(from.getTime())) from = new Date();
     } catch { from = new Date(); }
-    const to = new Date(from.getTime() + dim * 86400000);
-    return `${fmtDate(from)}  ⟶  ${fmtDate(to)}`;
+    return `${fmtDate(from)}  ⟶  ${fmtDate(new Date(from.getTime() + dim * 86400000))}`;
   };
 
-  /* ══════════════════════════════════════════════════
-     renderLogs — now includes dynamic validity range
-     for Verified entries
-  ══════════════════════════════════════════════════ */
   window.renderLogs = (history) => {
     let out = "";
     (history || []).slice().reverse().forEach(h => {
       if (typeof h === "string") { out += `<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`; return; }
       if (h.status === "Pending")
-        out += `<pre style="font-family:monospace;margin:0;">⏳ PENDING\nRequested: ${h.reqT}\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n--------------------------\n</pre>`;
+        out += `<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">⏳ PENDING\nRequested : ${h.reqT}\nNAME      : ${currentUserData.name}\nPHONE     : ${currentUserData.phone}\nSHIFT     : ${h.shift}\nDAYS      : ${h.days}\nAMOUNT    : ₹${h.amt}\n--------------------------\n</pre>`;
       if (h.status === "OTP_Verified")
-        out += `<pre style="font-family:monospace;margin:0;">🔐 OTP VERIFIED\nRequested: ${h.reqT}\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\nOTP at : ${h.otpT}\n--------------------------\n</pre>`;
+        out += `<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">🔐 OTP VERIFIED\nRequested : ${h.reqT}\nNAME      : ${currentUserData.name}\nPHONE     : ${currentUserData.phone}\nSHIFT     : ${h.shift}\nDAYS      : ${h.days}\nAMOUNT    : ₹${h.amt}\nOTP at    : ${h.otpT}\n--------------------------\n</pre>`;
       if (h.status === "Verified")
-        out += `<pre style="font-family:monospace;margin:0;">✅ VERIFIED\nRequested: ${h.reqT}\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\nVerified : ${h.actionT}\nValidity : ${validityRange(h.actionT)}\n--------------------------\n</pre>`;
+        out += `<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">✅ VERIFIED\nRequested : ${h.reqT}\nNAME      : ${currentUserData.name}\nPHONE     : ${currentUserData.phone}\nSHIFT     : ${h.shift}\nDAYS      : ${h.days}\nAMOUNT    : ₹${h.amt}\nVerified  : ${h.actionT}\nValidity  : ${validityRange(h.actionT)}\n--------------------------\n</pre>`;
       if (h.status === "Rejected")
-        out += `<pre style="font-family:monospace;margin:0;">❌ REJECTED\nRequested: ${h.reqT}\nNAME   : ${currentUserData.name}\nPHONE  : ${currentUserData.phone}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\nRejected : ${h.actionT}\n--------------------------\n</pre>`;
+        out += `<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">❌ REJECTED\nRequested : ${h.reqT}\nNAME      : ${currentUserData.name}\nPHONE     : ${currentUserData.phone}\nSHIFT     : ${h.shift}\nDAYS      : ${h.days}\nAMOUNT    : ₹${h.amt}\nRejected  : ${h.actionT}\n--------------------------\n</pre>`;
     });
     return out || "No payment history.";
   };
@@ -319,6 +361,18 @@
       const uRef = doc(db, "users", user.uid);
       await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
         await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
+      });
+
+      /* Load rates from Firestore on login */
+      getDoc(doc(db, "settings", "rates")).then(rs => {
+        if (rs.exists()) {
+          const d = rs.data();
+          if (d.dayVal)       window.dayVal       = d.dayVal;
+          if (d.nightVal)     window.nightVal     = d.nightVal;
+          if (d.bothVal)      window.bothVal      = d.bothVal;
+          if (d.daysinamonth) window.daysinamonth = d.daysinamonth;
+          refreshPriceLabels();
+        }
       });
 
       onSnapshot(uRef, (snap) => {
@@ -342,6 +396,16 @@
         const srv = window.getRealSurvival(currentUserData);
         document.getElementById('status-days').innerText = window.formatTime(srv);
         document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
+
+        /* Show last valid date under survival timer */
+        const ldStrip = document.getElementById('user-last-date');
+        if (currentUserData.joinDateISO && srv > 0) {
+          const ld = lastValidDate(srv);
+          ldStrip.innerText = `📅 Valid until: ${ld}`;
+          ldStrip.style.display = 'block';
+        } else {
+          ldStrip.style.display = 'none';
+        }
 
         if (currentUserData.joinDateISO) {
           document.getElementById('join-trigger-box').classList.add('hidden');
@@ -372,12 +436,25 @@
 
   /* ── Live Interval ── */
   setInterval(() => {
-    if (currentUserData.joinDateISO)
-      document.getElementById('status-days').innerText = window.formatTime(window.getRealSurvival(currentUserData));
+    if (currentUserData.joinDateISO) {
+      const srv = window.getRealSurvival(currentUserData);
+      document.getElementById('status-days').innerText = window.formatTime(srv);
+      document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
+      const ldStrip = document.getElementById('user-last-date');
+      if (srv > 0) { ldStrip.innerText = `📅 Valid until: ${lastValidDate(srv)}`; ldStrip.style.display = 'block'; }
+      else ldStrip.style.display = 'none';
+    }
     document.querySelectorAll('.admin-live-srv').forEach(el => {
       const iso = el.dataset.iso;
-      if (iso && iso !== "null")
-        el.innerText = window.formatTime(parseFloat(el.dataset.paid) - ((new Date() - new Date(iso)) / 86400000));
+      if (iso && iso !== "null") {
+        const srv = parseFloat(el.dataset.paid) - ((new Date() - new Date(iso)) / 86400000);
+        el.innerText = window.formatTime(srv);
+        /* Also update last-date if present */
+        const ld = el.nextElementSibling;
+        if (ld && ld.classList.contains('admin-last-date')) {
+          ld.innerText = srv > 0 ? `📅 Until: ${lastValidDate(srv)}` : '⛔ Expired';
+        }
+      }
     });
     document.querySelectorAll('.sig-timer').forEach(async el => {
       const rem = Math.max(0, Math.floor((parseInt(el.dataset.expiry) - Date.now()) / 1000));
@@ -399,7 +476,7 @@
     const p = document.getElementById('p-phone').value.trim();
     window.calcTotal();
     if (n.length < 6 || f.length < 6 || a.length < 6) return alert("Min 6 chars required for Name, Father & Address");
-    if (!/^\d{10}$/.test(p)) return alert("Phone number must be Valid!!!");
+    if (!/^\d{10}$/.test(p)) return alert("Phone number must be valid (10 digits)!");
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
       name: n, father: f, phone: p, address: a,
       history: arrayUnion(
@@ -458,7 +535,17 @@
     } else alert("Invalid OTP");
   };
 
-  /* ── calcTotal ── */
+  const refreshPriceLabels = () => {
+    document.getElementById('dayPrice').textContent   = window.dayVal;
+    document.getElementById('nightPrice').textContent  = window.nightVal;
+    document.getElementById('bothPrice').textContent   = window.bothVal;
+    document.querySelector('option[value="600"]') && (document.querySelector('option[value="600"]').value = window.dayVal);
+    /* Re-assign values to the select options by index */
+    const sel = document.getElementById('p-shift');
+    if (sel) { sel.options[0].value = window.dayVal; sel.options[1].value = window.nightVal; sel.options[2].value = window.bothVal; }
+    document.getElementById('p-days').value = window.daysinamonth;
+  };
+
   window.calcTotal = () => {
     const monthInput  = document.getElementById('p-days');
     const shiftEl     = document.getElementById('p-shift');
@@ -478,17 +565,12 @@
     document.getElementById('validity-strip').style.display = 'flex';
   };
 
-  /* ── doPayment ── */
   window.doPayment = () => {
     const m   = parseInt(document.getElementById('p-days').value) || 0;
     const amt = window.totalpaymenttodo || 0;
     window.calculatedPaymentAmt  = amt;
     window.calculatedPaymentDays = m;
-    const userChoice = confirm(
-      "Choose your Payment Action:\n\n" +
-      "👉 Click [ OK ] to OPEN YOUR UPI APP and pay now.\n\n" +
-      "👉 Click [ CANCEL ] if you ALREADY PAID and want to verify your receipt."
-    );
+    const userChoice = confirm("Choose your Payment Action:\n\n👉 Click [ OK ] to OPEN YOUR UPI APP and pay now.\n\n👉 Click [ CANCEL ] if you ALREADY PAID and want to verify your receipt.");
     clearAllPaymentErrors();
     document.getElementById('pstep1').style.display = 'block';
     document.getElementById('pstep2').style.display = 'none';
@@ -496,11 +578,6 @@
     if (userChoice) window.location.href = `upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;
   };
 
-  /* ══════════════════════════════════════════════════════════
-     checkpaymentinfo — Gate 1 Part A
-     CHANGE: days = window.daysinamonth (not m * daysinamonth,
-             since m is already clamped to daysinamonth)
-  ══════════════════════════════════════════════════════════ */
   window.checkpaymentinfo = async () => {
     try {
       clearAllPaymentErrors();
@@ -508,97 +585,67 @@
       const uidVal          = document.getElementById('payment-uid').value.trim();
       const screenshotInput = document.getElementById('payment-screenshot');
       let hasErrors = false;
-
-      if (!/^[6-9]\d{9}$/.test(phoneVal)) {
-        document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number.";
-        document.getElementById('payment-phone-error-box').classList.remove('hidden');
-        hasErrors = true;
-      }
-      if (!/^\d{12}$/.test(uidVal)) {
-        document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID.";
-        document.getElementById('payment-uid-error-box').classList.remove('hidden');
-        hasErrors = true;
-      }
-      if (!screenshotInput.files || screenshotInput.files.length === 0) {
-        document.getElementById('payment-screenshot-error-msg').innerText = "Please attach a screenshot of your payment.";
-        document.getElementById('payment-screenshot-error-box').classList.remove('hidden');
-        hasErrors = true;
-      }
+      if (!/^[6-9]\d{9}$/.test(phoneVal)) { document.getElementById('payment-phone-error-msg').innerText = "Please enter a valid 10-digit phone number."; document.getElementById('payment-phone-error-box').classList.remove('hidden'); hasErrors = true; }
+      if (!/^\d{12}$/.test(uidVal))        { document.getElementById('payment-uid-error-msg').innerText = "Payment UID must be an exact 12-digit numeric transaction ID."; document.getElementById('payment-uid-error-box').classList.remove('hidden'); hasErrors = true; }
+      if (!screenshotInput.files || screenshotInput.files.length === 0) { document.getElementById('payment-screenshot-error-msg').innerText = "Please attach a screenshot of your payment."; document.getElementById('payment-screenshot-error-box').classList.remove('hidden'); hasErrors = true; }
       if (hasErrors) return;
 
-      /* Anti-Fraud Check 1 of 2 */
       const historySnap = await getDoc(doc(db, "payment_history", uidVal));
-      if (historySnap.exists()) {
-        document.getElementById('payment-uid-error-msg').innerText = "This Transaction UID has already been used. Double-spend blocked.";
-        document.getElementById('payment-uid-error-box').classList.remove('hidden');
-        return;
-      }
+      if (historySnap.exists()) { document.getElementById('payment-uid-error-msg').innerText = "This Transaction UID has already been used. Double-spend blocked."; document.getElementById('payment-uid-error-box').classList.remove('hidden'); return; }
 
-      /* Compress screenshot */
       const file             = screenshotInput.files[0];
       const payId            = Date.now();
       const compressedBase64 = await new Promise((resolve, reject) => {
-        const reader   = new FileReader();
-        reader.onload  = (e) => {
-          const img    = new Image();
-          img.onload   = () => {
-            const canvas  = document.createElement('canvas');
-            const scale   = Math.min(1, 800 / img.width);
-            canvas.width  = img.width  * scale;
-            canvas.height = img.height * scale;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const scale  = Math.min(1, 800 / img.width);
+            canvas.width = img.width * scale; canvas.height = img.height * scale;
             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
             resolve(canvas.toDataURL('image/jpeg', 0.6));
           };
-          img.onerror  = reject;
-          img.src      = e.target.result;
+          img.onerror = reject; img.src = e.target.result;
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+        reader.onerror = reject; reader.readAsDataURL(file);
       });
 
-      const amt       = window.calculatedPaymentAmt  || window.totalpaymenttodo || 0;
-      /* FIX: days = window.daysinamonth directly (not m * daysinamonth) */
+      const amt       = window.calculatedPaymentAmt || window.totalpaymenttodo || 0;
       const d         = window.daysinamonth;
-      const shiftSelect = document.getElementById('p-shift');
-      const shiftName   = shiftSelect.options[shiftSelect.selectedIndex]?.text || "Default";
-
-      window.currentPayId     = payId;
-      window.currentShiftName = shiftName;
+      const shiftEl   = document.getElementById('p-shift');
+      const shiftName = shiftEl.options[shiftEl.selectedIndex]?.text || "Default";
+      window.currentPayId = payId; window.currentShiftName = shiftName;
 
       const randomOtp = Math.floor(100000 + Math.random() * 900000);
       window.generatedPaymentOtp = randomOtp;
 
       await setDoc(doc(db, "signals", `pay_${auth.currentUser.uid}_${payId}`), {
-        type: 'PAYMENT', otp: randomOtp,
-        uid: auth.currentUser.uid, name: currentUserData.name, phone: currentUserData.phone,
-        providedPhone: phoneVal, providedUID: uidVal,
-        screenshot: compressedBase64,
-        id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending'
+        type:'PAYMENT', otp:randomOtp, uid:auth.currentUser.uid, name:currentUserData.name, phone:currentUserData.phone,
+        providedPhone:phoneVal, providedUID:uidVal, screenshot:compressedBase64,
+        id:payId, reqT:getStamp(), shift:shiftName, days:d, amt:amt, status:'Pending'
       });
 
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        history: arrayUnion({ id: payId, reqT: getStamp(), shift: shiftName, days: d, amt: amt, status: 'Pending' })
+        history: arrayUnion({ id:payId, reqT:getStamp(), shift:shiftName, days:d, amt:amt, status:'Pending' })
       });
 
       document.getElementById('pstep1').style.display = 'none';
       document.getElementById('pstep2').style.display = 'block';
-
     } catch (error) {
       console.error("checkpaymentinfo crash:", error);
-      alert("An error occurred during payment validation: " + error.message);
+      alert("An error occurred: " + error.message);
     }
   };
 
-  /* ── verifyPayment ── */
   window.verifyPayment = async () => {
     try {
       clearAllPaymentErrors();
       const typedOtp    = document.getElementById('Payment-otp').value.trim();
       const otpErrorBox = document.getElementById('payment-otp-error-box');
       const otpErrorMsg = document.getElementById('payment-otp-error-msg');
-
       if (!window.generatedPaymentOtp) { otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Session expired. Please cancel and try again."; return; }
-      if (typedOtp !== window.generatedPaymentOtp.toString()) { otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Invalid OTP code. Please check and try again."; return; }
+      if (typedOtp !== window.generatedPaymentOtp.toString()) { otpErrorBox.classList.remove('hidden'); otpErrorMsg.innerText = "Invalid OTP. Please check and try again."; return; }
 
       const providedUID = document.getElementById('payment-uid').value.trim();
       const historySnap = await getDoc(doc(db, "payment_history", providedUID));
@@ -606,68 +653,97 @@
 
       const payId    = window.currentPayId;
       const sigDocId = `pay_${auth.currentUser.uid}_${payId}`;
-      await updateDoc(doc(db, "signals", sigDocId), { status: 'OTP_Verified' });
+      await updateDoc(doc(db, "signals", sigDocId), { status:'OTP_Verified' });
 
       const uRef  = doc(db, "users", auth.currentUser.uid);
       const uSnap = await getDoc(uRef);
       if (uSnap.exists()) {
-        const newHistory = uSnap.data().history.map(h => {
-          if (h.id !== payId) return h;
-          return { ...h, status: 'OTP_Verified', otpT: getStamp() };
-        });
+        const newHistory = uSnap.data().history.map(h => h.id !== payId ? h : { ...h, status:'OTP_Verified', otpT:getStamp() });
         await updateDoc(uRef, { history: newHistory });
       }
-
       document.getElementById('pay-modal').style.display = 'none';
       alert("✅ OTP verified! Please wait for admin to confirm your payment.");
-    } catch (error) {
-      console.error("verifyPayment crash:", error);
-      alert("OTP verification failed: " + error.message);
-    }
+    } catch (error) { console.error("verifyPayment crash:", error); alert("OTP verification failed: " + error.message); }
   };
 
-  window.closePaymentWizard = () => {
-    clearAllPaymentErrors();
-    document.getElementById('pay-modal').style.display = 'none';
+  window.closePaymentWizard = () => { clearAllPaymentErrors(); document.getElementById('pay-modal').style.display = 'none'; };
+
+  window.toggleSigScreenshot = (btnEl, sectionId) => {
+    const section = document.getElementById(sectionId);
+    const isOpen  = section.classList.toggle('open');
+    btnEl.innerText = isOpen ? '📷 Hide Screenshot' : '📷 Show Screenshot';
   };
 
   /* ══════════════════════════════════════════════════════════
-     toggleSigScreenshot — collapses/expands screenshot section
-     in a payment signal card without affecting other fields
+     handlePay — Gate 2
+     KEY FIX: add sid to processingSignals FIRST so the
+     onSnapshot re-render skips it immediately, before any
+     async Firestore operations complete.
   ══════════════════════════════════════════════════════════ */
-  window.toggleSigScreenshot = (btnEl, sectionId) => {
-    const section = document.getElementById(sectionId);
-    const isCollapsed = section.classList.toggle('collapsed');
-    btnEl.innerText = isCollapsed ? '📷 Show Screenshot' : '📷 Hide Screenshot';
+  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone) => {
+    /* ── IMMEDIATE: mark as processing so onSnapshot skips it ── */
+    processingSignals.add(sid);
+    /* Re-render signals list right now to hide the card */
+    const listEl = document.getElementById('admin-otp-list');
+    if (listEl) {
+      listEl.querySelectorAll(`[data-sid="${sid}"]`).forEach(el => el.closest('.sig-wrapper')?.remove());
+    }
+
+    try {
+      const ref  = doc(db, "users", uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) { processingSignals.delete(sid); return; }
+
+      const u           = snap.data();
+      const prevBalance = u.totalPaidDays || 0;
+      const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
+
+      if (stat === 'OK') {
+        const histRef  = doc(db, "payment_history", String(providedUID));
+        const histSnap = await getDoc(histRef);
+        if (histSnap.exists()) {
+          alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
+          await deleteDoc(doc(db, "signals", sid));
+          processingSignals.delete(sid);
+          return;
+        }
+        await setDoc(histRef, {
+          uid, providedUID:String(providedUID), providedPhone:String(providedPhone),
+          screenshotStored:true, shift, days, amt, reqT, actionT:getStamp(), finalNet:newBalance
+        });
+      }
+
+      const newHistory = (u.history || []).map(h => {
+        if (typeof h !== 'object' || h.id !== payId) return h;
+        return { ...h, status: stat === 'OK' ? 'Verified' : 'Rejected', actionT:getStamp(), finalNet:newBalance };
+      });
+
+      await updateDoc(ref, { totalPaidDays:newBalance, history:newHistory });
+      await deleteDoc(doc(db, "signals", sid));
+    } catch (e) {
+      console.error("handlePay error:", e);
+      alert("Error processing payment: " + e.message);
+    } finally {
+      /* Remove from processing set after Firestore confirms deletion */
+      processingSignals.delete(sid);
+    }
   };
 
   /* ══════════════════════════════════════════════════════════
      loadAdmin
   ══════════════════════════════════════════════════════════ */
+  let adminLoaded = false;
   window.loadAdmin = () => {
+    if (adminLoaded) return;
+    adminLoaded = true;
 
     /* ── 1. Signals ── */
-    onSnapshot(collection(db, "signals"), async (s) => {
+    onSnapshot(collection(db, "signals"), (s) => {
       let h = "";
-
-      /* CHANGE: Auto-delete signals whose UID already exists in payment_history */
-      const deletePromises = [];
       s.forEach(d => {
-        const sig = d.data();
-        if (sig.type === 'PAYMENT' && sig.providedUID) {
-          deletePromises.push(
-            getDoc(doc(db, "payment_history", String(sig.providedUID))).then(hSnap => {
-              if (hSnap.exists()) {
-                console.log(`Auto-deleting duplicate signal ${d.id} — UID ${sig.providedUID} already in payment_history`);
-                return deleteDoc(doc(db, "signals", d.id));
-              }
-            })
-          );
-        }
-      });
-      await Promise.all(deletePromises);
+        /* SKIP signals being processed — this is the core fix */
+        if (processingSignals.has(d.id)) return;
 
-      s.forEach(d => {
         const sig = d.data();
         if (sig.type !== 'PAYMENT') {
           h += `<div class="card" style="background:#1a1a1a; color:white; border-left:4px solid var(--yellow);">` +
@@ -675,7 +751,7 @@
                `${sig.name}<br><span style="color:var(--green); font-size:12px;">📞 ${sig.phone}</span><br>` +
                `<span style="color:#888; font-size:10px;">${sig.timestamp}</span><br>` +
                `OTP: <span style="color:var(--yellow); font-size:18px; font-weight:bold;">${sig.otp}</span>` +
-               `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="deleteDoc(doc(db,'signals','${d.id}'))">CLEAR</button></div>`;
+               `<button class="btn btn-outline" style="margin-top:10px; padding:8px;" onclick="window.clearSignal('${d.id}')">CLEAR</button></div>`;
         } else {
           const isOtpVerified  = sig.status === 'OTP_Verified';
           const statusColor    = isOtpVerified ? '#00e5ff' : '#f1c40f';
@@ -684,58 +760,48 @@
           const verifyOpacity  = isOtpVerified ? '1' : '0.4';
           const ssSectionId    = `ss-sec-${d.id}`;
 
-          /* Screenshot section — starts visible, toggle button collapses only this */
+          /* Screenshot collapsed by default (.open class NOT added) */
           const screenshotContent = sig.screenshot
             ? `<img src="${sig.screenshot}" style="width:100%; max-width:400px; border-radius:8px; margin-top:8px; border:1px solid #333; cursor:zoom-in; display:block;" onclick="document.getElementById('ss-viewer').src=this.src; document.getElementById('ss-modal').style.display='flex';">`
             : `<span style="color:#888; font-size:11px; display:block; padding:8px 0;">No screenshot attached</span>`;
 
           h +=
-            /* Main info card */
             `<div style="white-space:pre-wrap; font-family:monospace; background:#000; color:#0f0; border:1px solid #333; font-size:12px; border-radius:12px 12px 0 0; padding:12px;">` +
-            `[PAYMENT SIGNAL]\nSTATUS : <span style="color:${statusColor}; font-weight:bold;">${statusLabel}</span>\n` +
-            `--------------------------\n` +
-            `NAME     : ${sig.name}\nPHONE    : ${sig.phone}\nPAY PHONE: ${sig.providedPhone || 'N/A'}\nPAY UID  : ${sig.providedUID || 'N/A'}\n` +
-            `SHIFT    : ${sig.shift}\nDAYS     : ${sig.days}\nAMOUNT   : ₹${sig.amt} (${sig.reqT})\n` +
-            `--------------------------\n` +
-            `OTP      : <span style="color:var(--yellow); font-size:18px; font-weight:bold; letter-spacing:3px;">${sig.otp}</span>\n` +
-            `--------------------------\n</div>` +
-            /* Screenshot toggle button */
+            `[PAYMENT SIGNAL]\nSTATUS : <span style="color:${statusColor}; font-weight:bold;">${statusLabel}</span>\n--------------------------\n` +
+            `NAME     : ${sig.name}\nPHONE    : ${sig.phone}\nPAY PHONE: ${sig.providedPhone||'N/A'}\nPAY UID  : ${sig.providedUID||'N/A'}\n` +
+            `SHIFT    : ${sig.shift}\nDAYS     : ${sig.days}\nAMOUNT   : ₹${sig.amt} (${sig.reqT})\n--------------------------\n` +
+            `OTP      : <span style="color:var(--yellow); font-size:18px; font-weight:bold; letter-spacing:3px;">${sig.otp}</span>\n--------------------------\n</div>` +
             `<div style="background:#111; border:1px solid #333; border-top:none; padding:6px 10px;">` +
-            `<button onclick="window.toggleSigScreenshot(this,'${ssSectionId}')" style="background:none; border:1px solid #555; color:#0f0; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-family:monospace;">📷 Hide Screenshot</button>` +
+            `<button onclick="window.toggleSigScreenshot(this,'${ssSectionId}')" style="background:none; border:1px solid #555; color:#0f0; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-family:monospace;">📷 Show Screenshot</button>` +
             `</div>` +
-            /* Screenshot section (collapsible) */
-            `<div id="${ssSectionId}" class="sig-ss-section" style="padding:10px; max-height:600px;">` +
-            screenshotContent +
-            `</div>` +
-            /* Action buttons */
-            `<div style="display:flex; gap:10px; background:#111; padding:10px; border:1px solid #333; border-top:none; border-radius:0 0 12px 12px;">` +
-            `<button class="btn btn-green" ${verifyDisabled} style="opacity:${verifyOpacity}; margin-top:0;" onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">VERIFY</button>` +
-            `<button class="btn btn-outline" style="margin-top:0;" onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}','${d.id}')">REJECT</button>` +
+            `<div id="${ssSectionId}" class="sig-ss-section">${screenshotContent}</div>` +
+            `<div style="display:flex; gap:10px; background:#111; padding:10px; border:1px solid #333; border-top:none; border-radius:0 0 12px 12px; margin-bottom:16px;">` +
+            `<button class="btn btn-green" ${verifyDisabled} style="opacity:${verifyOpacity}; margin-top:0;" onclick="window.handlePay('${d.id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">VERIFY</button>` +
+            `<button class="btn btn-outline" style="margin-top:0;" onclick="window.handlePay('${d.id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">REJECT</button>` +
             `</div>`;
         }
       });
-      document.getElementById('admin-otp-list').innerHTML = h || "No active signals.";
+      document.getElementById('admin-otp-list').innerHTML = h || "<p style='color:#aaa; text-align:center; padding:20px;'>No active signals.</p>";
     });
 
-    /* ── 2. Survivals ── */
+    /* ── 2. Members (Survivals) ── */
     onSnapshot(collection(db, "users"), s => {
       const g = { onJ_ok:"", onJ_exp:"", offJ_ok:"", offJ_exp:"", onNL:"", offNL:"" };
       s.forEach(d => {
-        const u = d.data();
+        const u        = d.data();
         const srv      = window.getRealSurvival(u);
         const isJoined = !!u.joinDateISO;
         const isOnline = !!u.isOnline;
+        const ld       = (isJoined && srv > 0) ? `<div class="admin-last-date" style="font-size:11px; color:#2e7d32; font-weight:bold; margin-top:2px;">📅 Until: ${lastValidDate(srv)}</div>` : '';
         const counterHtml = isJoined
-          ? `<span class="admin-live-srv" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'}; font-weight:bold;">${window.formatTime(srv)}</span>`
-          : `<span style="color:#666; font-weight:bold;">${window.formatTime(srv)} (Static)</span>`;
+          ? `<div style="text-align:right;"><span class="admin-live-srv" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'}; font-weight:bold; font-family:monospace;">${window.formatTime(srv)}</span><div class="admin-last-date" style="font-size:11px; color:${srv>0?'#2e7d32':'var(--red)'}; font-weight:bold;">${srv>0?`📅 Until: ${lastValidDate(srv)}`:'⛔ Expired'}</div></div>`
+          : `<span style="color:#666; font-weight:bold; font-family:monospace;">${window.formatTime(srv)} (Static)</span>`;
         const card = `<div class="player-card" onclick="window.openUser('${d.id}')">
           <div class="player-header">
             <div class="player-info">
               <img src="${u.photo||''}" class="player-photo">
-              <div>
-                <div style="font-weight:bold; font-size:14px;">${u.name}</div>
-                <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">${isOnline ? '● Online' : '○ Offline'}</div>
-              </div>
+              <div><div style="font-weight:bold; font-size:14px;">${u.name}</div>
+              <div class="status-badge" style="background:${isOnline?'#e8f5e9':'#ffebee'}; color:${isOnline?'green':'red'};">${isOnline?'● Online':'○ Offline'}</div></div>
             </div>${counterHtml}
           </div>
           <div class="player-details"><span>📞 ${u.phone||'N/A'}</span><span>📧 ${u.email||'N/A'}</span></div>
@@ -746,43 +812,48 @@
         else                              g.offNL += card;
       });
       document.getElementById('admin-survival-list').innerHTML =
-        `<div class="detail-label">🟢 Online & Joined (Active / Grace)</div>${g.onJ_ok}` +
+        `<div class="detail-label">🟢 Online & Joined (Active)</div>${g.onJ_ok}` +
         `<div class="detail-label">🔴 Online & Joined (Expired)</div>${g.onJ_exp}` +
-        `<div class="detail-label">🟢 Offline & Joined (Active / Grace)</div>${g.offJ_ok}` +
+        `<div class="detail-label">🟢 Offline & Joined (Active)</div>${g.offJ_ok}` +
         `<div class="detail-label">🔴 Offline & Joined (Expired)</div>${g.offJ_exp}` +
         `<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}` +
         `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
     });
 
-    /* ── 3. Payment History (newest first) ── */
+    /* ── 3. Payment History — sorted by actionT newest first ── */
     onSnapshot(collection(db, "payment_history"), async snap => {
       const records = [];
-
-      /* For each history record, also fetch the user profile for name/photo */
       const fetches = [];
       snap.forEach(d => {
         const r = { id: d.id, ...d.data() };
         records.push(r);
         if (r.uid) {
-          fetches.push(
-            getDoc(doc(db, "users", r.uid)).then(uSnap => {
-              if (uSnap.exists()) {
-                r._userName  = uSnap.data().name  || '—';
-                r._userPhone = uSnap.data().phone || '—';
-                r._userPhoto = uSnap.data().photo || '';
-                r._userFather= uSnap.data().father|| '—';
-                r._userAddr  = uSnap.data().address|| '—';
-              }
-            }).catch(() => {})
-          );
+          fetches.push(getDoc(doc(db, "users", r.uid)).then(uSnap => {
+            if (uSnap.exists()) {
+              r._name   = uSnap.data().name   || '—';
+              r._phone  = uSnap.data().phone  || '—';
+              r._photo  = uSnap.data().photo  || '';
+              r._father = uSnap.data().father || '—';
+              r._addr   = uSnap.data().address|| '—';
+            }
+          }).catch(() => {}));
         }
       });
       await Promise.all(fetches);
 
-      /* Sort newest first using providedUID which is a 12-digit timestamp-ish number */
-      records.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+      /* Sort by actionT chronologically (newest first) */
+      records.sort((a, b) => {
+        const parse = (s) => {
+          try {
+            const [dp, tp] = (s||'').split(', ');
+            const [dd,mm,yyyy] = dp.split('/');
+            return new Date(`${yyyy}-${mm}-${dd}T${tp}`).getTime();
+          } catch { return 0; }
+        };
+        return parse(b.actionT) - parse(a.actionT);
+      });
 
-      if (records.length === 0) {
+      if (!records.length) {
         document.getElementById('admin-pay-history-list').innerHTML = `<p style="color:#aaa; text-align:center; padding:20px;">No verified payments yet.</p>`;
         return;
       }
@@ -792,17 +863,15 @@
         const cardId   = `ph-body-${i}`;
         const chevId   = `ph-chev-${i}`;
         const valRange = validityRange(r.actionT || getStamp());
-
         html += `
           <div class="ph-card">
-            <!-- Collapsed header: amount, shift, name, pay-phone, verified time -->
             <div class="ph-header" onclick="document.getElementById('${cardId}').classList.toggle('open'); document.getElementById('${chevId}').classList.toggle('open');">
               <div style="display:flex; align-items:center; gap:10px;">
-                ${r._userPhoto ? `<img src="${r._userPhoto}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #eee;">` : ''}
+                ${r._photo ? `<img src="${r._photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #eee;">` : ''}
                 <div>
                   <div style="font-weight:bold; font-size:13px;">₹${r.amt} — ${r.shift}</div>
-                  <div style="font-size:11px; color:#555; font-weight:600;">${r._userName || '—'} &nbsp;|&nbsp; 📞 ${r.providedPhone || '—'}</div>
-                  <div style="font-size:10px; color:#888;">✅ ${r.actionT || '—'}</div>
+                  <div style="font-size:11px; color:#555; font-weight:600;">${r._name||'—'} &nbsp;|&nbsp; 📞 ${r.providedPhone||'—'}</div>
+                  <div style="font-size:10px; color:#888;">✅ ${r.actionT||'—'}</div>
                 </div>
               </div>
               <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
@@ -810,138 +879,234 @@
                 <span class="ph-chevron" id="${chevId}">▼</span>
               </div>
             </div>
-
-            <!-- Expanded body: full user profile + all payment details + dynamic validity -->
             <div class="ph-body" id="${cardId}">
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed #ddd;">
-                ${r._userPhoto ? `<img src="${r._userPhoto}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">` : ''}
+                ${r._photo ? `<img src="${r._photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);">` : ''}
                 <div>
-                  <div style="font-weight:bold; font-size:14px;">${r._userName || '—'}</div>
-                  <div style="font-size:12px; color:#555;">Father: ${r._userFather || '—'}</div>
-                  <div style="font-size:12px; color:#555;">Address: ${r._userAddr || '—'}</div>
+                  <div style="font-weight:bold; font-size:14px;">${r._name||'—'}</div>
+                  <div style="font-size:12px; color:#555;">Father: ${r._father||'—'}</div>
+                  <div style="font-size:12px; color:#555;">Address: ${r._addr||'—'}</div>
                 </div>
               </div>
               <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                <tr><td style="padding:4px 0; color:#888; width:45%;">👤 User UID</td><td style="padding:4px 0; word-break:break-all;">${r.uid}</td></tr>
-                <tr><td style="padding:4px 0; color:#888;">📱 Profile Phone</td><td style="padding:4px 0;">${r._userPhone || '—'}</td></tr>
+                <tr><td style="padding:4px 0; color:#888; width:45%;">👤 User UID</td><td style="padding:4px 0; word-break:break-all; font-size:11px;">${r.uid}</td></tr>
+                <tr><td style="padding:4px 0; color:#888;">📱 Profile Phone</td><td style="padding:4px 0;">${r._phone||'—'}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">💳 UPI Txn UID</td><td style="padding:4px 0; font-weight:bold;">${r.providedUID}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">📞 Payment Phone</td><td style="padding:4px 0;">${r.providedPhone}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">🏷 Shift</td><td style="padding:4px 0;">${r.shift}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">📅 Days Added</td><td style="padding:4px 0; font-weight:bold; color:var(--primary);">${r.days} days</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">💰 Amount</td><td style="padding:4px 0; font-weight:bold;">₹${r.amt}</td></tr>
-                <tr><td style="padding:4px 0; color:#888;">🕐 Requested</td><td style="padding:4px 0;">${r.reqT || '—'}</td></tr>
+                <tr><td style="padding:4px 0; color:#888;">🕐 Requested</td><td style="padding:4px 0;">${r.reqT||'—'}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">✅ Verified</td><td style="padding:4px 0;">${r.actionT}</td></tr>
                 <tr><td style="padding:4px 0; color:#888;">📊 Final Balance</td><td style="padding:4px 0;">${Math.floor(r.finalNet)} days</td></tr>
-                <tr>
-                  <td style="padding:6px 0; color:#888;">🗓 Validity</td>
-                  <td style="padding:6px 0;">
-                    <span style="background:#e8f5e9; color:#2e7d32; font-weight:bold; padding:3px 8px; border-radius:6px; font-size:12px;">${valRange}</span>
-                  </td>
-                </tr>
+                <tr><td style="padding:6px 0; color:#888;">🗓 Validity</td><td style="padding:6px 0;"><span style="background:#e8f5e9; color:#2e7d32; font-weight:bold; padding:3px 8px; border-radius:6px; font-size:12px;">${valRange}</span></td></tr>
               </table>
             </div>
           </div>`;
       });
       document.getElementById('admin-pay-history-list').innerHTML = html;
     });
+
+    /* ── 4. Load rates from Firestore into editor ── */
+    getDoc(doc(db, "settings", "rates")).then(rs => {
+      const d = rs.exists() ? rs.data() : {};
+      document.getElementById('rate-day').value   = d.dayVal       || window.dayVal;
+      document.getElementById('rate-night').value = d.nightVal     || window.nightVal;
+      document.getElementById('rate-both').value  = d.bothVal      || window.bothVal;
+      document.getElementById('rate-dim').value   = d.daysinamonth || window.daysinamonth;
+    });
   };
 
   /* ══════════════════════════════════════════════════════════
-     handlePay — Gate 2
-     CHANGE: also stores userName + userPhone in payment_history
-             for richer history display without needing to re-fetch
+     saveRates — with confirmation showing exactly what changed
   ══════════════════════════════════════════════════════════ */
-  window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone, sigDocId) => {
-    const ref  = doc(db, "users", uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
+  window.saveRates = async () => {
+    const newDay   = Number(document.getElementById('rate-day').value);
+    const newNight = Number(document.getElementById('rate-night').value);
+    const newBoth  = Number(document.getElementById('rate-both').value);
+    const newDim   = Number(document.getElementById('rate-dim').value);
 
-    const u           = snap.data();
-    const prevBalance = u.totalPaidDays || 0;
-    const newBalance  = stat === 'OK' ? prevBalance + days : prevBalance;
+    const changes = [];
+    if (newDay   !== window.dayVal)       changes.push(`☀️ Day Shift: ₹${window.dayVal} → ₹${newDay}`);
+    if (newNight !== window.nightVal)     changes.push(`🌙 Night Shift: ₹${window.nightVal} → ₹${newNight}`);
+    if (newBoth  !== window.bothVal)      changes.push(`🌓 Both Shifts: ₹${window.bothVal} → ₹${newBoth}`);
+    if (newDim   !== window.daysinamonth) changes.push(`📅 Days/Month: ${window.daysinamonth} → ${newDim}`);
 
-    if (stat === 'OK') {
-      /* Anti-Fraud Check 2 of 2 */
-      const histRef  = doc(db, "payment_history", String(providedUID));
-      const histSnap = await getDoc(histRef);
-      if (histSnap.exists()) {
-        alert("⛔ FRAUD DETECTED: This UID already exists in payment_history. Signal deleted.");
-        await deleteDoc(doc(db, "signals", sid));
-        return;
-      }
-      await setDoc(histRef, {
-        uid,
-        providedUID:   String(providedUID),
-        providedPhone: String(providedPhone),
-        screenshotStored: true,
-        shift, days, amt, reqT,
-        actionT:   getStamp(),
-        finalNet:  newBalance
-      });
-    }
+    if (!changes.length) return alert("No changes detected.");
+    if (!confirm(`⚠️ You are about to update the following library pricing:\n\n${changes.join('\n')}\n\nDo you want to apply these changes?`)) return;
 
-    const newHistory = (u.history || []).map(h => {
-      if (typeof h !== 'object' || h.id !== payId) return h;
-      return { ...h, status: stat === 'OK' ? 'Verified' : 'Rejected', actionT: getStamp(), finalNet: newBalance };
-    });
+    window.dayVal       = newDay;
+    window.nightVal     = newNight;
+    window.bothVal      = newBoth;
+    window.daysinamonth = newDim;
 
-    await updateDoc(ref, { totalPaidDays: newBalance, history: newHistory });
-    await deleteDoc(doc(db, "signals", sid));
+    await setDoc(doc(db, "settings", "rates"), { dayVal:newDay, nightVal:newNight, bothVal:newBoth, daysinamonth:newDim });
+    refreshPriceLabels();
+    window.calcTotal();
+    alert("✅ Rates updated and saved successfully.");
   };
 
-  /* ── User Folder ── */
+  /* ══════════════════════════════════════════════════════════
+     openUser — alarm-style survival editor, last-date display,
+                removes old +/- day input system
+  ══════════════════════════════════════════════════════════ */
   window.openUser = async (uid) => {
     const snap = await getDoc(doc(db, "users", uid));
     if (!snap.exists()) return;
-    const u = snap.data();
+    const u   = snap.data();
+    const srv = window.getRealSurvival(u);
+    const ld  = (u.joinDateISO && srv > 0) ? `📅 Valid until: ${lastValidDate(srv)}` : (srv <= 0 ? '⛔ Membership expired' : '');
+
+    /* Convert current survival to D:H:M:S for alarm editor */
+    const absSrv    = Math.max(0, srv);
+    const totalSecs = Math.floor(absSrv * 86400);
+    const eDays     = Math.floor(totalSecs / 86400);
+    const eHrs      = Math.floor((totalSecs % 86400) / 3600);
+    const eMins     = Math.floor((totalSecs % 3600) / 60);
+    const eSecs     = totalSecs % 60;
+
     document.getElementById('folder-content').innerHTML = `
       <div class="card" style="text-align:center;">
-        <img src="${u.photo||''}" style="width:70px; height:70px; border-radius:50%; margin-bottom:10px;">
-        <div class="admin-live-srv live-srv-display" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}">${window.formatTime(window.getRealSurvival(u))}</div>
+        <img src="${u.photo||''}" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;">
+        <div class="admin-live-srv live-srv-display" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}">${window.formatTime(srv)}</div>
+        ${ld ? `<div style="font-size:13px; font-weight:bold; color:#2e7d32; margin-top:4px;">${ld}</div>` : ''}
       </div>
       <div class="card">
-        <p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p>
-        <p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p>
+        <p><b>Name:</b> ${u.name}</p>
+        <p><b>Father:</b> ${u.father||'-'}</p>
+        <p><b>Mobile:</b> ${u.phone||'-'}</p>
+        <p><b>Email:</b> ${u.email||'-'}</p>
         <p><b>Address:</b> ${u.address||'-'}</p>
       </div>
+
+      <!-- Alarm-style survival editor -->
       <div class="card">
-        <label class="detail-label">Manual Adjustment</label>
-        <div style="display:flex; gap:5px;">
-          <input type="number" id="adm-manual-days" placeholder="+/- days" style="flex:1; padding:10px;">
-          <button class="btn btn-blue" onclick="window.adminEditDays('${uid}')">Set</button>
+        <label class="detail-label">⏱ Set Survival Time (like setting an alarm)</label>
+        <p style="font-size:12px; color:#888; margin:4px 0 14px;">Tap ▲/▼ to change each unit. Current value pre-filled.</p>
+        <div class="alarm-editor">
+          <div class="alarm-unit">
+            <label>Days</label>
+            <div class="alarm-spin">
+              <button onclick="alarmStep('ae-d',1)">▲</button>
+              <input id="ae-d" type="number" min="0" value="${eDays}">
+              <button onclick="alarmStep('ae-d',-1)">▼</button>
+            </div>
+          </div>
+          <div class="alarm-sep">:</div>
+          <div class="alarm-unit">
+            <label>Hours</label>
+            <div class="alarm-spin">
+              <button onclick="alarmStep('ae-h',1,23)">▲</button>
+              <input id="ae-h" type="number" min="0" max="23" value="${eHrs}">
+              <button onclick="alarmStep('ae-h',-1,23)">▼</button>
+            </div>
+          </div>
+          <div class="alarm-sep">:</div>
+          <div class="alarm-unit">
+            <label>Mins</label>
+            <div class="alarm-spin">
+              <button onclick="alarmStep('ae-m',1,59)">▲</button>
+              <input id="ae-m" type="number" min="0" max="59" value="${eMins}">
+              <button onclick="alarmStep('ae-m',-1,59)">▼</button>
+            </div>
+          </div>
+          <div class="alarm-sep">:</div>
+          <div class="alarm-unit">
+            <label>Secs</label>
+            <div class="alarm-spin">
+              <button onclick="alarmStep('ae-s',1,59)">▲</button>
+              <input id="ae-s" type="number" min="0" max="59" value="${eSecs}">
+              <button onclick="alarmStep('ae-s',-1,59)">▼</button>
+            </div>
+          </div>
         </div>
+        <button class="btn btn-blue" style="margin-top:16px;" onclick="window.applyAlarmEdit('${uid}',${srv.toFixed(8)})">Apply New Survival Time</button>
       </div>
+
       <div class="card"><div class="log-container" onclick="this.classList.toggle('expanded')">${window.renderLogs(u.history)}</div></div>
       <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>`;
     document.getElementById('owner-folder-view').classList.add('show');
   };
 
+  /* Alarm spinner helper */
+  window.alarmStep = (id, dir, max = Infinity) => {
+    const el  = document.getElementById(id);
+    let val   = parseInt(el.value) + dir;
+    if (val < 0)    val = max === Infinity ? 0 : max;
+    if (val > max)  val = 0;
+    el.value = val;
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     applyAlarmEdit — converts alarm D:H:M:S to decimal days,
+     shows confirmation with before/after, updates Firestore
+  ══════════════════════════════════════════════════════════ */
+  window.applyAlarmEdit = async (uid, oldSrvDecimal) => {
+    const d = parseInt(document.getElementById('ae-d').value) || 0;
+    const h = parseInt(document.getElementById('ae-h').value) || 0;
+    const m = parseInt(document.getElementById('ae-m').value) || 0;
+    const s = parseInt(document.getElementById('ae-s').value) || 0;
+
+    const newDecimalDays = d + h/24 + m/1440 + s/86400;
+
+    const oldFmt = window.formatTime(oldSrvDecimal);
+    const newFmt = window.formatTime(newDecimalDays);
+
+    const oldTs  = Math.floor(Math.abs(oldSrvDecimal) * 86400);
+    const od = Math.floor(oldTs/86400), oh = Math.floor((oldTs%86400)/3600), om = Math.floor((oldTs%3600)/60), os = oldTs%60;
+
+    if (!confirm(
+      `⚠️ Confirm Survival Time Change for this member:\n\n` +
+      `FROM : ${od}d ${oh}h ${om}m ${os}s  (${oldFmt})\n` +
+      `TO   : ${d}d ${h}h ${m}m ${s}s  (${newFmt})\n\n` +
+      `This directly sets how much time this member has remaining.\nAre you sure?`
+    )) return;
+
+    /* When joinDateISO exists, totalPaidDays must be set so that:
+       totalPaidDays - (now - joinDate) = newDecimalDays
+       i.e. totalPaidDays = newDecimalDays + (now - joinDate)          */
+    const uSnap = await getDoc(doc(db, "users", uid));
+    if (!uSnap.exists()) return;
+    const u = uSnap.data();
+
+    let newTotalPaidDays;
+    if (u.joinDateISO) {
+      const elapsed = (new Date() - new Date(u.joinDateISO)) / 86400000;
+      newTotalPaidDays = newDecimalDays + elapsed;
+    } else {
+      newTotalPaidDays = newDecimalDays;
+    }
+
+    await updateDoc(doc(db, "users", uid), {
+      totalPaidDays: newTotalPaidDays,
+      history: arrayUnion(`Admin set survival time: ${oldFmt} → ${newFmt} at ${getStamp()}`)
+    });
+
+    alert(`✅ Survival time updated to ${newFmt}`);
+    window.openUser(uid);
+  };
+
   window.adminForceLeave = async (uid) => {
-    if (confirm("Force Stop Session?")) {
+    if (confirm("Force stop this member's session?")) {
       const snap = await getDoc(doc(db, "users", uid));
       await updateDoc(doc(db, "users", uid), { totalPaidDays: window.getRealSurvival(snap.data()), joinDateISO: null, history: arrayUnion(`Force Exit by Admin at ${getStamp()}`) });
       document.getElementById('owner-folder-view').classList.remove('show');
     }
   };
 
-  window.adminEditDays = async (uid) => {
-    const val = parseFloat(document.getElementById('adm-manual-days').value);
-    const cur = (await getDoc(doc(db, "users", uid))).data().totalPaidDays;
-    await updateDoc(doc(db, "users", uid), { totalPaidDays: cur + val });
-    window.openUser(uid);
-  };
+  window.clearSignal = async (sid) => { await deleteDoc(doc(db, "signals", sid)).catch(() => {}); };
 
   window.connectToWifi = async () => {
     if (!auth.currentUser) return alert("Please log in first.");
     const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
     if (!snap.exists()) return alert("User profile not found.");
     const userTime = window.getRealSurvival(snap.data());
-    const wSnap    = await getDoc(doc(db, "settings", "wifi"));
-    if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
-    const data = wSnap.data();
-    if (userTime >= (-(Number(data['max-connection-days']) || window.daysinamonth))) {
+    if (userTime >= 0) {
+      const wSnap    = await getDoc(doc(db, "settings", "wifi"));
+      const data = wSnap.data();
+      if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
       const ssid = data.ssid, pass = data.pass;
-      if (!ssid || !pass) return alert("Wi-Fi details incomplete in database.");
+      if (!ssid || !pass) return alert("Wi-Fi details incomplete.");
       window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
       setTimeout(() => { if (document.visibilityState === 'visible') alert("Please open this in the Library App."); }, 1500);
     } else alert("Please pay your fees to access the Wi-Fi network!");
@@ -949,7 +1114,7 @@
 
   window.saveWifiSettings = async () => {
     await setDoc(doc(db, "settings", "wifi"), { ssid: document.getElementById('wifi-ssid').value, pass: document.getElementById('wifi-pass').value });
-    alert("Saved.");
+    alert("Wi-Fi settings saved.");
   };
 
   window.switchMain = (t) => {
@@ -965,7 +1130,7 @@
     });
   };
   window.switchDataManage = (t) => {
-    ['wifi','pay'].forEach(k => {
+    ['wifi','pay','rates'].forEach(k => {
       document.getElementById('dm-pane-'+k).classList.toggle('hidden', k !== t);
       document.getElementById('dm-'+k+'-btn').classList.toggle('active', k === t);
     });
@@ -976,12 +1141,14 @@
   window.closeLeaveWizard = () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit         = (id) => { document.getElementById(id).readOnly = false; document.getElementById(id).focus(); };
 
+  /* Initial price label setup */
   document.getElementById('dayPrice').textContent   = window.dayVal;
   document.getElementById('nightPrice').textContent  = window.nightVal;
   document.getElementById('bothPrice').textContent   = window.bothVal;
-  document.querySelector('option[value="day"]').value   = window.dayVal;
-  document.querySelector('option[value="night"]').value = window.nightVal;
-  document.querySelector('option[value="both"]').value  = window.bothVal;
+  const sel = document.getElementById('p-shift');
+  sel.options[0].value = window.dayVal;
+  sel.options[1].value = window.nightVal;
+  sel.options[2].value = window.bothVal;
   document.getElementById('p-days').value = window.daysinamonth;
 
   window.updateUserPhoto = (i) => {
