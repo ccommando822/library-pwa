@@ -422,7 +422,7 @@
 
         document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
 
-        if (user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {
+        if (user.email === "c.commando822@gmail.com") {
           document.getElementById('tab-man').classList.remove('hidden');
           window.loadAdmin();
         }
@@ -1101,7 +1101,7 @@
     const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
     if (!snap.exists()) return alert("User profile not found.");
     const userTime = window.getRealSurvival(snap.data());
-    if (userTime >= 0) {
+    if (userTime >= -1) {
       const wSnap    = await getDoc(doc(db, "settings", "wifi"));
       const data = wSnap.data();
       if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
