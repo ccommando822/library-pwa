@@ -997,13 +997,19 @@
   window.clearSignal = async (sid) => { await deleteDoc(doc(db,"signals",sid)).catch(()=>{}); };
 
   window.connectToWifi = async () => {
-    if(!auth.currentUser) return alert("Please log in first.");
-    const snap=await getDoc(doc(db,"users",auth.currentUser.uid)); if(!snap.exists()) return alert("User not found.");
-    if(window.getRealSurvival(snap.data())<-(window.daysinamonth)) return alert("Please pay fees to access Wi-Fi!");
-    const wSnap=await getDoc(doc(db,"settings","wifi")); if(!wSnap.exists()) return alert("Wi-Fi config missing.");
-    const {ssid,pass}=wSnap.data(); if(!ssid||!pass) return alert("Wi-Fi details incomplete.");
-    window.location.href=`mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-    setTimeout(()=>{ if(document.visibilityState==='visible') alert("Open in the Library App to connect."); },1500);
+    if (!auth.currentUser) return alert("Please log in first.");
+    const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    if (!snap.exists()) return alert("User profile not found.");
+    const userTime = window.getRealSurvival(snap.data());
+    if (userTime >= -1) {
+      const wSnap    = await getDoc(doc(db, "settings", "wifi"));
+      const data = wSnap.data();
+      if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
+      const ssid = data.ssid, pass = data.pass;
+      if (!ssid || !pass) return alert("Wi-Fi details incomplete.");
+      window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
+      setTimeout(() => { if (document.visibilityState === 'visible') alert("Please open this in the Library App."); }, 1500);
+    } else alert("Please pay your fees to access the Wi-Fi network!");
   };
 
   window.saveWifiSettings = async () => {
