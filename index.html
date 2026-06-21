@@ -299,6 +299,11 @@
 
   const app      = initializeApp(firebaseConfig);
   const auth     = getAuth(app);
+  getRedirectResult(auth).then(result => {
+  if (result?.user) {
+    // user signed in via redirect — handle same as popup success
+  }
+});
   const db       = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
@@ -549,7 +554,13 @@
     }
   }, 1000);
 
-  window.login  = () => signInWithPopup(auth, provider);
+  window.login = () => {
+  if (window.AndroidBridge) {
+    signInWithRedirect(auth, provider);
+  } else {
+    signInWithPopup(auth, provider);
+  }
+};
   window.logout = async () => {
     if (auth.currentUser) await updateDoc(doc(db,"users",auth.currentUser.uid), { isOnline: false });
     signOut(auth).then(() => location.reload());
