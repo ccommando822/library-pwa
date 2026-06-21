@@ -1,4 +1,3 @@
-cat > /mnt/user-data/outputs/library_erp_v8.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -718,10 +717,14 @@ cat > /mnt/user-data/outputs/library_erp_v8.html << 'HTMLEOF'
     const ssid = data.ssid, pass = data.pass;
     if (!data.ssid || !data.pass) return alert("Wi-Fi details are incomplete. Ask admin to fill them in.");
     window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-    document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
+    setTimeout(() => { 
+    if (document.visibilityState === 'visible') {
+      document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
       document.getElementById('wifi-modal-pass').innerText = "you cannot connect to wifi without App";
       document.getElementById('wifi-modal-label').innerText = key === 'wifi2' ? 'Network 2' : 'Network 1';
       document.getElementById('wifi-info-modal').style.display = 'flex';
+    } 
+  }, 1500);
   };
 
   /* saveWifiSettings — accepts 'wifi' or 'wifi2' */
