@@ -529,7 +529,7 @@
     if (document.getElementById('leave-otp').value == window.currentLeaveOtp) {
       const lastBal = window.getRealSurvival(currentUserData);
       await updateDoc(doc(db, "users", auth.currentUser.uid), { totalPaidDays: lastBal, joinDateISO: null, history: arrayUnion(`Left Library on ${getStamp()}`, `Membership Left. Last Balance: ${Math.floor(lastBal)} days`) });
-      window.location.href = `mylibraryapp://forgetwifi`;
+      window.location.href = `rakshapalsinghlibrary://forgetwifi`;
       await deleteDoc(doc(db, "signals", "leave_" + auth.currentUser.uid));
       setTimeout(() => location.reload(), 1000);
     } else alert("Invalid OTP");
@@ -1107,7 +1107,7 @@
       if (!wSnap.exists()) return alert("Wi-Fi configuration missing.");
       const ssid = data.ssid, pass = data.pass;
       if (!ssid || !pass) return alert("Wi-Fi details incomplete.");
-      window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
+      window.location.href = `rakshapalsinghlibrary://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
       setTimeout(() => { if (document.visibilityState === 'visible') alert("Please open this in the Library App."); }, 1500);
     } else alert("Please pay your fees to access the Wi-Fi network!");
   };
