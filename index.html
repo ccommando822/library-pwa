@@ -715,16 +715,13 @@ cat > /mnt/user-data/outputs/library_erp_v8.html << 'HTMLEOF'
     const wSnap = await getDoc(doc(db,"settings",key));
     if (!wSnap.exists()) return alert(`Wi-Fi ${key} configuration not set yet.`);
     const data = wSnap.data();
+    const ssid = data.ssid, pass = data.pass;
     if (!data.ssid || !data.pass) return alert("Wi-Fi details are incomplete. Ask admin to fill them in.");
-    window.location.href = `rakshapalsinghlibrary://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-    setTimeout(() => { 
-    if (document.visibilityState === 'visible') {
-      document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
+    window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
+    document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
       document.getElementById('wifi-modal-pass').innerText = "you cannot connect to wifi without App";
       document.getElementById('wifi-modal-label').innerText = key === 'wifi2' ? 'Network 2' : 'Network 1';
       document.getElementById('wifi-info-modal').style.display = 'flex';
-    } 
-  }, 1500);
   };
 
   /* saveWifiSettings — accepts 'wifi' or 'wifi2' */
