@@ -102,7 +102,7 @@
 <div id="holding-screen">
   <div id="holding-spinner" class="holding-spinner"></div>
   <div style="font-size:28px; margin-bottom:10px;" id="holding-icon">🔐</div>
-  <h2 id="holding-title" style="margin:0 0 10px; font-size:20px; color:var(--dark);">Verifying Your Device</h2>
+  <h2 id="holding-title" style="margin:0 0 10px; font-size:20px; color:var(--dark);">Verifying Your Account</h2>
   <p id="holding-msg" style="color:#666; font-size:14px; line-height:1.6; max-width:320px; margin:0 0 24px;">
     Opening the Library App to verify your device identity. Please wait…
   </p>
@@ -396,6 +396,10 @@
     }
 
     hs.classList.add('show');
+    
+    // Automatically retry verification when the holding screen is displayed
+    if (typeof window.retryDrmVerification === 'function') {
+        window.retryDrmVerification();
   };
 
   const hideHolding = () => {
