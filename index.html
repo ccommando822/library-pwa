@@ -422,30 +422,7 @@
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
 
-    let timeElapsed = 0;
-    let window.drmCheckInterval = 0;
-
-  // Clear any old checking loops before starting a new one
-  if (window.drmCheckInterval) clearInterval(window.drmCheckInterval);
-
-  // Start checking every 100 milliseconds
-  window.drmCheckInterval = setInterval(() => {
-    timeElapsed += 100;
-
-    // 1. CHECK CONDITION: Did the app return the ID yet?
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('drm_callback')) {
-      clearInterval(window.drmCheckInterval); // Stop the counter instantly
-      hideHolding();                          // Go ahead with the app
-      return;
-    }
-
-    // 2. TIMEOUT CONDITION: Reached exactly 10 seconds (10000ms) without the ID
-    if (timeElapsed >= 10000) {
-      clearInterval(window.drmCheckInterval); // Stop the counter
-      showHolding('failed');                  // Show app missing screen
-    }
-  }, 100);
+    
   };
 
   window.retryDrmVerification = () => triggerDrmVerification();
