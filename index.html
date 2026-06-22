@@ -351,118 +351,119 @@
   const processingSignals = new Set();
 
   /* ══════════════════════════════════════════════════
-     DRM VERIFICATION FLOW
+     DRM VERIFICATION FLOW  (all logic lives here)
   ══════════════════════════════════════════════════ */
   const CALLBACK_BASE = "https://rakshapal-singh-library-ded2e.web.app/";
 
-  /* Show the holding screen with a given state */
-  const showHolding = (state = 'verifying') => {
-    const hs = document.getElementById('holding-screen');
-    const spinner = document.getElementById('holding-spinner');
-    const icon    = document.getElementById('holding-icon');
-    const title   = document.getElementById('holding-title');
-    const msg     = document.getElementById('holding-msg');
+  /* ── Internal helpers (holding screen UI only) ── */
+  const _showHolding = (state) => {
+    const spinner    = document.getElementById('holding-spinner');
     const retryBox   = document.getElementById('holding-retry-box');
     const installBox = document.getElementById('holding-install-box');
+    const icon       = document.getElementById('holding-icon');
+    const title      = document.getElementById('holding-title');
+    const msg        = document.getElementById('holding-msg');
 
+    spinner.style.display    = 'block';
     retryBox.style.display   = 'none';
     installBox.style.display = 'none';
-    spinner.style.display    = 'block';
 
-    if (state === 'verifying') {    alert('1a');
+    if (state === 'verifying') {
       icon.innerText  = '🔐';
       title.innerText = 'Verifying Your Device';
       msg.innerText   = 'Opening the Library App to verify your device identity. Please wait…';
-    } else if (state === 'mismatch') {   alert('1b');
-      spinner.style.display = 'none';
-      icon.innerText  = '⛔';
-      title.innerText = 'Device Not Recognised';
-      msg.innerText   = 'This account is registered to a different device.';
+    } else if (state === 'no_app') {
+      spinner.style.display    = 'none';
+      icon.innerText           = '📱';
+      title.innerText          = 'Library App Not Detected';
+      msg.innerText            = 'The Library App could not be opened. Please install it to continue.';
+      installBox.style.display = 'block';
+    } else if (state === 'failed') {
+      spinner.style.display    = 'none';
+      icon.innerText           = '❌';
+      title.innerText          = 'Verification Failed';
+      msg.innerText            = 'Could not extract device ID from the Library App.';
+      installBox.style.display = 'block';
+    } else if (state === 'mismatch') {
+      spinner.style.display  = 'none';
+      icon.innerText         = '⛔';
+      title.innerText        = 'Account Active on Another Device';
+      msg.innerText          = 'This account is already logged in on a different phone.';
       document.getElementById('holding-retry-msg').innerText =
-        'Your device ID does not match what is stored for this account. If you believe this is an error, retry or contact the admin.';
+        'First logout from the other device, then tap Retry here.';
       retryBox.style.display = 'block';
-    } else if (state === 'failed') {  alert('1c');
-      spinner.style.display = 'none';
-      icon.innerText  = '❌';
-      title.innerText = 'Verification Failed';
-      msg.innerText   = 'Could not extract device ID from the Library App.';
-      installBox.style.display = 'block';
-    } else if (state === 'no_app') {    alert('1d');
-      spinner.style.display = 'none';
-      icon.innerText  = '📱';
-      title.innerText = 'Library App Not Updated';
-      msg.innerText   = 'Latest the Library App, Not Found. Please install it to continue.';
-      installBox.style.display = 'block';
     }
 
-    hs.classList.add('show'); 
-    alert('1e');
+    document.getElementById('holding-screen').classList.add('show');
   };
 
-  const hideHolding = () => {      alert('2a');
-    document.getElementById('holding-screen').classList.remove('show');    alert('2b');
-  };
+  const _hideHolding = () =>
+    document.getElementById('holding-screen').classList.remove('show');
 
-  /* Trigger deep link to app — fires automatically after sign-in */
-  const triggerDrmVerification = () => {     alert('3a');
-    showHolding('verifying');
+  /* ── Single entry-point for the entire DRM workflow ──
+     Call once after Firebase auth + user doc are ready.
+     Returns true if verification passed, false if the user is blocked. */
+  const runDrmFlow = async (user, db) => {
+    /* 1. Read URL params left by the native app callback */
+    const params      = new URLSearchParams(window.location.search);
+    const drmId       = params.get('drm_id');
+    const drmError    = params.get('drm_error');
+    const isCallback  = !!(drmId || drmError || params.get('drm_callback'));
+
+    /* Clean the URL immediately so a manual refresh won't re-trigger */
+    if (isCallback) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    /* 2. Read the stored DRM ID from Firestore */
+    const uSnap       = await getDoc(doc(db, "users", user.uid));
+    const storedDrmId = uSnap.exists() ? (uSnap.data().mediaDrmId || '') : '';
+
+    /* 3A. App returned an extraction error → mark in Firebase, block user */
+    if (drmError) {
+      await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
+      _showHolding('failed');
+      return false;
+    }
+
+    /* 3B. App returned a valid device ID → check / save it */
+    if (drmId) {
+      if (!storedDrmId) {
+        /* First time — save and allow */
+        await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
+        _hideHolding();
+        return true;
+      }
+      if (storedDrmId === drmId) {
+        /* Same device — allow */
+        _hideHolding();
+        return true;
+      }
+      /* Different device — block */
+      _showHolding('mismatch');
+      return false;
+    }
+
+    /* 3C. No DRM params — fresh sign-in.
+           Trigger the deep link and wait for the app to call back. */
+    _showHolding('verifying');
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
-    alert('3b');
-    /* If the app is not installed, the deep link silently fails.
-       After 10 s, if we're still visible, show the install prompt. */
+
+    /* If the app is not installed the deep link silently fails.
+       After 10 s, if the page is still visible, show the install prompt. */
     setTimeout(() => {
-      if (document.visibilityState === 'visible') {
-        showHolding('no_app');
-      }
+      if (document.visibilityState === 'visible') _showHolding('no_app');
     }, 10000);
-    alert('3c');
+
+    return false; /* dashboard must not load until callback comes back */
   };
 
-  window.retryDrmVerification = () => triggerDrmVerification();  alert('4');
-
-  /* ── Handle callback from app on page load ── */
-  alert('5');
-  const urlParams  = new URLSearchParams(window.location.search);
-  const drmId      = urlParams.get('drm_id');
-  const drmError   = urlParams.get('drm_error');
-  const drmCallback = urlParams.get('drm_callback');
-  alert('6');
-  /* Clean URL immediately so refresh doesn't re-trigger */
-  if (drmId || drmError || drmCallback) {     alert('7');
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-
-  /* Called once auth + user doc are ready */
-  const processDrmCallback = async (user, existingDrmId) => {                   alert('8a');
-    if (drmId) {                                                                alert('8b');
-      /* Path A — no DRM stored yet: save and allow */
-      if (!existingDrmId) {                                                     alert('8c');
-        await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
-        hideHolding();
-        return;
-      }
-      /* Path B — IDs match: allow */
-      if (existingDrmId === drmId) {                                             alert('8d');
-        hideHolding();
-        return;
-      }
-      /* Path C — mismatch: block */                                             alert('8e');
-      showHolding('mismatch');
-      return;
-    }
-
-    if (drmError) {                                                              alert('8f');
-      /* Save "failed" to Firebase so admin can see it */
-      await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
-      showHolding('failed');
-      return;
-    }
-
-    /* No DRM params — fresh sign-in (not a callback).
-       If user already has a stored DRM ID, they were verified on a
-       previous session; trigger reverification now. */                     alert('8g');
-    triggerDrmVerification();
+  /* Retry button on holding screen just re-runs the whole flow for this user */
+  window.retryDrmVerification = async () => {
+    if (!auth.currentUser) return;
+    const passed = await runDrmFlow(auth.currentUser, db);
+    if (passed) renderDashboard(auth.currentUser);
   };
 
   /* ══════════════════════════════════════════════════
@@ -600,24 +601,12 @@
         await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [], mediaDrmId: '' });
       });
 
-      /* Read current DRM ID from Firestore */
-      const uSnap = await getDoc(uRef);
-      const existingDrmId = uSnap.exists() ? (uSnap.data().mediaDrmId || '') : '';
-
       /* ── DRM VERIFICATION ──
-         If this is a callback from the app (drm_id or drm_error in URL),
-         process it. Otherwise trigger verification automatically. */
-      if (drmId || drmError) {
-        await processDrmCallback(user, existingDrmId);
-      } else {
-        /* Not a callback — trigger device verification automatically */
-        triggerDrmVerification();
-        /* Don't proceed to render profile until verification succeeds */
-        return;
-      }
-
-      /* If holding screen is still visible (mismatch / failed), stop here */
-      if (document.getElementById('holding-screen').classList.contains('show')) return;
+         runDrmFlow handles everything: URL params, Firebase read/write,
+         deep-link trigger, and holding-screen UI.
+         Returns true only when the user is cleared to see the dashboard. */
+      const verified = await runDrmFlow(user, db);
+      if (!verified) return;
 
       /* ── Verified — render dashboard ── */
       renderDashboard(user);
