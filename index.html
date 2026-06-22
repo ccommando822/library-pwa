@@ -400,70 +400,66 @@
   const _hideHolding = () =>
     document.getElementById('holding-screen').classList.remove('show');
 
-  /* ── Single entry-point for the entire DRM workflow ──
-     Call once after Firebase auth + user doc are ready.
-     Returns true if verification passed, false if the user is blocked. */
-  const runDrmFlow = async (user, db) => {
-    /* 1. Read URL params left by the native app callback */
-    const params      = new URLSearchParams(window.location.search);
-    const drmId       = params.get('drm_id');
-    const drmError    = params.get('drm_error');
-    const isCallback  = !!(drmId || drmError || params.get('drm_callback'));
+  /* ── runDrmFlow: called ONLY when the app has already sent back an ID ──
+     user + doc are guaranteed to exist before this is called.
+     drmId / drmError come from URL params, already read and cleaned by caller. */
+  const runDrmFlow = async (user, db, drmId, drmError) => {
 
-    /* Clean the URL immediately so a manual refresh won't re-trigger */
-    if (isCallback) {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-
-    /* 2. Read the stored DRM ID from Firestore */
+    /* 1. Read the stored DRM ID from Firestore */
     const uSnap       = await getDoc(doc(db, "users", user.uid));
     const storedDrmId = uSnap.exists() ? (uSnap.data().mediaDrmId || '') : '';
 
-    /* 3A. App returned an extraction error → mark in Firebase, block user */
+    /* 2. App reported extraction failure → save 'failed', block */
     if (drmError) {
       await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
       _showHolding('failed');
       return false;
     }
 
-    /* 3B. App returned a valid device ID → check / save it */
-    if (drmId) {
-      if (!storedDrmId) {
-        /* First time — save and allow */
-        await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
-        _hideHolding();
-        return true;
-      }
-      if (storedDrmId === drmId) {
-        /* Same device — allow */
-        _hideHolding();
-        return true;
-      }
-      /* Different device — block */
-      _showHolding('mismatch');
-      return false;
+    /* 3. App returned a valid device ID — compare with Firebase */
+    if (!storedDrmId || storedDrmId === 'failed') {
+      /* Firebase empty or previously failed — first valid device, save and allow */
+      await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
+      _hideHolding();
+      return true;
     }
+    if (storedDrmId === drmId) {
+      /* Same device as registered — allow */
+      _hideHolding();
+      return true;
+    }
+    /* Different device — block */
+    _showHolding('mismatch');
+    return false;
+  };
 
-    /* 3C. No DRM params — fresh sign-in.
-           Trigger the deep link and wait for the app to call back. */
+  /* ── fireDrmDeepLink ──────────────────────────────────────────────────────
+     Fires the Library App deep link automatically (no permission prompt).
+     Timeline:
+       t=0s   → deep link fires, app opens silently
+       t=0–10s → app extracts ID, calls back with ?drm_id=XXX → page reloads
+                 → onAuthStateChanged → doc created → runDrmFlow → done
+       t=10s  → if page is still here (app never opened / didn't respond)
+                → show "App not found / not updated" screen with download button
+  ────────────────────────────────────────────────────────────────────────── */
+  const fireDrmDeepLink = () => {
     _showHolding('verifying');
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
+
+    /* Fire — opens Library App automatically, same as connectToWifi */
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
 
-    /* If the app is not installed the deep link silently fails.
-       After 10 s, if the page is still visible, show the install prompt. */
+    /* If the app sends back the ID, the page reloads before 10s and this
+       timeout is abandoned. If we're still here at 10s, app didn't respond. */
     setTimeout(() => {
       if (document.visibilityState === 'visible') _showHolding('no_app');
     }, 10000);
-
-    return false; /* dashboard must not load until callback comes back */
   };
 
-  /* Retry button on holding screen just re-runs the whole flow for this user */
-  window.retryDrmVerification = async () => {
+  /* ── Retry button: re-fires the deep link from the holding screen ── */
+  window.retryDrmVerification = () => {
     if (!auth.currentUser) return;
-    const passed = await runDrmFlow(auth.currentUser, db);
-    if (passed) renderDashboard(auth.currentUser);
+    fireDrmDeepLink();
   };
 
   /* ══════════════════════════════════════════════════
@@ -593,30 +589,45 @@
   ══════════════════════════════════════════════════ */
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      /* Load rates */
-      try { const rs=await getDoc(doc(db,"settings","rates")); if(rs.exists()) applyRatesData(rs.data()); } catch(e) { console.warn("Rates load error:",e.message); }
 
-      const uRef = doc(db, "users", user.uid);
-      await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
-        await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [], mediaDrmId: '' });
-      });
+      /* ── CHECK: Did the app just call back with a DRM ID? ──
+         This is the SECOND time onAuthStateChanged fires — after the app
+         redirected back to ?drm_id=XXX. Handle it first before anything else. */
+      const params           = new URLSearchParams(window.location.search);
+      const incomingDrmId    = params.get('drm_id');
+      const incomingDrmError = params.get('drm_error');
 
-      /* ── DRM VERIFICATION ──
-         runDrmFlow handles everything: URL params, Firebase read/write,
-         deep-link trigger, and holding-screen UI.
-         Returns true only when the user is cleared to see the dashboard. */
-      const verified = await runDrmFlow(user, db);
-      if (!verified) return;
+      if (incomingDrmId || incomingDrmError) {
+        /* Clean URL immediately so a refresh won't re-trigger */
+        window.history.replaceState({}, '', window.location.pathname);
 
-      /* ── Verified — render dashboard ── */
-      renderDashboard(user);
+        /* NOW create/update user doc — user+doc ready before runDrmFlow */
+        const uRef = doc(db, "users", user.uid);
+        await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
+          await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [], mediaDrmId: '' });
+        });
+        try { const rs=await getDoc(doc(db,"settings","rates")); if(rs.exists()) applyRatesData(rs.data()); } catch(e) { console.warn("Rates load error:",e.message); }
+
+        /* Firebase check → allow or block */
+        const verified = await runDrmFlow(user, db, incomingDrmId, incomingDrmError);
+        if (verified) renderDashboard(user);
+        return;
+      }
+
+      /* ── FIRST sign-in (no DRM params in URL yet) ──
+         Fire the deep link IMMEDIATELY — before creating the doc,
+         before any Firebase calls. App opens automatically, no permission prompt. */
+      fireDrmDeepLink();
+      /* Execution stops here. When the app calls back with ?drm_id=XXX
+         the page reloads and onAuthStateChanged fires again, hitting the
+         block above which handles doc creation + Firebase check. */
 
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
       document.getElementById('profilePanel').classList.add('hidden');
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display = 'none';
-      hideHolding();
+      _hideHolding();
     }
   });
 
