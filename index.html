@@ -224,6 +224,19 @@
 
 <section id="account" class="active">
   <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
+  <div id="verifyPanel" class="card hidden" style="text-align:center; padding:28px 20px;">
+    <div style="font-size:40px; margin-bottom:12px;">🔐</div>
+    <h3 style="margin:0 0 8px; font-size:18px; color:var(--dark);">Device Verification Required</h3>
+    <p style="color:#666; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Tap the button below to verify this device.<br>The Library App will open automatically.
+    </p>
+    <button class="btn btn-blue" onclick="window.startVerification()" style="font-size:16px; padding:16px;">
+      🛡️ Verify My Device
+    </button>
+    <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">
+      Sign out and try a different account
+    </button>
+  </div>
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center;">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
@@ -442,18 +455,40 @@
        t=10s  → if page is still here (app never opened / didn't respond)
                 → show "App not found / not updated" screen with download button
   ────────────────────────────────────────────────────────────────────────── */
+  let _drmTimeoutId = null; /* track so retry can reset it */
+
   const fireDrmDeepLink = () => {
     _showHolding('verifying');
-    const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
 
-    /* Fire — opens Library App automatically, same as connectToWifi */
+    /* Clear any previous timeout (e.g. from a prior retry attempt) */
+    if (_drmTimeoutId) { clearTimeout(_drmTimeoutId); _drmTimeoutId = null; }
+
+    /* ── Deep link ──────────────────────────────────────────────────────────
+       CURRENT:  mylibraryapp://  → Chrome shows "Continue to app?" popup.
+                 This popup CANNOT be suppressed from JS — it is enforced by
+                 Android/Chrome at OS level.
+
+       TO REMOVE THE POPUP: register an Android App Link in your app's
+       AndroidManifest.xml and serve /.well-known/assetlinks.json on your
+       domain. Then change the href below to:
+         https://rakshapal-singh-library-ded2e.web.app/app-redirect?action=getdeviceid&callback=...
+       App Links open the app instantly with zero prompt, exactly like UPI/Paytm.
+    ──────────────────────────────────────────────────────────────────────── */
+    const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
 
-    /* If the app sends back the ID, the page reloads before 10s and this
-       timeout is abandoned. If we're still here at 10s, app didn't respond. */
-    setTimeout(() => {
-      if (document.visibilityState === 'visible') _showHolding('no_app');
+    /* If the app sends back the ID the page reloads and this timeout is
+       naturally abandoned. If still here after 10s → app not found/updated. */
+    _drmTimeoutId = setTimeout(() => {
+      _drmTimeoutId = null;
+      _showHolding('no_app');
     }, 10000);
+  };
+
+  /* ── startVerification: called by "Verify My Device" button ── */
+  window.startVerification = () => {
+    document.getElementById('verifyPanel').classList.add('hidden');
+    fireDrmDeepLink();
   };
 
   /* ── Retry button: re-fires the deep link from the holding screen ── */
@@ -615,15 +650,19 @@
       }
 
       /* ── FIRST sign-in (no DRM params in URL yet) ──
-         Fire the deep link IMMEDIATELY — before creating the doc,
-         before any Firebase calls. App opens automatically, no permission prompt. */
-      fireDrmDeepLink();
-      /* Execution stops here. When the app calls back with ?drm_id=XXX
-         the page reloads and onAuthStateChanged fires again, hitting the
-         block above which handles doc creation + Firebase check. */
+         Show the "Verify My Device" button. The user taps it to fire the
+         deep link. This avoids auto-triggering before the user is ready,
+         and ensures the Chrome "Continue?" popup appears in direct response
+         to a tap (which Android handles more reliably than a scripted redirect). */
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('verifyPanel').classList.remove('hidden');
+      /* verifyPanel's button calls window.startVerification() → fireDrmDeepLink().
+         When the app calls back with ?drm_id=XXX the page reloads and
+         onAuthStateChanged fires again, hitting the block above. */
 
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('verifyPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.add('hidden');
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display = 'none';
