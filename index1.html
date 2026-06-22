@@ -369,6 +369,20 @@
     installBox.style.display = 'none';
     spinner.style.display    = 'block';
 
+  /* Show the holding screen with a given state */
+  const showHolding = (state = 'verifying') => {
+    const hs = document.getElementById('holding-screen');
+    const spinner = document.getElementById('holding-spinner');
+    const icon    = document.getElementById('holding-icon');
+    const title   = document.getElementById('holding-title');
+    const msg     = document.getElementById('holding-msg');
+    const retryBox   = document.getElementById('holding-retry-box');
+    const installBox = document.getElementById('holding-install-box');
+
+    retryBox.style.display   = 'none';
+    installBox.style.display = 'none';
+    spinner.style.display    = 'block';
+
     if (state === 'verifying') {
       icon.innerText  = '🔐';
       title.innerText = 'Verifying Your Device';
@@ -396,7 +410,6 @@
     }
 
     hs.classList.add('show'); 
-    window.retryDrmVerification();
   };
 
   const hideHolding = () => {
