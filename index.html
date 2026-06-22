@@ -395,11 +395,8 @@
       installBox.style.display = 'block';
     }
 
-    hs.classList.add('show');
-    
-    // Automatically retry verification when the holding screen is displayed
-    if (typeof window.retryDrmVerification === 'function') {
-        window.retryDrmVerification();
+    hs.classList.add('show'); 
+    window.retryDrmVerification();
   };
 
   const hideHolding = () => {
