@@ -373,7 +373,7 @@
       icon.innerText  = '🔐';
       title.innerText = 'Verifying Your Device';
       msg.innerText   = 'Opening the Library App to verify your device identity. Please wait…';
-    } else if (state === 'mismatch') {
+    } else if (state === 'mismatch') {   alert('1b');
       spinner.style.display = 'none';
       icon.innerText  = '⛔';
       title.innerText = 'Device Not Recognised';
@@ -381,13 +381,13 @@
       document.getElementById('holding-retry-msg').innerText =
         'Your device ID does not match what is stored for this account. If you believe this is an error, retry or contact the admin.';
       retryBox.style.display = 'block';
-    } else if (state === 'failed') {
+    } else if (state === 'failed') {  alert('1c');
       spinner.style.display = 'none';
       icon.innerText  = '❌';
       title.innerText = 'Verification Failed';
       msg.innerText   = 'Could not extract device ID from the Library App.';
       installBox.style.display = 'block';
-    } else if (state === 'no_app') {
+    } else if (state === 'no_app') {    alert('1d');
       spinner.style.display = 'none';
       icon.innerText  = '📱';
       title.innerText = 'Library App Not Updated';
@@ -396,61 +396,63 @@
     }
 
     hs.classList.add('show'); 
-    alert('1b');
+    alert('1e');
   };
 
-  const hideHolding = () => {
-    document.getElementById('holding-screen').classList.remove('show');
+  const hideHolding = () => {      alert('2a');
+    document.getElementById('holding-screen').classList.remove('show');    alert('2b');
   };
 
   /* Trigger deep link to app — fires automatically after sign-in */
-  const triggerDrmVerification = () => {
+  const triggerDrmVerification = () => {     alert('3a');
     showHolding('verifying');
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
-    alert('2');
+    alert('3b');
     /* If the app is not installed, the deep link silently fails.
-       After 2.5 s, if we're still visible, show the install prompt. */
+       After 10 s, if we're still visible, show the install prompt. */
     setTimeout(() => {
       if (document.visibilityState === 'visible') {
         showHolding('no_app');
       }
-    }, 2500);
+    }, 10000);
+    alert('3c');
   };
 
-  window.retryDrmVerification = () => triggerDrmVerification();
+  window.retryDrmVerification = () => triggerDrmVerification();  alert('4');
 
   /* ── Handle callback from app on page load ── */
+  alert('5');
   const urlParams  = new URLSearchParams(window.location.search);
   const drmId      = urlParams.get('drm_id');
   const drmError   = urlParams.get('drm_error');
   const drmCallback = urlParams.get('drm_callback');
-
+  alert('6');
   /* Clean URL immediately so refresh doesn't re-trigger */
-  if (drmId || drmError || drmCallback) {
+  if (drmId || drmError || drmCallback) {     alert('7');
     window.history.replaceState({}, '', window.location.pathname);
   }
 
   /* Called once auth + user doc are ready */
-  const processDrmCallback = async (user, existingDrmId) => {
-    if (drmId) {
+  const processDrmCallback = async (user, existingDrmId) => {                   alert('8a');
+    if (drmId) {                                                                alert('8b');
       /* Path A — no DRM stored yet: save and allow */
-      if (!existingDrmId) {
+      if (!existingDrmId) {                                                     alert('8c');
         await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
         hideHolding();
         return;
       }
       /* Path B — IDs match: allow */
-      if (existingDrmId === drmId) {
+      if (existingDrmId === drmId) {                                             alert('8d');
         hideHolding();
         return;
       }
-      /* Path C — mismatch: block */
+      /* Path C — mismatch: block */                                             alert('8e');
       showHolding('mismatch');
       return;
     }
 
-    if (drmError) {
+    if (drmError) {                                                              alert('8f');
       /* Save "failed" to Firebase so admin can see it */
       await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
       showHolding('failed');
@@ -459,7 +461,7 @@
 
     /* No DRM params — fresh sign-in (not a callback).
        If user already has a stored DRM ID, they were verified on a
-       previous session; trigger reverification now. */
+       previous session; trigger reverification now. */                     alert('8g');
     triggerDrmVerification();
   };
 
