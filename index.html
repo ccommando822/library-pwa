@@ -369,7 +369,7 @@
     installBox.style.display = 'none';
     spinner.style.display    = 'block';
 
-    if (state === 'verifying') {
+    if (state === 'verifying') {    alert('1a');
       icon.innerText  = '🔐';
       title.innerText = 'Verifying Your Device';
       msg.innerText   = 'Opening the Library App to verify your device identity. Please wait…';
@@ -396,7 +396,7 @@
     }
 
     hs.classList.add('show'); 
-    window.retryDrmVerification();
+    alert('1b');
   };
 
   const hideHolding = () => {
@@ -408,7 +408,7 @@
     showHolding('verifying');
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
-
+    alert('2');
     /* If the app is not installed, the deep link silently fails.
        After 2.5 s, if we're still visible, show the install prompt. */
     setTimeout(() => {
