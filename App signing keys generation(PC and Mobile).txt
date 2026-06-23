@@ -1,0 +1,118 @@
+start
+
+
+Step 1 — Install these apps on your phone first:
+
+GitHub app (to view your repo)
+Termius or any SSH app (optional, skip for now)
+
+
+Step 2 — On a computer (PC/laptop), do this once:
+
+Download the ZIP I gave you
+Extract it
+Copy the files into your existing repo folder (merge, don't replace icons)
+Create your keystore (signing key) — one command:
+
+keytool -genkey -v -keystore release.jks -alias rakshapal -keyalg RSA -keysize 2048 -validity 10000
+
+Convert keystore to base64:
+
+base64 release.jks
+Copy that output.
+
+Step 3 — GitHub Secrets (on github.com):
+Go to your repo → Settings → Secrets → Actions → New secret
+Add these 5:
+
+KEYSTORE_BASE64 → paste base64 output
+KEYSTORE_PASSWORD → your chosen password
+KEY_ALIAS → rakshapal
+KEY_PASSWORD → your key password
+GOOGLE_SERVICES_JSON → base64 of your Firebase google-services.json
+
+
+
+
+_________________________________________________________________________________________________________
+
+                                      for PC
+_________________________________________________________________________________________________________
+
+
+
+Step 1 — Apps to install on your phone:
+
+Termux (from F-Droid, not Play Store)
+GitHub app
+A browser (Chrome)
+
+
+Step 2 — In Termux, run these commands one by one:
+Install Java:
+pkg update && pkg upgrade
+pkg install openjdk-17
+Create your keystore (signing key):
+keytool -genkey -v -keystore release.jks -alias rakshapal -keyalg RSA -keysize 2048 -validity 10000
+It will ask name, city etc — fill anything, remember the password.
+Convert to base64:
+base64 release.jks
+Copy that entire output.
+
+Step 3 — GitHub Secrets:
+Open github.com in Chrome on your phone → your repo → Settings → Secrets → Actions
+Add the 5 secrets I listed before.
+
+Step 4 — Firebase:
+Open firebase.google.com in Chrome on phone → your project → do the 4 things I listed before.
+
+Step 5 — Push the updated files to your repo
+Either via GitHub app or Termux with git.
+
+
+
+
+_________________________________________________________________________________________________________
+
+                                  Mobile
+_________________________________________________________________________________________________________
+
+
+
+Step 1 — Apps to install on your phone:
+
+Termux (from F-Droid, not Play Store)
+GitHub app
+A browser (Chrome)
+
+
+Step 2 — In Termux, run these commands one by one:
+Install Java:
+pkg update && pkg upgrade
+pkg install openjdk-17
+Create your keystore (signing key):
+keytool -genkey -v -keystore release.jks -alias rakshapal -keyalg RSA -keysize 2048 -validity 10000
+It will ask name, city etc — fill anything, remember the password.
+Convert to base64:
+base64 release.jks
+Copy that entire output.
+
+Step 3 — GitHub Secrets:
+Open github.com in Chrome on your phone → your repo → Settings → Secrets → Actions
+Add the 5 secrets I listed before.
+
+Step 4 — Firebase:
+Open firebase.google.com in Chrome on phone → your project → do the 4 things I listed before.
+
+Step 5 — Push the updated files to your repo
+Either via GitHub app or Termux with git.
+
+Step 4 — Firebase (firebase.google.com):
+
+Open your project
+Enable Google Sign-In in Authentication
+Enable Realtime Database
+Add your app's SHA-1 (from the keystore) to your Firebase Android app
+
+
+Step 5 — Push to GitHub → workflow builds APK automatically
