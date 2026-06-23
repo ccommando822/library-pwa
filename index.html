@@ -226,9 +226,9 @@
   <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
   <div id="verifyPanel" class="card hidden" style="text-align:center; padding:28px 20px;">
     <div style="font-size:40px; margin-bottom:12px;">🔐</div>
-    <h3 style="margin:0 0 8px; font-size:18px; color:var(--dark);">Device Verification Required</h3>
+    <h3 style="margin:0 0 8px; font-size:18px; color:var(--dark);">Account Verification Required</h3>
     <p style="color:#666; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      Tap the button below to verify this device.<br>The Library App will open automatically.
+      Tap the button below to verify this Account.<br>The Library App will open automatically.
     </p>
     <button class="btn btn-blue" onclick="window.startVerification()" style="font-size:16px; padding:16px;">
       🛡️ Verify My Device
@@ -383,25 +383,25 @@
 
     if (state === 'verifying') {
       icon.innerText  = '🔐';
-      title.innerText = 'Verifying Your Device';
-      msg.innerText   = 'Opening the Library App to verify your device identity. Please wait…';
+      title.innerText = 'Verifying Your Account';
+      msg.innerText   = 'Opening the Library App to verify your Account. Please wait…';
     } else if (state === 'no_app') {
       spinner.style.display    = 'none';
       icon.innerText           = '📱';
-      title.innerText          = 'Library App Not Detected';
-      msg.innerText            = 'The Library App could not be opened. Please install it to continue.';
+      title.innerText          = 'Library App Not Updated';
+      msg.innerText            = 'The Library App could not be interacted due to OLD VERSION.<br> Please install the new version to continue.';
       installBox.style.display = 'block';
     } else if (state === 'failed') {
       spinner.style.display    = 'none';
       icon.innerText           = '❌';
-      title.innerText          = 'Verification Failed';
-      msg.innerText            = 'Could not extract device ID from the Library App.';
+      title.innerText          = 'Could not Verify';
+      msg.innerText            = 'You can Go ahead with no problem.<br> Could not verify due to old phone.';
       installBox.style.display = 'block';
     } else if (state === 'mismatch') {
       spinner.style.display  = 'none';
       icon.innerText         = '⛔';
       title.innerText        = 'Account Active on Another Device';
-      msg.innerText          = 'This account is already logged in on a different phone.';
+      msg.innerText          = 'This account is already logged in on a different phone.<br> Please LOG OUT from previous phone.';
       document.getElementById('holding-retry-msg').innerText =
         'First logout from the other device, then tap Retry here.';
       retryBox.style.display = 'block';
