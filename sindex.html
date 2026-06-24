@@ -651,7 +651,9 @@
     onSnapshot(uRef, (snap) => {
       if (!snap.exists()) return;
       currentUserData = snap.data();
-
+  
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('hidden');
       document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 
       const seatEl = document.getElementById('p-seat');
