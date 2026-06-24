@@ -77,14 +77,59 @@
     .rate-row input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: center; }
     .last-date-strip { background: linear-gradient(135deg,#e3f0fd,#e8f5e9); border-radius: 10px; padding: 8px 14px; margin-top: 6px; text-align: center; font-size: 13px; font-weight: bold; color: #1976d2; }
     .sig-section-hdr { font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 7px 12px; border-radius: 7px; margin: 12px 0 8px; letter-spacing: 0.5px; }
-    /* Full-screen popup overlay */
     .full-popup { position:fixed; top:0; left:0; width:100%; height:100%; z-index:999997; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; flex-direction:column; }
+
+    /* ── Holding / Device Verification Screen ── */
+    #holding-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; z-index: 999998; display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 30px; box-sizing: border-box; text-align: center;
+    }
+    #holding-screen.show { display: flex; }
+    .holding-spinner {
+      width: 56px; height: 56px; border: 5px solid #e3f0fd;
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.9s linear infinite; margin-bottom: 22px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 <header>Rakshapal Singh Library</header>
 
-<!-- ══ SEAT CONDITION POPUP — persistent until user agrees ══ -->
+<!-- ══ HOLDING / DEVICE VERIFICATION SCREEN ══ -->
+<div id="holding-screen">
+  <div id="holding-spinner" class="holding-spinner"></div>
+  <div style="font-size:28px; margin-bottom:10px;" id="holding-icon">🔐</div>
+  <h2 id="holding-title" style="margin:0 0 10px; font-size:20px; color:var(--dark);">Verifying Your Account</h2>
+  <p id="holding-msg" style="color:#666; font-size:14px; line-height:1.6; max-width:320px; margin:0 0 24px;">
+    Opening the Library App to verify your identity. Please wait…
+  </p>
+  <div id="holding-retry-box" style="display:none; width:100%; max-width:320px;">
+    <div style="background:#fff3cd; border-radius:12px; padding:16px; margin-bottom:16px; border-left:4px solid var(--yellow); text-align:left;">
+      <strong>⚠️ Device Mismatch</strong>
+      <p id="holding-retry-msg" style="margin:8px 0 0; font-size:13px; color:#555;"></p>
+    </div>
+    <button class="btn btn-blue" onclick="window.retryDrmVerification()">🔄 Retry Login</button>
+  </div>
+  <div id="holding-install-box" style="display:none; width:100%; max-width:320px;">
+    <div style="background:#e3f0fd; border-radius:12px; padding:16px; margin-bottom:16px; text-align:left;">
+      <strong>📱 Library App Required</strong>
+      <p style="margin:8px 0 0; font-size:13px; color:#555;">User verification requires the Library App. Please install it to continue. If already installed then click retry.</p>
+    </div>
+    <a href="https://github.com/Vishnu-Hack39965/App-Creation/releases/latest/download/app-debug.apk" download
+     style="display:block; background:var(--primary); color:white; padding:14px; border-radius:12px; font-weight:bold; text-decoration:none; margin-bottom:10px; font-size:15px; text-align:center;">
+    📥 Download Library App
+    </a>
+    <button class="btn btn-outline" onclick="window.retryDrmVerification()" style="margin-top:0;">🔄 Retry Verification</button>
+  </div>
+  <button id="holding-logout-btn" onclick="window.logout()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline;">
+    Sign out and try a different account
+  </button>
+</div>
+
+<!-- ══ SEAT CONDITION POPUP ══ -->
 <div id="seat-popup" class="full-popup" style="display:none; background:rgba(0,0,0,0.88);">
   <div style="background:white; border-radius:20px; padding:25px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.4); max-height:90vh; overflow-y:auto;">
     <div style="font-size:32px; text-align:center; margin-bottom:10px;">🪑</div>
@@ -94,7 +139,7 @@
   </div>
 </div>
 
-<!-- ══ WI-FI INFO MODAL — shows credentials + download button ══ -->
+<!-- ══ WI-FI INFO MODAL ══ -->
 <div id="wifi-info-modal" class="full-popup" style="display:none; background:rgba(0,0,0,0.75);">
   <div style="background:white; border-radius:20px; padding:25px; max-width:380px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="font-size:36px; margin-bottom:8px;">📶</div>
@@ -124,7 +169,7 @@
   <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
 </div>
 
-<!-- Payment Wizard -->
+  <!-- Payment Wizard -->
 <div id="pay-modal" class="wizard-overlay" style="padding:0;">
   <div style="position:sticky; top:0; left:0; width:100%; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
     <h2 style="margin:0; font-size:24px;">Payment Wizard</h2>
@@ -179,6 +224,19 @@
 
 <section id="account" class="active">
   <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
+  <div id="verifyPanel" class="card hidden" style="text-align:center; padding:28px 20px;">
+    <div style="font-size:40px; margin-bottom:12px;">🔐</div>
+    <h3 style="margin:0 0 8px; font-size:18px; color:var(--dark);">Account Verification Required</h3>
+    <p style="color:#666; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Tap the button below to verify this Account.<br>The Library App will open automatically.
+    </p>
+    <button class="btn btn-blue" onclick="window.startVerification()" style="font-size:16px; padding:16px;">
+      🛡️ Verify My Device
+    </button>
+    <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">
+      Sign out and try a different account
+    </button>
+  </div>
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center;">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
@@ -187,18 +245,15 @@
       <div id="status-days" class="live-srv-display">00:00:00:00</div>
       <div id="user-last-date" class="last-date-strip" style="display:none;"></div>
       <div id="join-trigger-box"><button class="btn btn-blue" onclick="window.openWizard()">Start Admission</button></div>
-      <!-- Wi-Fi 1 connect button -->
       <div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">
         <button id="wifi1-connect-btn" class="btn btn-green" onclick="window.connectToWifi('wifi')">🛜 Connect to Internet</button>
       </div>
-      <!-- Wi-Fi 2 connect button -->
       <div id="wifi2-connect-trigger" class="hidden" style="margin-top:8px;">
         <button id="wifi2-connect-btn" class="btn btn-green" style="background:#27ae60;" onclick="window.connectToWifi('wifi2')">🛜 Connect to Internet 2</button>
       </div>
     </div>
 
     <div class="card">
-      <!-- Seat No. — read-only for users, no edit button -->
       <div class="detail-row" id="seat-row" style="display:none;">
         <div class="detail-content">
           <label class="detail-label">🪑 Seat No.</label>
@@ -209,6 +264,7 @@
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
+      <!-- NO mediaDrmId field here — user tab never shows it -->
       <button class="btn btn-green" onclick="window.saveProfile()">Update Folder Details</button>
     </div>
 
@@ -246,7 +302,6 @@
       <button id="dm-pay-btn" onclick="switchDataManage('pay')">💳 History</button>
       <button id="dm-rates-btn" onclick="switchDataManage('rates')">⚙️ Rates</button>
     </div>
-    <!-- Wi-Fi sub-pane: two networks -->
     <div id="dm-pane-wifi">
       <div class="card">
         <label class="detail-label">📶 Library Wi-Fi 1</label>
@@ -302,18 +357,149 @@
   const db       = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  /* ══════════════════════════════════════════════════════════
-     RATES — loaded from Firestore, never from window globals.
-     All price/duration logic reads from this object exclusively.
-  ══════════════════════════════════════════════════════════ */
   let rates = { dayVal: 600, nightVal: 500, bothVal: 800, daysinamonth: 30 };
-
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
   const fmtDate  = (d) => d.toLocaleDateString('en-GB');
   const processingSignals = new Set();
 
-  /* ── refreshPriceLabels: updates ALL UI that depends on rates ── */
+  /* ══════════════════════════════════════════════════
+     DRM VERIFICATION FLOW  (all logic lives here)
+  ══════════════════════════════════════════════════ */
+  const CALLBACK_BASE = "https://rakshapal-singh-library-ded2e.web.app/";
+
+  /* ── Internal helpers (holding screen UI only) ── */
+  const _showHolding = (state) => {
+    const spinner    = document.getElementById('holding-spinner');
+    const retryBox   = document.getElementById('holding-retry-box');
+    const installBox = document.getElementById('holding-install-box');
+    const icon       = document.getElementById('holding-icon');
+    const title      = document.getElementById('holding-title');
+    const msg        = document.getElementById('holding-msg');
+
+    spinner.style.display    = 'block';
+    retryBox.style.display   = 'none';
+    installBox.style.display = 'none';
+
+    if (state === 'verifying') {
+      icon.innerText  = '🔐';
+      title.innerText = 'Verifying Your Account';
+      msg.innerText   = 'Opening the Library App to verify your Account. Please wait…';
+    } else if (state === 'no_app') {
+      spinner.style.display    = 'none';
+      icon.innerText           = '📱';
+      title.innerText          = 'Library App Not Updated';
+      msg.innerText            = 'The Library App could not be interacted due to OLD VERSION.<br> Please install the new version to continue.';
+      installBox.style.display = 'block';
+    } else if (state === 'failed') {
+      spinner.style.display    = 'none';
+      icon.innerText           = '❌';
+      title.innerText          = 'Could not Verify';
+      msg.innerText            = 'You can Go ahead with no problem.<br> Could not verify due to old phone.';
+      installBox.style.display = 'block';
+    } else if (state === 'mismatch') {
+      spinner.style.display  = 'none';
+      icon.innerText         = '⛔';
+      title.innerText        = 'Account Active on Another Device';
+      msg.innerText          = 'This account is already logged in on a different phone.<br> Please LOG OUT from previous phone.';
+      document.getElementById('holding-retry-msg').innerText =
+        'First logout from the other device, then tap Retry here.';
+      retryBox.style.display = 'block';
+    }
+
+    document.getElementById('holding-screen').classList.add('show');
+  };
+
+  const _hideHolding = () =>
+    document.getElementById('holding-screen').classList.remove('show');
+
+  /* ── runDrmFlow: called ONLY when the app has already sent back an ID ──
+     user + doc are guaranteed to exist before this is called.
+     drmId / drmError come from URL params, already read and cleaned by caller. */
+  const runDrmFlow = async (user, db, drmId, drmError) => {
+
+    /* 1. Read the stored DRM ID from Firestore */
+    const uSnap       = await getDoc(doc(db, "users", user.uid));
+    const storedDrmId = uSnap.exists() ? (uSnap.data().mediaDrmId || '') : '';
+
+    /* 2. App reported extraction failure → save 'failed', block */
+    if (drmError) {
+      await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
+      _showHolding('failed');
+      return false;
+    }
+
+    /* 3. App returned a valid device ID — compare with Firebase */
+    if (!storedDrmId || storedDrmId === 'failed') {
+      /* Firebase empty or previously failed — first valid device, save and allow */
+      await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
+      _hideHolding();
+      return true;
+    }
+    if (storedDrmId === drmId) {
+      /* Same device as registered — allow */
+      _hideHolding();
+      return true;
+    }
+    /* Different device — block */
+    _showHolding('mismatch');
+    return false;
+  };
+
+  /* ── fireDrmDeepLink ──────────────────────────────────────────────────────
+     Fires the Library App deep link automatically (no permission prompt).
+     Timeline:
+       t=0s   → deep link fires, app opens silently
+       t=0–10s → app extracts ID, calls back with ?drm_id=XXX → page reloads
+                 → onAuthStateChanged → doc created → runDrmFlow → done
+       t=10s  → if page is still here (app never opened / didn't respond)
+                → show "App not found / not updated" screen with download button
+  ────────────────────────────────────────────────────────────────────────── */
+  let _drmTimeoutId = null; /* track so retry can reset it */
+
+  const fireDrmDeepLink = () => {
+    _showHolding('verifying');
+
+    /* Clear any previous timeout (e.g. from a prior retry attempt) */
+    if (_drmTimeoutId) { clearTimeout(_drmTimeoutId); _drmTimeoutId = null; }
+
+    /* ── Deep link ──────────────────────────────────────────────────────────
+       CURRENT:  mylibraryapp://  → Chrome shows "Continue to app?" popup.
+                 This popup CANNOT be suppressed from JS — it is enforced by
+                 Android/Chrome at OS level.
+
+       TO REMOVE THE POPUP: register an Android App Link in your app's
+       AndroidManifest.xml and serve /.well-known/assetlinks.json on your
+       domain. Then change the href below to:
+         https://rakshapal-singh-library-ded2e.web.app/app-redirect?action=getdeviceid&callback=...
+       App Links open the app instantly with zero prompt, exactly like UPI/Paytm.
+    ──────────────────────────────────────────────────────────────────────── */
+    const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
+    window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
+
+    /* If the app sends back the ID the page reloads and this timeout is
+       naturally abandoned. If still here after 10s → app not found/updated. */
+    _drmTimeoutId = setTimeout(() => {
+      _drmTimeoutId = null;
+      _showHolding('no_app');
+    }, 10000);
+  };
+
+  /* ── startVerification: called by "Verify My Device" button ── */
+  window.startVerification = () => {
+    document.getElementById('verifyPanel').classList.add('hidden');
+    fireDrmDeepLink();
+  };
+
+  /* ── Retry button: re-fires the deep link from the holding screen ── */
+  window.retryDrmVerification = () => {
+    if (!auth.currentUser) return;
+    fireDrmDeepLink();
+  };
+
+  /* ══════════════════════════════════════════════════
+     RATES
+  ══════════════════════════════════════════════════ */
   const refreshPriceLabels = () => {
     const sel = document.getElementById('p-shift');
     if (sel) {
@@ -357,7 +543,6 @@
     return fmtDate(new Date(Date.now() + srv * 86400000));
   };
 
-  /* Uses rates.daysinamonth (read from Firestore, not window global) */
   const validityRange = (fromStamp) => {
     let from;
     try { const [dp,tp]=fromStamp.split(', '); const [dd,mm,yyyy]=dp.split('/'); from=new Date(`${yyyy}-${mm}-${dd}T${tp}`); if(isNaN(from.getTime())) from=new Date(); } catch { from=new Date(); }
@@ -377,8 +562,7 @@
   };
 
   /* ══════════════════════════════════════════════════
-     SEAT POPUP — show when seatPending===true,
-     persists across logout/login via Firestore flag
+     SEAT POPUP
   ══════════════════════════════════════════════════ */
   const checkAndShowSeatPopup = (userData) => {
     const popup = document.getElementById('seat-popup');
@@ -436,88 +620,120 @@
   };
 
   /* ══════════════════════════════════════════════════
-     Auth State — awaits rates from Firestore before listener
+     AUTH STATE
   ══════════════════════════════════════════════════ */
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      /* Load rates first (awaited) */
-      try { const rs=await getDoc(doc(db,"settings","rates")); if(rs.exists()) applyRatesData(rs.data()); } catch(e) { console.warn("Rates load error:",e.message); }
 
-      const uRef = doc(db, "users", user.uid);
-      await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
-        await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [] });
-      });
+      /* ── CHECK: Did the app just call back with a DRM ID? ──
+         This is the SECOND time onAuthStateChanged fires — after the app
+         redirected back to ?drm_id=XXX. Handle it first before anything else. */
+      const params           = new URLSearchParams(window.location.search);
+      const incomingDrmId    = params.get('drm_id');
+      const incomingDrmError = params.get('drm_error');
 
-      if (user.email === "c.commando822@gmail.com") {
-        getDoc(doc(db,"settings","wifi")).then(w  => { if(w.exists())  { document.getElementById('wifi-ssid').value=w.data().ssid||"";  document.getElementById('wifi-pass').value=w.data().pass||""; } });
-        getDoc(doc(db,"settings","wifi2")).then(w2 => { if(w2.exists()) { document.getElementById('wifi2-ssid').value=w2.data().ssid||""; document.getElementById('wifi2-pass').value=w2.data().pass||""; } });
+      if (incomingDrmId || incomingDrmError) {
+        /* Clean URL immediately so a refresh won't re-trigger */
+        window.history.replaceState({}, '', window.location.pathname);
+
+        /* NOW create/update user doc — user+doc ready before runDrmFlow */
+        const uRef = doc(db, "users", user.uid);
+        await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
+          await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [], mediaDrmId: '' });
+        });
+        try { const rs=await getDoc(doc(db,"settings","rates")); if(rs.exists()) applyRatesData(rs.data()); } catch(e) { console.warn("Rates load error:",e.message); }
+
+        /* Firebase check → allow or block */
+        const verified = await runDrmFlow(user, db, incomingDrmId, incomingDrmError);
+        if (verified) renderDashboard(user);
+        return;
       }
 
-      /* Update wifi button labels with SSID names (all users) */
-      getDoc(doc(db,"settings","wifi")).then(w => {
-        if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi1-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
-      });
-      getDoc(doc(db,"settings","wifi2")).then(w => {
-        if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi2-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
-      });
+      /* ── FIRST sign-in (no DRM params in URL yet) ──
+         Show the "Verify My Device" button. The user taps it to fire the
+         deep link. This avoids auto-triggering before the user is ready,
+         and ensures the Chrome "Continue?" popup appears in direct response
+         to a tap (which Android handles more reliably than a scripted redirect). */
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('verifyPanel').classList.remove('hidden');
+      /* verifyPanel's button calls window.startVerification() → fireDrmDeepLink().
+         When the app calls back with ?drm_id=XXX the page reloads and
+         onAuthStateChanged fires again, hitting the block above. */
 
-      onSnapshot(uRef, (snap) => {
-        if (!snap.exists()) return;
-        currentUserData = snap.data();
-
-        document.getElementById('loginPanel').classList.add('hidden');
-        document.getElementById('profilePanel').classList.remove('hidden');
-        document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
-
-        /* Seat No. — shown in profile, no edit button */
-        const seatEl = document.getElementById('p-seat');
-        const seatRow = document.getElementById('seat-row');
-        if (currentUserData.seatNo) {
-          if (seatEl) seatEl.value = currentUserData.seatNo;
-          if (seatRow) seatRow.style.display = 'flex';
-        } else {
-          if (seatRow) seatRow.style.display = 'none';
-        }
-
-        ['name','father','phone','address'].forEach(k => { const el=document.getElementById('p-'+k); if(el) el.value=currentUserData[k]||""; });
-
-        const srv = window.getRealSurvival(currentUserData);
-        document.getElementById('status-days').innerText = window.formatTime(srv);
-        document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
-        updateUserValidTill();
-
-        /* Seat popup — shown if admin just assigned a seat */
-        checkAndShowSeatPopup(currentUserData);
-
-        if (currentUserData.joinDateISO) {
-          document.getElementById('join-trigger-box').classList.add('hidden');
-          document.getElementById('active-tools').classList.remove('hidden');
-          document.getElementById('wifi-connect-trigger').classList.remove('hidden');
-          document.getElementById('wifi2-connect-trigger').classList.remove('hidden');
-          document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
-          window.calcTotal();
-        } else {
-          document.getElementById('join-trigger-box').classList.remove('hidden');
-          document.getElementById('active-tools').classList.add('hidden');
-          document.getElementById('wifi-connect-trigger').classList.add('hidden');
-          document.getElementById('wifi2-connect-trigger').classList.add('hidden');
-          document.getElementById('status-joined').innerText = "NOT JOINED";
-        }
-
-        document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
-
-        if (user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {
-          document.getElementById('tab-man').classList.remove('hidden');
-          window.loadAdmin();
-        }
-      });
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('verifyPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.add('hidden');
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display = 'none';
+      _hideHolding();
     }
   });
+
+  /* ── Separate function so we can call it cleanly after DRM passes ── */
+  const renderDashboard = (user) => {
+    if (user.email === "c.commando822@gmail.com") {
+      getDoc(doc(db,"settings","wifi")).then(w  => { if(w.exists())  { document.getElementById('wifi-ssid').value=w.data().ssid||"";  document.getElementById('wifi-pass').value=w.data().pass||""; } });
+      getDoc(doc(db,"settings","wifi2")).then(w2 => { if(w2.exists()) { document.getElementById('wifi2-ssid').value=w2.data().ssid||""; document.getElementById('wifi2-pass').value=w2.data().pass||""; } });
+    }
+
+    getDoc(doc(db,"settings","wifi")).then(w => {
+      if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi1-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
+    });
+    getDoc(doc(db,"settings","wifi2")).then(w => {
+      if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi2-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
+    });
+
+    const uRef = doc(db, "users", user.uid);
+    onSnapshot(uRef, (snap) => {
+      if (!snap.exists()) return;
+      currentUserData = snap.data();
+
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('hidden');
+      document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
+
+      const seatEl = document.getElementById('p-seat');
+      const seatRow = document.getElementById('seat-row');
+      if (currentUserData.seatNo) {
+        if (seatEl) seatEl.value = currentUserData.seatNo;
+        if (seatRow) seatRow.style.display = 'flex';
+      } else {
+        if (seatRow) seatRow.style.display = 'none';
+      }
+
+      ['name','father','phone','address'].forEach(k => { const el=document.getElementById('p-'+k); if(el) el.value=currentUserData[k]||""; });
+
+      const srv = window.getRealSurvival(currentUserData);
+      document.getElementById('status-days').innerText = window.formatTime(srv);
+      document.getElementById('status-days').style.color = srv >= 0 ? "var(--green)" : "var(--red)";
+      updateUserValidTill();
+
+      checkAndShowSeatPopup(currentUserData);
+
+      if (currentUserData.joinDateISO) {
+        document.getElementById('join-trigger-box').classList.add('hidden');
+        document.getElementById('active-tools').classList.remove('hidden');
+        document.getElementById('wifi-connect-trigger').classList.remove('hidden');
+        document.getElementById('wifi2-connect-trigger').classList.remove('hidden');
+        document.getElementById('status-joined').innerText = "JOINED: " + currentUserData.joinDate;
+        window.calcTotal();
+      } else {
+        document.getElementById('join-trigger-box').classList.remove('hidden');
+        document.getElementById('active-tools').classList.add('hidden');
+        document.getElementById('wifi-connect-trigger').classList.add('hidden');
+        document.getElementById('wifi2-connect-trigger').classList.add('hidden');
+        document.getElementById('status-joined').innerText = "NOT JOINED";
+      }
+
+      document.getElementById('user-pay-log').innerHTML = window.renderLogs(currentUserData.history);
+
+      if (user.email === "c.commando822@gmail.com" || user.email === "vishnu.406.39965@gmail.com") {
+        document.getElementById('tab-man').classList.remove('hidden');
+        window.loadAdmin();
+      }
+    });
+  };
 
   /* ── Live Interval ── */
   setInterval(() => {
@@ -549,9 +765,25 @@
     }
   }, 1000);
 
-  window.login  = () => signInWithPopup(auth, provider);
+  window.login = () => signInWithPopup(auth, provider);
+
+  /* ══════════════════════════════════════════════════
+     LOGOUT — clears DRM ID, triggers forgetWifi, signs out
+  ══════════════════════════════════════════════════ */
   window.logout = async () => {
-    if (auth.currentUser) await updateDoc(doc(db,"users",auth.currentUser.uid), { isOnline: false });
+    if (auth.currentUser) {
+      /* 1. Clear mediaDrmId from Firestore */
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        isOnline: false,
+        mediaDrmId: ''
+      }).catch(() => {});
+
+      /* 2. Trigger forgetWifi deep link to disconnect library Wi-Fi */
+      window.location.href = 'mylibraryapp://forgetwifi';
+
+      /* 3. Short delay then sign out */
+      await new Promise(r => setTimeout(r, 600));
+    }
     signOut(auth).then(() => location.reload());
   };
 
@@ -603,7 +835,6 @@
     } else alert("Invalid OTP");
   };
 
-  /* calcTotal reads prices from rates object (not window globals) */
   window.calcTotal = () => {
     const mi=document.getElementById('p-days'), sh=document.getElementById('p-shift'), ph=document.getElementById('p-phone').value.trim();
     if (!mi||!sh) return;
@@ -647,7 +878,7 @@
       const file=ssi.files[0], payId=Date.now();
       const b64=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e2=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,800/img.width); c.width=img.width*sc; c.height=img.height*sc; c.getContext('2d').drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',0.6)); }; img.onerror=rej; img.src=e2.target.result; }; r.onerror=rej; r.readAsDataURL(file); });
       const amt=window.calculatedPaymentAmt||window.totalpaymenttodo||0;
-      const d = rates.daysinamonth;  /* from Firestore rates, not window global */
+      const d = rates.daysinamonth;
       const shEl=document.getElementById('p-shift'), shName=shEl.options[shEl.selectedIndex]?.text||"Default";
       window.currentPayId=payId; window.currentShiftName=shName;
       const otp=Math.floor(100000+Math.random()*900000); window.generatedPaymentOtp=otp;
@@ -675,15 +906,10 @@
       alert("✅ OTP verified! Waiting for admin confirmation.");
     } catch(err) { console.error(err); alert("OTP error: "+err.message); }
   };
-
   window.closePaymentWizard = () => { clearAllPaymentErrors(); document.getElementById('pay-modal').style.display='none'; };
-
   window.toggleSigScreenshot = (btn, secId) => { const s=document.getElementById(secId),open=s.classList.toggle('open'); btn.innerText=open?'📷 Hide Screenshot':'📷 Show Screenshot'; };
   window.togglePhScreenshot  = (btn, secId) => { const s=document.getElementById(secId),open=s.classList.toggle('open'); btn.innerText=open?'🖼 Hide Screenshot':'🖼 Show Screenshot'; };
 
-  /* ══════════════════════════════════════════════════
-     saveRates — reads/writes rates object (no window globals)
-  ══════════════════════════════════════════════════ */
   window.saveRates = async () => {
     const nD=Number(document.getElementById('rate-day').value), nN=Number(document.getElementById('rate-night').value), nB=Number(document.getElementById('rate-both').value), nM=Number(document.getElementById('rate-dim').value);
     if(!nD||!nN||!nB||!nM) return alert("All fields must be valid positive numbers.");
@@ -701,11 +927,6 @@
     alert("✅ Rates saved to Firestore. All prices updated instantly.");
   };
 
-  /* ══════════════════════════════════════════════════
-     connectToWifi — shows modal with credentials + download
-     No more deep link or "open in library app" message.
-     key = 'wifi' | 'wifi2'
-  ══════════════════════════════════════════════════ */
   window.connectToWifi = async (key = 'wifi') => {
     if (!auth.currentUser) return alert("Please log in first.");
     const snap = await getDoc(doc(db,"users",auth.currentUser.uid));
@@ -717,32 +938,27 @@
     const ssid = data.ssid, pass = data.pass;
     if (!data.ssid || !data.pass) return alert("Wi-Fi details are incomplete. Ask admin to fill them in.");
     window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}`;
-    setTimeout(() => { 
-    if (document.visibilityState === 'visible') {
-      document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
-      document.getElementById('wifi-modal-pass').innerText = "you cannot connect to wifi without App";
-      document.getElementById('wifi-modal-label').innerText = key === 'wifi2' ? 'Network 2' : 'Network 1';
-      document.getElementById('wifi-info-modal').style.display = 'flex';
-    } 
-  }, 1500);
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        document.getElementById('wifi-modal-ssid').innerText = "Pls download the App first";
+        document.getElementById('wifi-modal-pass').innerText = "you cannot connect to wifi without App";
+        document.getElementById('wifi-modal-label').innerText = key === 'wifi2' ? 'Network 2' : 'Network 1';
+        document.getElementById('wifi-info-modal').style.display = 'flex';
+      }
+    }, 1500);
   };
 
-  /* saveWifiSettings — accepts 'wifi' or 'wifi2' */
   window.saveWifiSettings = async (key = 'wifi') => {
     const ssid = document.getElementById(`${key}-ssid`).value.trim();
     const pass  = document.getElementById(`${key}-pass`).value.trim();
     if (!ssid || !pass) return alert("Both SSID and password are required.");
     await setDoc(doc(db,"settings",key), { ssid, pass });
     alert(`Wi-Fi ${key === 'wifi2' ? '2' : '1'} settings saved.`);
-    /* Update user-facing button label */
     const btnId = key === 'wifi2' ? 'wifi2-connect-btn' : 'wifi1-connect-btn';
     const btn = document.getElementById(btnId);
     if (btn) btn.innerText = `🛜 Connect to ${ssid}`;
   };
 
-  /* ══════════════════════════════════════════════════
-     handlePay — Gate 2
-  ══════════════════════════════════════════════════ */
   window.handlePay = async (sid, uid, stat, days, amt, reqT, shift, payId, providedUID, providedPhone) => {
     processingSignals.add(sid);
     try {
@@ -771,7 +987,6 @@
     if (adminLoaded) return;
     adminLoaded = true;
 
-    /* Signals */
     onSnapshot(collection(db,"signals"), s => {
       const joinLeave=[], otpV=[], pending=[];
       s.forEach(d => {
@@ -801,7 +1016,6 @@
       document.getElementById('admin-otp-list').innerHTML = h || "<p style='color:#aaa; text-align:center; padding:20px;'>No active signals.</p>";
     });
 
-    /* Members */
     onSnapshot(collection(db,"users"), s=>{
       const g={onJ_ok:"",onJ_exp:"",offJ_ok:"",offJ_exp:"",onNL:"",offNL:""};
       s.forEach(d=>{
@@ -825,7 +1039,6 @@
         `<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
     });
 
-    /* Payment History */
     onSnapshot(collection(db,"payment_history"), async snap=>{
       const records=[]; const fetches=[];
       snap.forEach(d=>{ const r={id:d.id,...d.data()}; records.push(r); if(r.uid) fetches.push(getDoc(doc(db,"users",r.uid)).then(us=>{ if(us.exists()){const u=us.data(); r._name=u.name||'—'; r._phone=u.phone||'—'; r._photo=u.photo||''; r._father=u.father||'—'; r._addr=u.address||'—';} }).catch(()=>{})); });
@@ -877,7 +1090,7 @@
   };
 
   /* ══════════════════════════════════════════════════
-     openUser — with seat no. admin editor at top
+     openUser — ADMIN ONLY — shows MediaDRM ID below Address
   ══════════════════════════════════════════════════ */
   window.openUser = async (uid) => {
     const snap=await getDoc(doc(db,"users",uid));
@@ -887,6 +1100,21 @@
     const ld=(u.joinDateISO&&srv>0)?`📅 Valid until: ${lastValidDate(srv)}`:(u.joinDateISO&&srv<=0?'⛔ Expired':'');
     const abs=Math.max(0,srv), ts=Math.floor(abs*86400);
     const eD=Math.floor(ts/86400), eH=Math.floor((ts%86400)/3600), eM=Math.floor((ts%3600)/60), eS=ts%60;
+
+    /* MediaDRM ID display */
+    const rawDrm = u.mediaDrmId || '';
+    let drmDisplay, drmStyle;
+    if (!rawDrm) {
+      drmDisplay = '— Not verified yet —';
+      drmStyle = 'color:#aaa; font-style:italic; font-size:13px;';
+    } else if (rawDrm === 'failed') {
+      drmDisplay = '❌ Extraction Failed';
+      drmStyle = 'color:var(--red); font-weight:bold; font-size:13px;';
+    } else {
+      drmDisplay = rawDrm;
+      drmStyle = 'color:#333; font-size:11px; word-break:break-all; font-family:monospace;';
+    }
+
     const seatStatus = u.seatNo
       ? `<div style="font-size:12px; margin-top:8px; background:#f0f4ff; padding:8px; border-radius:8px;">
            Current: <b>Seat No. ${u.seatNo}</b> &nbsp;|&nbsp; Status: ${u.seatPending?'⏳ Awaiting student confirmation':'✅ Confirmed by student'}
@@ -903,6 +1131,11 @@
         <p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p>
         <p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p>
         <p><b>Address:</b> ${u.address||'-'}</p>
+        <!-- ── MediaDRM ID — Admin Only, below Address ── -->
+        <div style="padding-top:12px; border-top:1px solid #eee; margin-top:4px;">
+          <div class="detail-label" style="margin-bottom:6px;">🔐 MediaDRM Device ID</div>
+          <div style="${drmStyle}">${drmDisplay}</div>
+        </div>
       </div>
 
       <!-- ── Seat No. Admin Editor ── -->
@@ -916,7 +1149,7 @@
         ${seatStatus}
       </div>
 
-      <!-- ── Alarm-style survival time editor ── -->
+      <!-- ── Alarm-style survival editor ── -->
       <div class="card">
         <label class="detail-label">⏱ Set Survival Time</label>
         <p style="font-size:12px; color:#888; margin:4px 0 10px;">Current time pre-filled. Hours column has +/− toggle.</p>
@@ -964,7 +1197,7 @@
         <button class="btn btn-blue" style="margin-top:12px;" onclick="window.applyAlarmEdit('${uid}')">✅ Apply New Survival Time</button>
       </div>
 
-      <!-- ── Manual integer day adjustment ── -->
+      <!-- ── Manual day adjustment ── -->
       <div class="card">
         <label class="detail-label">➕ Manual Day Adjustment (integers only)</label>
         <p style="font-size:12px; color:#888; margin:4px 0 10px;">Positive or negative whole number. E.g. +30 or −5.</p>
@@ -981,10 +1214,6 @@
     window.updateAlarmDiff && window.updateAlarmDiff();
   };
 
-  /* ══════════════════════════════════════════════════
-     adminSetSeat — writes seatNo + seatPending:true to Firestore
-     Triggers the seat condition popup on the student's next view
-  ══════════════════════════════════════════════════ */
   window.adminSetSeat = async (uid, oldSeat) => {
     const input = document.getElementById('adm-seat-no');
     const newSeatStr = input.value.trim();
@@ -1002,7 +1231,6 @@
     window.openUser(uid);
   };
 
-  /* Alarm helpers */
   window.alarmStep = (id, dir, max=Infinity) => {
     const el=document.getElementById(id); let v=parseInt(el.value)+dir;
     if(v<0) v=max===Infinity?0:max; if(v>max) v=0; el.value=v;
@@ -1070,7 +1298,6 @@
   window.closeLeaveWizard= () => { document.getElementById('leaveWizard').classList.remove('show'); document.getElementById('lstep1').classList.add('step-active'); document.getElementById('lstep2').classList.remove('step-active'); };
   window.makeEdit        = (id) => { document.getElementById(id).readOnly=false; document.getElementById(id).focus(); };
 
-  /* Initial label refresh with default rates (overwritten after Firestore loads) */
   refreshPriceLabels();
 
   window.updateUserPhoto = (i) => {
