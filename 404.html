@@ -79,6 +79,9 @@
     .sig-section-hdr { font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 7px 12px; border-radius: 7px; margin: 12px 0 8px; letter-spacing: 0.5px; }
     /* Full-screen popup overlay */
     .full-popup { position:fixed; top:0; left:0; width:100%; height:100%; z-index:999997; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; flex-direction:column; }
+    /* Loading spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-spinner { width: 48px; height: 48px; border: 5px solid #e3f0fd; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto 18px; }
   </style>
 </head>
 <body>
@@ -179,6 +182,14 @@
 
 <section id="account" class="active">
   <div id="loginPanel" class="card" style="text-align:center;"><button class="btn btn-blue" onclick="window.login()">Sign in with Google</button></div>
+
+  <!-- CHANGE 1: New loadingPanel, hidden by default -->
+  <div id="loadingPanel" class="card hidden" style="text-align:center; padding:40px 20px;">
+    <div class="loading-spinner"></div>
+    <div style="font-size:16px; font-weight:bold; color:var(--primary); margin-bottom:6px;">Please wait…</div>
+    <div style="font-size:13px; color:#888;">Loading your profile data</div>
+  </div>
+
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center;">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
@@ -465,8 +476,6 @@
         if (!snap.exists()) return;
         currentUserData = snap.data();
 
-        document.getElementById('loginPanel').classList.add('hidden');
-        document.getElementById('profilePanel').classList.remove('hidden');
         document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 
         /* Seat No. — shown in profile, no edit button */
@@ -510,9 +519,14 @@
           document.getElementById('tab-man').classList.remove('hidden');
           window.loadAdmin();
         }
+
+        /* CHANGE 3: All profile data is now rendered — hide loadingPanel, show profilePanel */
+        document.getElementById('loadingPanel').classList.add('hidden');
+        document.getElementById('profilePanel').classList.remove('hidden');
       });
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('loadingPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.add('hidden');
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display = 'none';
@@ -549,7 +563,11 @@
     }
   }, 1000);
 
-  window.login  = () => signInWithPopup(auth, provider);
+  /* CHANGE 2: In window.login, show loadingPanel and hide loginPanel after sign-in popup */
+  window.login  = () => signInWithPopup(auth, provider).then(() => {
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('loadingPanel').classList.remove('hidden');
+  });
   window.logout = async () => {
     if (auth.currentUser) await updateDoc(doc(db,"users",auth.currentUser.uid), { isOnline: false });
     signOut(auth).then(() => location.reload());
