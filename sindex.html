@@ -92,6 +92,12 @@
       border-top-color: var(--primary); border-radius: 50%;
       animation: spin 0.9s linear infinite; margin-bottom: 22px;
     }
+    /* ── Loading Panel spinner ── */
+    .loading-spinner {
+      width: 48px; height: 48px; border: 5px solid #e3f0fd;
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.85s linear infinite; margin: 0 auto 18px;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -169,7 +175,7 @@
   <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
 </div>
 
-  <!-- Payment Wizard -->
+<!-- Payment Wizard -->
 <div id="pay-modal" class="wizard-overlay" style="padding:0;">
   <div style="position:sticky; top:0; left:0; width:100%; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
     <h2 style="margin:0; font-size:24px;">Payment Wizard</h2>
@@ -237,6 +243,14 @@
       Sign out and try a different account
     </button>
   </div>
+
+  <!-- CHANGE 1: loadingPanel added after verifyPanel, hidden by default -->
+  <div id="loadingPanel" class="card hidden" style="text-align:center; padding:40px 20px;">
+    <div class="loading-spinner"></div>
+    <div style="font-size:16px; font-weight:bold; color:var(--primary); margin-bottom:6px;">Please wait…</div>
+    <div style="font-size:13px; color:#888;">Loading your profile data</div>
+  </div>
+
   <div id="profilePanel" class="hidden">
     <div class="card" style="text-align:center;">
       <img id="u-img" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('photo-input').click()">
@@ -264,7 +278,6 @@
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label><input type="text" id="p-father" readonly></div><span class="pencil-btn" onclick="makeEdit('p-father')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label><input type="tel" id="p-phone" readonly></div><span class="pencil-btn" onclick="makeEdit('p-phone')">✏️</span></div>
       <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label><textarea id="p-address" readonly rows="2"></textarea></div><span class="pencil-btn" onclick="makeEdit('p-address')">✏️</span></div>
-      <!-- NO mediaDrmId field here — user tab never shows it -->
       <button class="btn btn-green" onclick="window.saveProfile()">Update Folder Details</button>
     </div>
 
@@ -364,11 +377,10 @@
   const processingSignals = new Set();
 
   /* ══════════════════════════════════════════════════
-     DRM VERIFICATION FLOW  (all logic lives here)
+     DRM VERIFICATION FLOW
   ══════════════════════════════════════════════════ */
   const CALLBACK_BASE = "https://rakshapal-singh-library-ded2e.web.app/";
 
-  /* ── Internal helpers (holding screen UI only) ── */
   const _showHolding = (state) => {
     const spinner    = document.getElementById('holding-spinner');
     const retryBox   = document.getElementById('holding-retry-box');
@@ -389,19 +401,19 @@
       spinner.style.display    = 'none';
       icon.innerText           = '📱';
       title.innerText          = 'Library App Not Updated';
-      msg.innerText            = 'The Library App could not be interacted due to OLD VERSION.<br> Please install the new version to continue.';
+      msg.innerText            = 'The Library App could not be interacted due to OLD VERSION. Please install the new version to continue.';
       installBox.style.display = 'block';
     } else if (state === 'failed') {
       spinner.style.display    = 'none';
       icon.innerText           = '❌';
       title.innerText          = 'Could not Verify';
-      msg.innerText            = 'You can Go ahead with no problem.<br> Could not verify due to old phone.';
+      msg.innerText            = 'You can Go ahead with no problem. Could not verify due to old phone.';
       installBox.style.display = 'block';
     } else if (state === 'mismatch') {
       spinner.style.display  = 'none';
       icon.innerText         = '⛔';
       title.innerText        = 'Account Active on Another Device';
-      msg.innerText          = 'This account is already logged in on a different phone.<br> Please LOG OUT from previous phone.';
+      msg.innerText          = 'This account is already logged in on a different phone. Please LOG OUT from previous phone.';
       document.getElementById('holding-retry-msg').innerText =
         'First logout from the other device, then tap Retry here.';
       retryBox.style.display = 'block';
@@ -413,85 +425,47 @@
   const _hideHolding = () =>
     document.getElementById('holding-screen').classList.remove('show');
 
-  /* ── runDrmFlow: called ONLY when the app has already sent back an ID ──
-     user + doc are guaranteed to exist before this is called.
-     drmId / drmError come from URL params, already read and cleaned by caller. */
   const runDrmFlow = async (user, db, drmId, drmError) => {
-
-    /* 1. Read the stored DRM ID from Firestore */
     const uSnap       = await getDoc(doc(db, "users", user.uid));
     const storedDrmId = uSnap.exists() ? (uSnap.data().mediaDrmId || '') : '';
 
-    /* 2. App reported extraction failure → save 'failed', block */
     if (drmError) {
       await updateDoc(doc(db, "users", user.uid), { mediaDrmId: 'failed' });
       _showHolding('failed');
       return false;
     }
 
-    /* 3. App returned a valid device ID — compare with Firebase */
     if (!storedDrmId || storedDrmId === 'failed') {
-      /* Firebase empty or previously failed — first valid device, save and allow */
       await updateDoc(doc(db, "users", user.uid), { mediaDrmId: drmId });
       _hideHolding();
       return true;
     }
     if (storedDrmId === drmId) {
-      /* Same device as registered — allow */
       _hideHolding();
       return true;
     }
-    /* Different device — block */
     _showHolding('mismatch');
     return false;
   };
 
-  /* ── fireDrmDeepLink ──────────────────────────────────────────────────────
-     Fires the Library App deep link automatically (no permission prompt).
-     Timeline:
-       t=0s   → deep link fires, app opens silently
-       t=0–10s → app extracts ID, calls back with ?drm_id=XXX → page reloads
-                 → onAuthStateChanged → doc created → runDrmFlow → done
-       t=10s  → if page is still here (app never opened / didn't respond)
-                → show "App not found / not updated" screen with download button
-  ────────────────────────────────────────────────────────────────────────── */
-  let _drmTimeoutId = null; /* track so retry can reset it */
+  let _drmTimeoutId = null;
 
   const fireDrmDeepLink = () => {
     _showHolding('verifying');
-
-    /* Clear any previous timeout (e.g. from a prior retry attempt) */
     if (_drmTimeoutId) { clearTimeout(_drmTimeoutId); _drmTimeoutId = null; }
-
-    /* ── Deep link ──────────────────────────────────────────────────────────
-       CURRENT:  mylibraryapp://  → Chrome shows "Continue to app?" popup.
-                 This popup CANNOT be suppressed from JS — it is enforced by
-                 Android/Chrome at OS level.
-
-       TO REMOVE THE POPUP: register an Android App Link in your app's
-       AndroidManifest.xml and serve /.well-known/assetlinks.json on your
-       domain. Then change the href below to:
-         https://rakshapal-singh-library-ded2e.web.app/app-redirect?action=getdeviceid&callback=...
-       App Links open the app instantly with zero prompt, exactly like UPI/Paytm.
-    ──────────────────────────────────────────────────────────────────────── */
     const callbackUrl = `${CALLBACK_BASE}?drm_callback=1`;
     window.location.href = `mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
-
-    /* If the app sends back the ID the page reloads and this timeout is
-       naturally abandoned. If still here after 10s → app not found/updated. */
     _drmTimeoutId = setTimeout(() => {
       _drmTimeoutId = null;
       _showHolding('no_app');
     }, 10000);
   };
 
-  /* ── startVerification: called by "Verify My Device" button ── */
   window.startVerification = () => {
     document.getElementById('verifyPanel').classList.add('hidden');
     fireDrmDeepLink();
   };
 
-  /* ── Retry button: re-fires the deep link from the holding screen ── */
   window.retryDrmVerification = () => {
     if (!auth.currentUser) return;
     fireDrmDeepLink();
@@ -525,7 +499,6 @@
     refreshPriceLabels();
   };
 
-  /* ── Helpers ── */
   window.formatTime = (decimalDays) => {
     if (decimalDays == null) return "00:00:00:00";
     const sign = decimalDays < 0 ? "-" : "";
@@ -624,45 +597,31 @@
   ══════════════════════════════════════════════════ */
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-
-      /* ── CHECK: Did the app just call back with a DRM ID? ──
-         This is the SECOND time onAuthStateChanged fires — after the app
-         redirected back to ?drm_id=XXX. Handle it first before anything else. */
       const params           = new URLSearchParams(window.location.search);
       const incomingDrmId    = params.get('drm_id');
       const incomingDrmError = params.get('drm_error');
 
       if (incomingDrmId || incomingDrmError) {
-        /* Clean URL immediately so a refresh won't re-trigger */
         window.history.replaceState({}, '', window.location.pathname);
 
-        /* NOW create/update user doc — user+doc ready before runDrmFlow */
         const uRef = doc(db, "users", user.uid);
         await updateDoc(uRef, { isOnline: true, email: user.email }).catch(async () => {
           await setDoc(uRef, { name: user.displayName, email: user.email, photo: user.photoURL, isOnline: true, totalPaidDays: 0, history: [], mediaDrmId: '' });
         });
         try { const rs=await getDoc(doc(db,"settings","rates")); if(rs.exists()) applyRatesData(rs.data()); } catch(e) { console.warn("Rates load error:",e.message); }
 
-        /* Firebase check → allow or block */
         const verified = await runDrmFlow(user, db, incomingDrmId, incomingDrmError);
         if (verified) renderDashboard(user);
         return;
       }
 
-      /* ── FIRST sign-in (no DRM params in URL yet) ──
-         Show the "Verify My Device" button. The user taps it to fire the
-         deep link. This avoids auto-triggering before the user is ready,
-         and ensures the Chrome "Continue?" popup appears in direct response
-         to a tap (which Android handles more reliably than a scripted redirect). */
       document.getElementById('loginPanel').classList.add('hidden');
       document.getElementById('verifyPanel').classList.remove('hidden');
-      /* verifyPanel's button calls window.startVerification() → fireDrmDeepLink().
-         When the app calls back with ?drm_id=XXX the page reloads and
-         onAuthStateChanged fires again, hitting the block above. */
 
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
       document.getElementById('verifyPanel').classList.add('hidden');
+      document.getElementById('loadingPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.add('hidden');
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display = 'none';
@@ -670,8 +629,12 @@
     }
   });
 
-  /* ── Separate function so we can call it cleanly after DRM passes ── */
+  /* ── renderDashboard ── */
   const renderDashboard = (user) => {
+    /* CHANGE 2: Hide verifyPanel, show loadingPanel while data loads */
+    document.getElementById('verifyPanel').classList.add('hidden');
+    document.getElementById('loadingPanel').classList.remove('hidden');
+
     if (user.email === "c.commando822@gmail.com") {
       getDoc(doc(db,"settings","wifi")).then(w  => { if(w.exists())  { document.getElementById('wifi-ssid').value=w.data().ssid||"";  document.getElementById('wifi-pass').value=w.data().pass||""; } });
       getDoc(doc(db,"settings","wifi2")).then(w2 => { if(w2.exists()) { document.getElementById('wifi2-ssid').value=w2.data().ssid||""; document.getElementById('wifi2-pass').value=w2.data().pass||""; } });
@@ -689,8 +652,6 @@
       if (!snap.exists()) return;
       currentUserData = snap.data();
 
-      document.getElementById('loginPanel').classList.add('hidden');
-      document.getElementById('profilePanel').classList.remove('hidden');
       document.getElementById('u-img').src = currentUserData.photo || user.photoURL;
 
       const seatEl = document.getElementById('p-seat');
@@ -732,6 +693,10 @@
         document.getElementById('tab-man').classList.remove('hidden');
         window.loadAdmin();
       }
+
+      /* CHANGE 3: All profile data rendered — hide loadingPanel, show profilePanel */
+      document.getElementById('loadingPanel').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('hidden');
     });
   };
 
@@ -768,20 +733,15 @@
   window.login = () => signInWithPopup(auth, provider);
 
   /* ══════════════════════════════════════════════════
-     LOGOUT — clears DRM ID, triggers forgetWifi, signs out
+     LOGOUT
   ══════════════════════════════════════════════════ */
   window.logout = async () => {
     if (auth.currentUser) {
-      /* 1. Clear mediaDrmId from Firestore */
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         isOnline: false,
         mediaDrmId: ''
       }).catch(() => {});
-
-      /* 2. Trigger forgetWifi deep link to disconnect library Wi-Fi */
       window.location.href = 'mylibraryapp://forgetwifi';
-
-      /* 3. Short delay then sign out */
       await new Promise(r => setTimeout(r, 600));
     }
     signOut(auth).then(() => location.reload());
@@ -1090,7 +1050,7 @@
   };
 
   /* ══════════════════════════════════════════════════
-     openUser — ADMIN ONLY — shows MediaDRM ID below Address
+     openUser
   ══════════════════════════════════════════════════ */
   window.openUser = async (uid) => {
     const snap=await getDoc(doc(db,"users",uid));
@@ -1101,7 +1061,6 @@
     const abs=Math.max(0,srv), ts=Math.floor(abs*86400);
     const eD=Math.floor(ts/86400), eH=Math.floor((ts%86400)/3600), eM=Math.floor((ts%3600)/60), eS=ts%60;
 
-    /* MediaDRM ID display */
     const rawDrm = u.mediaDrmId || '';
     let drmDisplay, drmStyle;
     if (!rawDrm) {
@@ -1131,14 +1090,11 @@
         <p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p>
         <p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p>
         <p><b>Address:</b> ${u.address||'-'}</p>
-        <!-- ── MediaDRM ID — Admin Only, below Address ── -->
         <div style="padding-top:12px; border-top:1px solid #eee; margin-top:4px;">
           <div class="detail-label" style="margin-bottom:6px;">🔐 MediaDRM Device ID</div>
           <div style="${drmStyle}">${drmDisplay}</div>
         </div>
       </div>
-
-      <!-- ── Seat No. Admin Editor ── -->
       <div class="card">
         <label class="detail-label">🪑 Seat Number (Admin Only)</label>
         <div style="display:flex; gap:8px; align-items:center;">
@@ -1148,8 +1104,6 @@
         </div>
         ${seatStatus}
       </div>
-
-      <!-- ── Alarm-style survival editor ── -->
       <div class="card">
         <label class="detail-label">⏱ Set Survival Time</label>
         <p style="font-size:12px; color:#888; margin:4px 0 10px;">Current time pre-filled. Hours column has +/− toggle.</p>
@@ -1196,8 +1150,6 @@
         </div>
         <button class="btn btn-blue" style="margin-top:12px;" onclick="window.applyAlarmEdit('${uid}')">✅ Apply New Survival Time</button>
       </div>
-
-      <!-- ── Manual day adjustment ── -->
       <div class="card">
         <label class="detail-label">➕ Manual Day Adjustment (integers only)</label>
         <p style="font-size:12px; color:#888; margin:4px 0 10px;">Positive or negative whole number. E.g. +30 or −5.</p>
@@ -1207,7 +1159,6 @@
           <button class="btn btn-blue" style="width:auto; margin-top:0; padding:12px 18px;" onclick="window.adminEditDays('${uid}')">Apply</button>
         </div>
       </div>
-
       <div class="card"><div class="log-container" onclick="this.classList.toggle('expanded')">${window.renderLogs(u.history)}</div></div>
       <button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>`;
     document.getElementById('owner-folder-view').classList.add('show');
