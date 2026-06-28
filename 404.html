@@ -741,7 +741,8 @@
     const pass2 = w2Snap.exists() ? (w2Snap.data().pass || '') : '';
     const primary = key === 'wifi2' ? { ssid: ssid2, pass: pass2 } : { ssid, pass };
     if (!primary.ssid || !primary.pass) return alert("Wi-Fi details are incomplete. Ask admin to fill them in.");
-    window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}`;
+    const survivalDays = window.getRealSurvival(snap.data());
+    window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}&usersurvivaltime=${encodeURIComponent(String(survivalDays))}`;
     setTimeout(() => { 
     if (document.visibilityState === 'visible') {
       document.getElementById('wifi-modal-ssid').innerText = "Pls dowload the App first";
