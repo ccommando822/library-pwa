@@ -242,6 +242,10 @@
     <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">
       Sign out and try a different account
     </button>
+    <!-- ══ DEV BYPASS — remove before production if desired ══ -->
+    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">
+      ⚙️ Skip Verification (Dev)
+    </button>
   </div>
 
   <div id="loadingPanel" class="card hidden" style="text-align:center; padding:40px 20px;">
@@ -370,6 +374,8 @@
   const provider = new GoogleAuthProvider();
 
   let rates = { dayVal: 600, nightVal: 500, bothVal: 800, daysinamonth: 30 };
+  // ── Wi-Fi cache: loaded once in renderDashboard, reused everywhere ──
+  let wifiCache = { ssid: '', pass: '', ssid2: '', pass2: '' };
   let currentUserData = {};
   const getStamp = () => new Date().toLocaleString('en-GB');
   const fmtDate  = (d) => d.toLocaleDateString('en-GB');
@@ -468,6 +474,15 @@
   window.retryDrmVerification = () => {
     if (!auth.currentUser) return;
     fireDrmDeepLink();
+  };
+
+  /* ══════════════════════════════════════════════════
+     DEV BYPASS — skips DRM, goes straight to dashboard
+  ══════════════════════════════════════════════════ */
+  window.bypassVerification = () => {
+    if (!auth.currentUser) return alert("No user signed in.");
+    document.getElementById('verifyPanel').classList.add('hidden');
+    renderDashboard(auth.currentUser);
   };
 
   /* ══════════════════════════════════════════════════
@@ -633,17 +648,31 @@
     document.getElementById('verifyPanel').classList.add('hidden');
     document.getElementById('loadingPanel').classList.remove('hidden');
 
-    if (user.email === "c.commando822@gmail.com") {
-      getDoc(doc(db,"settings","wifi")).then(w  => { if(w.exists())  { document.getElementById('wifi-ssid').value=w.data().ssid||"";  document.getElementById('wifi-pass').value=w.data().pass||""; } });
-      getDoc(doc(db,"settings","wifi2")).then(w2 => { if(w2.exists()) { document.getElementById('wifi2-ssid').value=w2.data().ssid||""; document.getElementById('wifi2-pass').value=w2.data().pass||""; } });
-    }
-
-    getDoc(doc(db,"settings","wifi")).then(w => {
-      if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi1-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
-    });
-    getDoc(doc(db,"settings","wifi2")).then(w => {
-      if(w.exists()&&w.data().ssid) { const b=document.getElementById('wifi2-connect-btn'); if(b) b.innerText=`🛜 Connect to ${w.data().ssid}`; }
-    });
+    // ── Load wifi + rates in one batch; cache wifi for reuse ──
+    Promise.all([
+      getDoc(doc(db, "settings", "wifi")),
+      getDoc(doc(db, "settings", "wifi2")),
+      getDoc(doc(db, "settings", "rates"))
+    ]).then(([w, w2, rs]) => {
+      if (w.exists()) {
+        wifiCache.ssid = w.data().ssid || '';
+        wifiCache.pass = w.data().pass || '';
+        const b = document.getElementById('wifi1-connect-btn');
+        if (b && wifiCache.ssid) b.innerText = `🛜 Connect to ${wifiCache.ssid}`;
+        // pre-fill admin inputs if admin
+        const ws = document.getElementById('wifi-ssid'); if (ws) ws.value = wifiCache.ssid;
+        const wp = document.getElementById('wifi-pass'); if (wp) wp.value = wifiCache.pass;
+      }
+      if (w2.exists()) {
+        wifiCache.ssid2 = w2.data().ssid || '';
+        wifiCache.pass2 = w2.data().pass || '';
+        const b = document.getElementById('wifi2-connect-btn');
+        if (b && wifiCache.ssid2) b.innerText = `🛜 Connect to ${wifiCache.ssid2}`;
+        const ws2 = document.getElementById('wifi2-ssid'); if (ws2) ws2.value = wifiCache.ssid2;
+        const wp2 = document.getElementById('wifi2-pass'); if (wp2) wp2.value = wifiCache.pass2;
+      }
+      if (rs.exists()) applyRatesData(rs.data());
+    }).catch(e => console.warn("Settings load error:", e.message));
 
     const uRef = doc(db, "users", user.uid);
     onSnapshot(uRef, (snap) => {
@@ -887,28 +916,32 @@
   };
 
   /* ══════════════════════════════════════════════════
-     CONNECT TO WI-FI  — CHANGE 1(a)
-     Now sends usersurvivaltime (decimal days) in the
-     deep-link URL so the Android app can count down
-     locally without needing a network call.
+     CONNECT TO WI-FI
+     Uses wifiCache (no extra Firebase reads).
+     Sends name, father, phone, address + survivaltime
+     through the deep-link so the Android app has
+     everything it needs locally.
   ══════════════════════════════════════════════════ */
   window.connectToWifi = async (key = 'wifi') => {
     if (!auth.currentUser) return alert("Please log in first.");
-    const snap = await getDoc(doc(db,"users",auth.currentUser.uid));
-    if (!snap.exists()) return alert("User not found.");
-    if (window.getRealSurvival(snap.data()) < -1) return alert("Please pay your fees to access the Wi-Fi network!");
-    const [wSnap, w2Snap] = await Promise.all([
-      getDoc(doc(db,"settings","wifi")),
-      getDoc(doc(db,"settings","wifi2"))
-    ]);
-    const ssid  = wSnap.exists()  ? (wSnap.data().ssid  || '') : '';
-    const pass  = wSnap.exists()  ? (wSnap.data().pass  || '') : '';
-    const ssid2 = w2Snap.exists() ? (w2Snap.data().ssid || '') : '';
-    const pass2 = w2Snap.exists() ? (w2Snap.data().pass || '') : '';
+    // Use in-memory data — no Firebase read needed
+    if (window.getRealSurvival(currentUserData) < -1) return alert("Please pay your fees to access the Wi-Fi network!");
+    const { ssid, pass, ssid2, pass2 } = wifiCache;
     const primary = key === 'wifi2' ? { ssid: ssid2, pass: pass2 } : { ssid, pass };
     if (!primary.ssid || !primary.pass) return alert("Wi-Fi details are incomplete. Ask admin to fill them in.");
-    const survivalDays = window.getRealSurvival(snap.data());
-    window.location.href = `mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}&usersurvivaltime=${encodeURIComponent(String(survivalDays))}`;
+
+    const survivalDays = window.getRealSurvival(currentUserData);
+    const name    = encodeURIComponent(currentUserData.name    || '');
+    const father  = encodeURIComponent(currentUserData.father  || '');
+    const phone   = encodeURIComponent(currentUserData.phone   || '');
+    const address = encodeURIComponent(currentUserData.address || '');
+
+    window.location.href =
+      `mylibraryapp://wifi` +
+      `?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}` +
+      `&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}` +
+      `&usersurvivaltime=${encodeURIComponent(String(survivalDays))}` +
+      `&name=${name}&father=${father}&phone=${phone}&address=${address}`;
 
     setTimeout(() => {
       if (document.visibilityState === 'visible') {
@@ -925,6 +958,9 @@
     const pass  = document.getElementById(`${key}-pass`).value.trim();
     if (!ssid || !pass) return alert("Both SSID and password are required.");
     await setDoc(doc(db,"settings",key), { ssid, pass });
+    // Update cache so connectToWifi immediately uses new values
+    if (key === 'wifi2') { wifiCache.ssid2 = ssid; wifiCache.pass2 = pass; }
+    else                 { wifiCache.ssid  = ssid; wifiCache.pass  = pass; }
     alert(`Wi-Fi ${key === 'wifi2' ? '2' : '1'} settings saved.`);
     const btnId = key === 'wifi2' ? 'wifi2-connect-btn' : 'wifi1-connect-btn';
     const btn = document.getElementById(btnId);
