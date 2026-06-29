@@ -246,6 +246,10 @@
     <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">
       Sign out and try a different account
     </button>
+    <!-- ══ DEV BYPASS — remove before production if desired ══ -->
+    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">
+      ⚙️ Skip Verification (Dev)
+    </button>
   </div>
 
   <div id="loadingPanel" class="card hidden" style="text-align:center; padding:40px 20px;">
