@@ -129,14 +129,14 @@
     📥 Download Library App
     </a>
     <button class="btn btn-outline" onclick="window.retryDrmVerification()" style="margin-top:0;">🔄 Retry Verification</button>
+    <!-- ══ DEV BYPASS — remove before production if desired ══ -->
+    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">
+      ⚙️ Skip Verification (Dev)
+    </button>
   </div>
   <button id="holding-logout-btn" onclick="window.logout()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline;">
     Sign out and try a different account
   </button>
-  <!-- ══ DEV BYPASS — remove before production if desired ══ -->
-    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">
-      ⚙️ Skip Verification (Dev)
-    </button>
 </div>
 
 <!-- ══ SEAT CONDITION POPUP ══ -->
