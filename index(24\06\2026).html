@@ -1306,3 +1306,65 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+  
+now, download my repo:-https://github.com/Vishnu-Hack39965/App-Creation/archive/refs/heads/The-working-app.zip
+
+my deeplink format from my website:-
+
+window.location.href =
+      `mylibraryapp://wifi` +
+      `?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}` +
+      `&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}` +
+      `&usersurvivaltime=${encodeURIComponent(String(survivalDays))}` +
+      `&name=${name}&father=${father}&phone=${phone}&address=${address}`
+
+ and do these following changes:-
+
+1.(I) make changes in app files to get all variables value of user data from deep link
+(II).then add a function which will save or make the file where userdata will be stored inside appdata folder provided by android.
+(III).only the ssid and pass will be saved in base64 format inside that userdata file to ensure no leak of pass.
+(iv).and survivaltime to be saved with the exact time is was created or received. so we can find the remainig time of that user by reducing the time pasted from last saved/update in survivaltime.(ensure this data to not to left/mistreated or edited by user, so save it also in base64 format. and on every update first it decoded to normal then the reducement is done in time to find remaining time. then convert the new updated data and saved with exact clocl time value at that moment and then it converts to base64 and saved in file.)
+(V)After saving it must open "offline dashboard" page instead of wifi suggestion directly then after if user wants then he can connec using the buttons present in that page as stated everything below.
+
+2.(I).Add one more button "offline Dashboard" above the "go to home page" button in app main screen.
+(II).on opening offline dashboard page :-will check if the files of userdata are available in appdata:-(a) if not then show a message that please visit home page to connect to data and get your offline details
+(b)if present then will first calculate the survival time (using the same technique i told you like "decoded to normal then the reducement is done in time to find remaining time. then convert the new updated data and save it with exact clock time value at that moment and then it converts to base64 and saved in file." and also it will get the value of current_remaining_user_time after saving the updated value in file it will use that value for temporary showing the reducing time sec by sec with the other data as stated below to the user so user sees the updated survival time everytime it opens offline dashboard.
+
+(III)show field for data of user in this format.:-
+<div id="status-days" class="live-srv-display">00:00:00:00</div>
+      <div id="user-last-date" class="last-date-strip" style="display:none;"></div> # calculate the date of validation by calculating = <today date>+survivaltime
+<div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">
+        <button id="wifi1-connect-btn" class="btn btn-green" onclick="window.connectToWifi('wifi')">🛜 Connect to <ssid></button>
+      </div> # these buttons will use saved data to make wifisuggestion and also show ssid at place of <ssid>
+      <div id="wifi2-connect-trigger" class="hidden" style="margin-top:8px;">
+        <button id="wifi2-connect-btn" class="btn btn-green" style="background:#27ae60;" onclick="window.connectToWifi('wifi2')">🛜 Connect to <ssid2></button>
+      </div> # these buttons will use saved data to make wifisuggestion and also show ssid at place of <ssid2>
+    </div>
+          <div class="detail-row"><div class="detail-content"><label class="detail-label">Full Name</label>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Father's Name</label>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Mobile</label>
+      <div class="detail-row"><div class="detail-content"><label class="detail-label">Address</label>
+
+(iv).please show the above data in the stated format but with better layout and design that it looks a standard level app is visited.
+
+(V).now, come to the buttons of "connect to " in offline dashboard:-
+(a) on clicking the button :- it (aa)first check if the survival time (which we got on opening the offline dashboard page) is not less than (-1) if false then state that :-' Please, Pay your fees first' in a better layout and design above all info to grab the attention of user. otherwise if true then (ab)check if clock time is equal to 6am - 7 am or 6pm -6:30pm if true then state " Library Closed" otherwise (ac) else the respective ssid (the button is pressed for) and the attached pass for that ssid will get decoded from saved files in appdata then the previous wifisuggestion will get removed and a new wifisuggestion is made with that information and after successful suggesting it state :-"<as main heading>--->Successful, Wifi will be connected shortly,<---<h>
+<as small and underneath of above heading>--> please disconnect from other wifi if connected.' 
+
+3.(I).when the forgetlibrary deeplink function is called then it first delete the all the user files saved and then removesuggestion made by the app.
+
+4.(i).Add a background activity that will run every 3hours and check if userfiles exist if true then calculate the updated user_survival_time and save it to user_data file in App data as stated about how to update user_time("every update first it decoded the saved user_survival_time to normal then the reducement is done in time to find remaining time. then convert the new updated data and save with exact clock time at that moment to the value and then it converts to base64 and saved in file.
+
+(ii).add a background activity that will run at 6am to 7am or 6pm to 6:30 pm and calls remove suggestion only, no files to be deleted.
+
+5.(I)pls add a temporary data for check button in offline dashboard page so i can test if it is working.
+(II). also provide me a workflow that will give me the photos of main page of my app then one photo of first time opened offline dashboard page,then after clicking tempory data used for preview button photo and also a video from openin dashboard to closing dashboard.
+and after cloasing dashboard it opens go to home page button, and take a photo of that page.
+after then it closes the app and send the screenshots and video in artifact, also add a feature that if workflow fails then it upload the photos and video till that point as artifact.
