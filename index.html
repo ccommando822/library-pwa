@@ -630,7 +630,7 @@
       }
 
       document.getElementById('loginPanel').classList.add('hidden');
-      renderDashboard(auth.currentUser);
+      document.getElementById('verifyPanel').classList.remove('hidden');
 
     } else {
       document.getElementById('loginPanel').classList.remove('hidden');
