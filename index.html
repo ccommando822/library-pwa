@@ -1121,21 +1121,25 @@
     if (_searchTimeout) clearTimeout(_searchTimeout);
     _searchTimeout = setTimeout(async () => {
       try {
-        const Ref=doc(db,"users",auth.currentUser.uid);
-        const snap=await getDoc(Ref);
+        // FIX: Create a targeted query to find users matching the email
+        // Make sure 'query', 'where', 'limit', 'collection', and 'getDocs' are imported from firebase/firestore
+        const q = query(
+          collection(db, 'users'), 
+          where('email', '==', v), 
+          limit(5)
+        );
+        
+        // FIX: Use getDocs(q) instead of getDoc()
+        const querySnapshot = await getDocs(q);
         const matches = [];
-        snap.forEach(d => {
-          const u = d.data();
-          const email = (u.email||'').toLowerCase();
-          const name  = (u.name||'').toLowerCase();
-          // Match by email prefix OR name contains search term
-          if (email.startsWith(v) || email === v || name.includes(v)) {
-            matches.push({ uid: d.id, ...u });
-          }
+        
+        // FIX: querySnapshot natively supports .forEach()
+        querySnapshot.forEach(d => {
+          matches.push({ uid: d.id, ...d.data() });
         });
 
         if (!matches.length) {
-          resultsEl.innerHTML = '<div style="padding:10px; color:var(--red); font-size:13px;">❌ No user found with that email or name.</div>';
+          resultsEl.innerHTML = '<div style="padding:10px; color:var(--red); font-size:13px;">❌ No user found with that email.</div>';
           errEl.innerText = 'No matching user found in Firestore.';
           errEl.classList.add('show');
           iconEl.innerText = '❌';
@@ -1143,8 +1147,8 @@
         }
 
         resultsEl.innerHTML = matches.slice(0, 5).map(u => `
-          <div class="user-search-card" onclick="selectUserForDrive('${u.uid}','${(u.name||'').replace(/'/g,"&#39;")}','${(u.email||'')}','${u.photo||''}')">
-            <img class="user-search-avatar" src="${u.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'?')+'&background=1976d2&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=?&background=ccc&color=fff'">
+          <div class="user-search-card" onclick="selectUserForDrive('${u.uid}','${(u.name||'').replace(/'/g,"'")}','${(u.email||'')}','${u.photo||''}')">
+            <img class="user-search-avatar" src="${u.photo||'https://ui-avatars.com(u.name||'?')+'&background=1976d2&color=fff'}" onerror="this.src='https://ui-avatars.com'">
             <div class="user-search-info">
               <div class="user-search-name">${u.name||'(no name)'}</div>
               <div class="user-search-email">${u.email||''}</div>
@@ -1157,6 +1161,7 @@
       }
     }, 400);
   };
+
 
   window.selectUserForDrive = (uid, name, email, photo) => {
     _selectedUserForDrive = { uid, name, email, photo };
