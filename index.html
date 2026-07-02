@@ -8,18 +8,9 @@
     :root { --primary: #1976d2; --bg: #f4f7f6; --dark: #1c1e21; --green: #2ecc71; --red: #e74c3c; --yellow: #f1c40f; }
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
 
-    header {
-      background: var(--primary); color: white;
-      padding: 0 15px; height: 52px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 1001;
-    }
+    header { background: var(--primary); color: white; padding: 0 15px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1001; }
     .header-title { font-weight: bold; font-size: 17px; flex: 1; text-align: center; }
-    .header-icon-btn {
-      background: none; border: none; color: white; cursor: pointer;
-      font-size: 22px; padding: 6px 8px; line-height: 1; border-radius: 6px;
-      transition: background 0.15s;
-    }
+    .header-icon-btn { background: none; border: none; color: white; cursor: pointer; font-size: 22px; padding: 6px 8px; line-height: 1; border-radius: 6px; transition: background 0.15s; }
     .header-icon-btn:hover { background: rgba(255,255,255,0.15); }
 
     nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 52px; z-index: 1000; }
@@ -93,156 +84,74 @@
     .sig-section-hdr { font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 7px 12px; border-radius: 7px; margin: 12px 0 8px; letter-spacing: 0.5px; }
     .full-popup { position:fixed; top:0; left:0; width:100%; height:100%; z-index:999997; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; flex-direction:column; }
 
-    #holding-screen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: white; z-index: 999998; display: none;
-      flex-direction: column; align-items: center; justify-content: center;
-      padding: 30px; box-sizing: border-box; text-align: center;
-    }
+    /* ── Holding screen ── */
+    #holding-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999998; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; text-align: center; }
     #holding-screen.show { display: flex; }
     .holding-spinner { width: 56px; height: 56px; border: 5px solid #e3f0fd; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 22px; }
     .loading-spinner { width: 48px; height: 48px; border: 5px solid #e3f0fd; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto 18px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #hamburger-drawer {
-      position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: white; z-index: 999996; box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-      transition: left 0.3s ease; display: flex; flex-direction: column;
-    }
+    /* ── Hamburger ── */
+    #hamburger-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 999996; box-shadow: 4px 0 20px rgba(0,0,0,0.15); transition: left 0.3s ease; display: flex; flex-direction: column; }
     #hamburger-drawer.open { left: 0; }
-    #hamburger-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); z-index: 999995; display: none;
-    }
+    #hamburger-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999995; display: none; }
     #hamburger-overlay.open { display: block; }
-    .drawer-header {
-      background: var(--primary); color: white;
-      padding: 16px 20px; font-weight: bold; font-size: 16px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .drawer-item {
-      padding: 16px 20px; display: flex; align-items: center; gap: 14px;
-      cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 15px;
-      color: var(--dark); transition: background 0.15s;
-    }
+    .drawer-header { background: var(--primary); color: white; padding: 16px 20px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+    .drawer-item { padding: 16px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 15px; color: var(--dark); transition: background 0.15s; }
     .drawer-item:hover { background: #f0f7ff; }
     .drawer-item-icon { font-size: 22px; width: 32px; text-align: center; }
     .drawer-item-label { flex: 1; font-weight: 500; }
     .drawer-item-sub { font-size: 11px; color: #999; margin-top: 2px; }
 
-    #threedot-menu {
-      position: fixed; top: 56px; right: 8px;
-      background: white; border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
-      z-index: 999994; min-width: 200px; display: none; overflow: hidden;
-    }
+    /* ── Three-dot ── */
+    #threedot-menu { position: fixed; top: 56px; right: 8px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.18); z-index: 999994; min-width: 200px; display: none; overflow: hidden; }
     #threedot-menu.open { display: block; }
-    .tdm-item {
-      padding: 14px 18px; display: flex; align-items: center; gap: 12px;
-      cursor: pointer; font-size: 14px; font-weight: 500; color: var(--dark);
-      border-bottom: 1px solid #f0f0f0; transition: background 0.15s;
-    }
+    .tdm-item { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--dark); border-bottom: 1px solid #f0f0f0; transition: background 0.15s; }
     .tdm-item:last-child { border-bottom: none; }
     .tdm-item:hover { background: #f0f7ff; }
     .tdm-badge { font-size: 10px; background: var(--primary); color: white; padding: 2px 7px; border-radius: 10px; margin-left: auto; }
 
-    /* ══ GALLERY ══ */
-    #gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 10px; margin-bottom: 15px;
-    }
-    .gallery-item {
-      border-radius: 10px; overflow: hidden; background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
-      transition: transform 0.15s; position: relative;
-    }
+    /* ── Gallery ── */
+    #gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    .gallery-item { border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.15s; position: relative; }
     .gallery-item:hover { transform: scale(1.02); }
     .gallery-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-    .gallery-item-name {
-      font-size: 11px; padding: 6px 8px; font-weight: 500;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #444;
-    }
-    .gallery-item-type {
-      position: absolute; top: 6px; right: 6px;
-      background: rgba(0,0,0,0.55); color: white;
-      font-size: 9px; font-weight: bold; padding: 2px 6px;
-      border-radius: 4px; text-transform: uppercase;
-    }
+    .gallery-item-name { font-size: 11px; padding: 6px 8px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #444; }
+    .gallery-item-type { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.55); color: white; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
     .gallery-empty { text-align: center; padding: 60px 20px; color: #aaa; font-size: 14px; }
     .gallery-empty-icon { font-size: 48px; margin-bottom: 12px; }
-
-    #gallery-upload-fab {
-      position: fixed; bottom: 24px; right: 20px;
-      background: var(--primary); color: white;
-      border: none; border-radius: 28px; padding: 14px 22px;
-      font-size: 15px; font-weight: bold; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(25,118,210,0.4);
-      display: none; align-items: center; gap: 8px;
-      z-index: 100; transition: transform 0.15s;
-    }
+    #gallery-upload-fab { position: fixed; bottom: 24px; right: 20px; background: var(--primary); color: white; border: none; border-radius: 28px; padding: 14px 22px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 16px rgba(25,118,210,0.4); display: none; align-items: center; gap: 8px; z-index: 100; transition: transform 0.15s; }
     #gallery-upload-fab:hover { transform: scale(1.04); }
     #gallery-upload-fab.show { display: flex; }
-
-    #pending-uploads-panel {
-      background: #fff8e1; border: 1.5px solid var(--yellow);
-      border-radius: 12px; padding: 14px; margin-bottom: 14px; display: none;
-    }
+    #pending-uploads-panel { background: #fff8e1; border: 1.5px solid var(--yellow); border-radius: 12px; padding: 14px; margin-bottom: 14px; display: none; }
     #pending-uploads-panel.show { display: block; }
-    .pending-file-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 0; border-bottom: 1px solid #f0e68c; font-size: 13px;
-    }
+    .pending-file-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0e68c; font-size: 13px; }
     .pending-file-row:last-child { border-bottom: none; }
     .pending-file-icon { font-size: 20px; }
     .pending-file-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pending-file-size { font-size: 11px; color: #888; }
     .pending-remove-btn { background: none; border: none; cursor: pointer; color: var(--red); font-size: 18px; padding: 2px 4px; }
-
-    /* Upload progress bar */
     .upload-progress-wrap { margin-top: 8px; background: #f0f0f0; border-radius: 6px; height: 8px; overflow: hidden; display: none; }
     .upload-progress-wrap.show { display: block; }
     .upload-progress-bar { height: 8px; background: var(--primary); border-radius: 6px; width: 0%; transition: width 0.3s; }
-
-    #gallery-upload-modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); z-index: 999993;
-      display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
-    }
+    #gallery-upload-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999993; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     #gallery-upload-modal.show { display: flex; }
-    .upload-modal-box {
-      background: white; border-radius: 16px; padding: 24px;
-      max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
-    }
-    .upload-drop-zone {
-      border: 2px dashed #bbb; border-radius: 12px;
-      padding: 30px 20px; text-align: center; cursor: pointer;
-      transition: border-color 0.2s, background 0.2s; margin: 14px 0;
-    }
+    .upload-modal-box { background: white; border-radius: 16px; padding: 24px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .upload-drop-zone { border: 2px dashed #bbb; border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin: 14px 0; }
     .upload-drop-zone.drag-over { border-color: var(--primary); background: #e3f0fd; }
     .upload-drop-zone-icon { font-size: 36px; margin-bottom: 8px; }
     .upload-drop-zone-text { font-size: 14px; color: #666; }
     .upload-drop-zone-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
 
-    /* ══ DATA STRUCTURE PAGE ══ */
-    #data-structure-page {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--bg); z-index: 99998;
-      display: none; flex-direction: column; overflow-y: auto;
-    }
+    /* ── Data Structure page ── */
+    #data-structure-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 99998; display: none; flex-direction: column; overflow-y: auto; }
     #data-structure-page.show { display: flex; }
-    .ds-header {
-      background: var(--primary); color: white;
-      padding: 0 15px; height: 52px;
-      display: flex; align-items: center; gap: 12px;
-      position: sticky; top: 0; z-index: 10;
-    }
+    .ds-header { background: var(--primary); color: white; padding: 0 15px; height: 52px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
     .ds-header-back { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px 6px; }
     .ds-body { padding: 15px; max-width: 500px; margin: auto; width: 100%; box-sizing: border-box; }
-    .ds-tabs { display: flex; gap: 0; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 15px; }
-    .ds-tab { flex: 1; padding: 12px 8px; border: none; background: none; font-weight: bold; font-size: 12px; color: #666; cursor: pointer; transition: background 0.15s; border-bottom: 3px solid transparent; }
+    .ds-tabs { display: flex; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 15px; }
+    .ds-tab { flex: 1; padding: 12px 8px; border: none; background: none; font-weight: bold; font-size: 12px; color: #666; cursor: pointer; border-bottom: 3px solid transparent; }
     .ds-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0f7ff; }
-
     .email-row { background: white; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden; }
     .email-row-main { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
     .email-drag-handle { color: #ccc; font-size: 18px; cursor: grab; padding: 0 4px; user-select: none; }
@@ -262,46 +171,19 @@
     .email-btn-move { background: #f3f0fd; color: #7b1fa2; }
     .email-btn-move:hover { background: #e1bee7; }
 
-    /* Deleted file viewer (admin only) */
-    #deleted-file-viewer-modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85); z-index: 9999999;
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; padding: 20px; box-sizing: border-box;
-    }
-    #deleted-file-viewer-modal.show { display: flex; }
-    .dfv-inner { background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .dfv-header { background: var(--red); color: white; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between; }
-
-    /* ══ DRIVE MANAGER PAGE ══ */
-    #drive-manager-page {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--bg); z-index: 99997;
-      display: none; flex-direction: column; overflow-y: auto;
-    }
+    /* ── Drive Manager ── */
+    #drive-manager-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 99997; display: none; flex-direction: column; overflow-y: auto; }
     #drive-manager-page.show { display: flex; }
     .dm-header { background: var(--primary); color: white; padding: 0 15px; height: 52px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
-    .dm-body { padding: 15px; max-width: 500px; margin: auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; box-sizing: border-box; }
+    .dm-body { padding: 15px; max-width: 500px; margin: auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
     .dm-section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; color: #888; letter-spacing: 0.06em; margin: 18px 0 10px; }
     .dm-empty { text-align: center; padding: 20px; color: #bbb; font-size: 13px; }
-
-    #add-drive-fab {
-      position: fixed; bottom: 24px; right: 20px;
-      background: var(--primary); color: white;
-      border: none; border-radius: 28px; padding: 14px 22px;
-      font-size: 15px; font-weight: bold; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(25,118,210,0.4);
-      display: none; align-items: center; gap: 8px;
-      z-index: 99999; transition: transform 0.15s;
-    }
+    #add-drive-fab { position: fixed; bottom: 24px; right: 20px; background: var(--primary); color: white; border: none; border-radius: 28px; padding: 14px 22px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 16px rgba(25,118,210,0.4); display: none; align-items: center; gap: 8px; z-index: 99999; transition: transform 0.15s; }
     #add-drive-fab:hover { transform: scale(1.04); }
     #add-drive-fab.show { display: flex; }
 
-    #add-email-page {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: white; z-index: 999997;
-      display: none; flex-direction: column; overflow-y: auto;
-    }
+    /* ── Add Email page ── */
+    #add-email-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999997; display: none; flex-direction: column; overflow-y: auto; }
     #add-email-page.show { display: flex; }
     .aep-header { background: var(--primary); color: white; padding: 0 15px; height: 52px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
     .aep-body { padding: 20px; max-width: 500px; margin: auto; width: 100%; box-sizing: border-box; }
@@ -314,57 +196,46 @@
     .email-error-msg { color: var(--red); font-size: 12px; font-weight: 600; margin: 4px 0 10px; display: none; }
     .email-error-msg.show { display: block; }
 
-    /* ══ CONNECT TO SERVER BUTTON (shown on user account) ══ */
-    #connect-server-btn-wrap {
-      background: linear-gradient(135deg, #e3f0fd, #e8f5e9);
-      border: 2px solid var(--primary); border-radius: 14px;
-      padding: 16px; margin-bottom: 14px; display: none;
-    }
+    /* ── User search results in Add Email page ── */
+    #user-search-results { margin: 10px 0 16px; }
+    .user-search-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #f0f7ff; border: 1.5px solid var(--primary); border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-search-card:hover { background: #e3f0fd; }
+    .user-search-card.selected { background: #e3f0fd; border-color: var(--green); }
+    .user-search-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+    .user-search-info { flex: 1; min-width: 0; }
+    .user-search-name { font-size: 14px; font-weight: 600; }
+    .user-search-email { font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .user-search-tick { font-size: 20px; color: var(--green); }
+
+    /* ── Connect to Server button (on user account page) ── */
+    #connect-server-btn-wrap { background: linear-gradient(135deg, #e3f0fd, #e8f5e9); border: 2px solid var(--primary); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: none; }
     #connect-server-btn-wrap.show { display: block; }
-    .connect-server-btn {
-      width: 100%; padding: 14px; border: none; border-radius: 10px;
-      background: var(--primary); color: white; font-size: 15px;
-      font-weight: bold; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; gap: 8px;
-    }
+    .connect-server-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--primary); color: white; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .connect-server-btn:hover { background: #1565c0; }
-    .connect-server-connected {
-      background: #e8f5e9; border: 2px solid var(--green); border-radius: 12px;
-      padding: 12px 16px; text-align: center; font-size: 14px; font-weight: bold;
-      color: #2e7d32; display: none;
-    }
+    .connect-server-connected { background: #e8f5e9; border: 2px solid var(--green); border-radius: 12px; padding: 12px 16px; text-align: center; font-size: 14px; font-weight: bold; color: #2e7d32; display: none; }
     .connect-server-connected.show { display: block; }
 
-    /* OAuth loading overlay */
-    #oauth-loading {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255,255,255,0.95); z-index: 9999999;
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-    }
+    /* ── OAuth loading overlay ── */
+    #oauth-loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #oauth-loading.show { display: flex; }
 
-    #move-warn-modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); z-index: 9999999;
-      display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
-    }
+    /* ── Move warn modal ── */
+    #move-warn-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     #move-warn-modal.show { display: flex; }
     .move-warn-box { background: white; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; }
 
-    #gallery-lightbox {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.92); z-index: 999999;
-      display: none; align-items: center; justify-content: center; flex-direction: column;
-    }
+    /* ── Gallery lightbox ── */
+    #gallery-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; }
     #gallery-lightbox.show { display: flex; }
     #lightbox-img { max-width: 95%; max-height: 80vh; border-radius: 8px; object-fit: contain; }
     #lightbox-caption { color: white; margin-top: 12px; font-size: 13px; }
-    #lightbox-close {
-      position: absolute; top: 16px; right: 16px;
-      background: rgba(255,255,255,0.15); border: none; color: white;
-      font-size: 24px; cursor: pointer; border-radius: 50%; width: 40px; height: 40px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    #lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 24px; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+
+    /* ── Deleted file viewer modal ── */
+    #deleted-file-viewer-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
+    #deleted-file-viewer-modal.show { display: flex; }
+    .dfv-inner { background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .dfv-header { background: var(--red); color: white; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between; }
   </style>
 </head>
 <body>
@@ -388,7 +259,7 @@
 <div id="hamburger-overlay" onclick="closeHamburger()"></div>
 <div id="hamburger-drawer">
   <div class="drawer-header">📚 Rakshapal Singh Library</div>
-  <div class="drawer-item" id="drawer-gallery" onclick="switchMain('gallery'); closeHamburger();">
+  <div class="drawer-item" onclick="switchMain('gallery'); closeHamburger();">
     <span class="drawer-item-icon">🖼️</span>
     <div><div class="drawer-item-label">Gallery</div><div class="drawer-item-sub">View library media</div></div>
   </div>
@@ -418,20 +289,14 @@
   <div id="holding-install-box" style="display:none; width:100%; max-width:320px;">
     <div style="background:#e3f0fd; border-radius:12px; padding:16px; margin-bottom:16px; text-align:left;">
       <strong>📱 Library App Required</strong>
-      <p style="margin:8px 0 0; font-size:13px; color:#555;">User verification requires the Library App. Please install it to continue.</p>
+      <p style="margin:8px 0 0; font-size:13px; color:#555;">Install the Library App to continue verification.</p>
     </div>
     <a href="https://github.com/Vishnu-Hack39965/App-Creation/releases/latest/download/app-debug.apk" download
-     style="display:block; background:var(--primary); color:white; padding:14px; border-radius:12px; font-weight:bold; text-decoration:none; margin-bottom:10px; font-size:15px; text-align:center;">
-    📥 Download Library App
-    </a>
+       style="display:block; background:var(--primary); color:white; padding:14px; border-radius:12px; font-weight:bold; text-decoration:none; margin-bottom:10px; font-size:15px; text-align:center;">📥 Download Library App</a>
     <button class="btn btn-outline" onclick="window.retryDrmVerification()" style="margin-top:0;">🔄 Retry Verification</button>
-    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">
-      ⚙️ Skip Verification (Dev)
-    </button>
+    <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">⚙️ Skip Verification (Dev)</button>
   </div>
-  <button id="holding-logout-btn" onclick="window.logout()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline;">
-    Sign out and try a different account
-  </button>
+  <button onclick="window.logout()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline;">Sign out and try a different account</button>
 </div>
 
 <!-- ══ SEAT POPUP ══ -->
@@ -440,7 +305,7 @@
     <div style="font-size:32px; text-align:center; margin-bottom:10px;">🪑</div>
     <h3 style="margin:0 0 15px; font-size:17px; text-align:center; color:var(--dark);">Seat Assignment Notice</h3>
     <div id="seat-popup-body"></div>
-    <button onclick="window.agreeSeat()" class="btn btn-blue" style="margin-top:15px; font-size:16px; letter-spacing:0.5px;">✅ Agree</button>
+    <button onclick="window.agreeSeat()" class="btn btn-blue" style="margin-top:15px;">✅ Agree</button>
   </div>
 </div>
 
@@ -456,12 +321,8 @@
       <div style="font-size:10px; color:#888; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Password</div>
       <div id="wifi-modal-pass" style="font-size:17px; font-weight:bold; color:var(--dark); word-break:break-all;"></div>
     </div>
-    <a href="https://github.com/Vishnu-Hack39965/App-Creation/releases/latest/download/app-debug.apk" download
-     style="display:block; background:var(--primary); color:white; padding:14px; border-radius:12px; font-weight:bold; text-decoration:none; margin-bottom:10px; font-size:15px; text-align:center;">
-    📥 Download Library App
-    </a>
-    <button onclick="document.getElementById('wifi-info-modal').style.display='none'"
-            style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px; background:#f5f5f5; color:#666; font-weight:bold; cursor:pointer; font-size:14px;">Close</button>
+    <a href="https://github.com/Vishnu-Hack39965/App-Creation/releases/latest/download/app-debug.apk" download style="display:block; background:var(--primary); color:white; padding:14px; border-radius:12px; font-weight:bold; text-decoration:none; margin-bottom:10px; font-size:15px; text-align:center;">📥 Download Library App</a>
+    <button onclick="document.getElementById('wifi-info-modal').style.display='none'" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px; background:#f5f5f5; color:#666; font-weight:bold; cursor:pointer; font-size:14px;">Close</button>
   </div>
 </div>
 
@@ -471,15 +332,22 @@
   <p style="color:white; margin-top:10px; font-size:12px;">Tap anywhere to close</p>
 </div>
 
+<!-- OAuth Loading Overlay -->
+<div id="oauth-loading">
+  <div class="loading-spinner"></div>
+  <div style="font-size:16px; font-weight:bold; color:var(--primary); margin-bottom:6px;" id="oauth-loading-msg">Connecting to Google…</div>
+  <div style="font-size:13px; color:#888;">Please wait, do not close this page</div>
+</div>
+
 <!-- Payment Wizard -->
 <div id="pay-modal" class="wizard-overlay" style="padding:0;">
-  <div style="position:sticky; top:0; left:0; width:100%; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
+  <div style="position:sticky; top:0; background:white; padding:20px; box-sizing:border-box; border-bottom:1px solid #eee; z-index:10;">
     <h2 style="margin:0; font-size:24px;">Payment Wizard</h2>
   </div>
   <div style="padding:20px; padding-bottom:40px; box-sizing:border-box;">
     <div id="pstep1" class="step-card step-active">
       <span class="step-num">1</span> <b>Payment Information Validation</b>
-      <p><b>Phone Number</b></p>
+      <p><b>Phone Number</b> (no. you used to pay)</p>
       <input type="number" id="payment-phone" placeholder="Enter Payment Phone no." style="width:100%; padding:15px; font-size:20px; border-radius:10px; border:2px solid #ddd; margin-bottom:5px; box-sizing:border-box;">
       <div id="payment-phone-error-box" class="hidden"><p id="payment-phone-error-msg" style="color:var(--red); font-weight:bold; margin:5px 0; font-size:14px;"></p></div>
       <p><b>Payment UID</b></p>
@@ -519,13 +387,6 @@
   <button class="btn" style="background:none; color:gray;" onclick="window.closeLeaveWizard()">Cancel</button>
 </div>
 
-<!-- OAuth Loading Overlay -->
-<div id="oauth-loading">
-  <div class="loading-spinner"></div>
-  <div style="font-size:16px; font-weight:bold; color:var(--primary); margin-bottom:6px;" id="oauth-loading-msg">Connecting to Google…</div>
-  <div style="font-size:13px; color:#888;">Please wait, do not close this page</div>
-</div>
-
 <!-- ══ MAIN NAV ══ -->
 <nav id="main-nav">
   <button id="tab-gal" class="active" onclick="switchMain('gallery')">🖼️ Gallery</button>
@@ -541,16 +402,12 @@
       <button onclick="clearPendingUploads()" style="background:none; border:none; color:#856404; cursor:pointer; font-size:12px; text-decoration:underline;">Clear all</button>
     </div>
     <div id="pending-files-list"></div>
-    <!-- Upload progress -->
-    <div id="upload-status-area" style="margin-top:10px;display:none;">
-      <div style="font-size:12px;color:#666;margin-bottom:6px;" id="upload-status-text">Preparing upload…</div>
+    <div id="upload-status-area" style="margin-top:10px; display:none;">
+      <div style="font-size:12px; color:#666; margin-bottom:6px;" id="upload-status-text">Preparing upload…</div>
       <div class="upload-progress-wrap show"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
     </div>
-    <button class="btn btn-blue" style="margin-top:10px; font-size:14px; padding:12px;" onclick="startGalleryUpload()" id="start-upload-btn">
-      🚀 Upload All to Drive
-    </button>
+    <button class="btn btn-blue" style="margin-top:10px; font-size:14px; padding:12px;" onclick="startGalleryUpload()" id="start-upload-btn">🚀 Upload All to Drive</button>
   </div>
-
   <div id="gallery-grid">
     <div class="gallery-empty">
       <div class="gallery-empty-icon">🖼️</div>
@@ -560,9 +417,7 @@
   </div>
 </section>
 
-<button id="gallery-upload-fab" onclick="openGalleryUploadModal()">
-  <span style="font-size:20px;">+</span> Add Media
-</button>
+<button id="gallery-upload-fab" onclick="openGalleryUploadModal()"><span style="font-size:20px;">+</span> Add Media</button>
 
 <!-- Gallery Upload Modal -->
 <div id="gallery-upload-modal">
@@ -571,22 +426,15 @@
       <h3 style="margin:0; font-size:18px;">Add Media</h3>
       <button onclick="closeGalleryUploadModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#666;">✕</button>
     </div>
-    <div class="upload-drop-zone" id="upload-drop-zone"
-         onclick="document.getElementById('gallery-file-input').click()"
-         ondragover="event.preventDefault(); this.classList.add('drag-over')"
-         ondragleave="this.classList.remove('drag-over')"
-         ondrop="handleGalleryFileDrop(event)">
+    <div class="upload-drop-zone" id="upload-drop-zone" onclick="document.getElementById('gallery-file-input').click()" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleGalleryFileDrop(event)">
       <div class="upload-drop-zone-icon">📁</div>
       <div class="upload-drop-zone-text">Tap to choose files</div>
       <div class="upload-drop-zone-hint">or drag & drop here</div>
       <div class="upload-drop-zone-hint" style="margin-top:4px;">Images, Videos, PDFs supported</div>
     </div>
-    <input type="file" id="gallery-file-input" multiple accept="image/*,video/*,.pdf"
-           style="display:none" onchange="handleGalleryFileSelect(this.files)">
+    <input type="file" id="gallery-file-input" multiple accept="image/*,video/*,.pdf" style="display:none" onchange="handleGalleryFileSelect(this.files)">
     <div id="upload-selected-files" style="margin-top:10px;"></div>
-    <button class="btn btn-blue" onclick="addFilesToPending()" style="font-size:14px; padding:13px;">
-      ➕ Add to Pending Queue
-    </button>
+    <button class="btn btn-blue" onclick="addFilesToPending()" style="font-size:14px; padding:13px;">➕ Add to Pending Queue</button>
   </div>
 </div>
 
@@ -603,9 +451,9 @@
   <div id="verifyPanel" class="card hidden" style="text-align:center; padding:28px 20px;">
     <div style="font-size:40px; margin-bottom:12px;">🔐</div>
     <h3 style="margin:0 0 8px; font-size:18px; color:var(--dark);">Account Verification Required</h3>
-    <p style="color:#666; font-size:14px; line-height:1.6; margin:0 0 20px;">Tap the button below to verify this Account.</p>
+    <p style="color:#666; font-size:14px; line-height:1.6; margin:0 0 20px;">Tap the button below to verify this Account.<br>The Library App will open automatically.</p>
     <button class="btn btn-blue" onclick="window.startVerification()" style="font-size:16px; padding:16px;">🛡️ Verify My Device</button>
-    <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">Sign out</button>
+    <button onclick="window.logout()" style="margin-top:14px; background:none; border:none; color:#aaa; font-size:13px; cursor:pointer; text-decoration:underline; display:block; width:100%;">Sign out and try a different account</button>
     <button onclick="window.bypassVerification()" style="margin-top:10px; background:none; border:1px dashed #ccc; color:#bbb; font-size:11px; cursor:pointer; border-radius:8px; padding:8px 14px; display:block; width:100%;">⚙️ Skip Verification (Dev)</button>
   </div>
   <div id="loadingPanel" class="card hidden" style="text-align:center; padding:40px 20px;">
@@ -621,20 +469,20 @@
       <div id="status-days" class="live-srv-display">00:00:00:00</div>
       <div id="user-last-date" class="last-date-strip" style="display:none;"></div>
 
-      <!-- ── PHASE 2: Connect to Rakshapal Singh Servers button ── -->
+      <!-- ══ PHASE 2: Connect to Rakshapal Singh Servers button ══ -->
       <div id="connect-server-btn-wrap">
-        <div style="font-size:12px; color:#555; margin-bottom:10px; font-weight:600;">🔗 Drive Storage Request</div>
+        <div style="font-size:12px; color:#555; margin-bottom:8px; font-weight:600;">🔗 Drive Storage Request</div>
         <div style="font-size:12px; color:#888; margin-bottom:12px;">Admin has requested to use your Google Drive to store library files.</div>
         <button class="connect-server-btn" onclick="window.initiateOAuthConnect()">
           🔗 Connect to Rakshapal Singh Servers
         </button>
-        <div style="font-size:11px;color:#888;margin-top:8px;">You can revoke access anytime from your Google account settings.</div>
+        <div style="font-size:11px; color:#888; margin-top:8px;">You can revoke access anytime from your Google account settings.</div>
       </div>
       <div class="connect-server-connected" id="connect-server-connected">
         ✅ Connected to Rakshapal Singh Library Server
-        <div id="connect-expire-note" style="font-size:11px;color:#888;margin-top:4px;"></div>
+        <div id="connect-expire-note" style="font-size:11px; color:#888; margin-top:4px;"></div>
       </div>
-      <!-- ── end connect button ── -->
+      <!-- ══ end connect button ══ -->
 
       <div id="join-trigger-box"><button class="btn btn-blue" onclick="window.openWizard()">Start Admission</button></div>
       <div id="wifi-connect-trigger" class="hidden" style="margin-top:10px;">
@@ -707,6 +555,7 @@
     <div id="dm-pane-rates" class="hidden">
       <div class="card">
         <label class="detail-label">Shift Prices & Validity Days</label>
+        <p style="font-size:12px; color:#888; margin:0 0 14px;">All values are loaded from and saved to Firestore. Changes apply instantly everywhere.</p>
         <div class="rate-row"><label>☀️ Day Shift (₹)</label><input type="number" id="rate-day" min="0"></div>
         <div class="rate-row"><label>🌙 Night Shift (₹)</label><input type="number" id="rate-night" min="0"></div>
         <div class="rate-row"><label>🌓 Both Shifts (₹)</label><input type="number" id="rate-both" min="0"></div>
@@ -729,34 +578,21 @@
     <span style="font-weight:bold; font-size:17px;">Data Structure</span>
   </div>
   <div class="ds-body">
-    <p style="font-size:13px; color:#666; margin:0 0 14px; line-height:1.6;">
-      Control which Google Drive accounts store library files. Drag to reorder priority.
-      Files fill drives in order — once a drive hits <strong>10 GB</strong>, the next is used automatically.
-    </p>
+    <p style="font-size:13px; color:#666; margin:0 0 14px; line-height:1.6;">Control which Google Drive accounts store library files. Drag to reorder. Once a drive hits <strong>10 GB</strong>, the next is used automatically.</p>
     <div class="ds-tabs">
       <button class="ds-tab active" id="dst-online-btn" onclick="switchDSTab('online')">📂 Online Files Emails</button>
       <button class="ds-tab" id="dst-deleted-btn" onclick="switchDSTab('deleted')">🗑️ Deleted Files Emails</button>
     </div>
-
     <div id="dst-pane-online">
-      <div style="background:#e3f0fd; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#0d47a1;">
-        📌 Files are saved to these drives in order. First drive with free space is used. All files in this section are made <strong>publicly accessible</strong>.
-      </div>
+      <div style="background:#e3f0fd; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#0d47a1;">📌 Files are saved in order. First drive with free space is used. All files here are <strong>publicly accessible</strong>.</div>
       <div id="online-emails-list"><div class="dm-empty">No online storage emails added yet.</div></div>
     </div>
-
     <div id="dst-pane-deleted" style="display:none;">
-      <div style="background:#ffebee; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#b71c1c;">
-        🗑️ Deleted files are moved to these drives. Files are <strong>private</strong> — only admin can access using the stored access token.
-      </div>
-      <div id="deleted-emails-list"><div class="dm-empty">No deleted-file storage emails added yet.</div></div>
-
-      <!-- Admin deleted file browser -->
+      <div style="background:#ffebee; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#b71c1c;">🗑️ Deleted files go here. Files are <strong>private</strong> — only admin can access using stored tokens.</div>
+      <div id="deleted-emails-list"><div class="dm-empty">No deleted-file emails added yet.</div></div>
       <div style="margin-top:16px;">
         <div class="detail-label" style="margin-bottom:8px;">🔐 Browse Deleted Files (Admin Only)</div>
-        <div id="deleted-drives-list">
-          <div class="dm-empty">Connect deleted file drives to browse them here.</div>
-        </div>
+        <div id="deleted-drives-list"><div class="dm-empty">Connect deleted drives to browse them here.</div></div>
       </div>
     </div>
   </div>
@@ -769,43 +605,58 @@
     <span style="font-weight:bold; font-size:17px;">Drive Manager</span>
   </div>
   <div class="dm-body">
-    <p style="font-size:13px; color:#666; margin:0 0 6px; line-height:1.6;">
-      Connect Google Drive accounts to store library media files. Each drive has a <strong>10 GB</strong> limit.
-    </p>
+    <p style="font-size:13px; color:#666; margin:0 0 6px; line-height:1.6;">Connect Google Drive accounts to store library media files. Each drive has a <strong>10 GB</strong> limit.</p>
     <div class="dm-section-title">✅ Emails allowed to connect</div>
     <div id="dm-allowed-list"><div class="dm-empty">No drives connected yet. Tap "Add Drive" below.</div></div>
-    <div class="dm-section-title">⏳ Pending emails (request sent)</div>
+    <div class="dm-section-title">⏳ Pending emails (request sent, awaiting user)</div>
     <div id="dm-pending-list"><div class="dm-empty">No pending requests.</div></div>
   </div>
 </div>
+<button id="add-drive-fab" onclick="openAddEmailPage()"><span style="font-size:20px;">🗄️</span> Add Drive</button>
 
-<button id="add-drive-fab" onclick="openAddEmailPage()">
-  <span style="font-size:20px;">🗄️</span> Add Drive
-</button>
-
-<!-- ══ ADD EMAIL SUB-PAGE ══ -->
+<!-- ══ ADD EMAIL / USER SEARCH SUB-PAGE ══ -->
 <div id="add-email-page">
   <div class="aep-header">
     <button style="background:none; border:none; color:white; font-size:22px; cursor:pointer; padding:4px 6px;" onclick="closeAddEmailPage()">←</button>
     <span style="font-weight:bold; font-size:17px;">Connect a Drive</span>
   </div>
   <div class="aep-body">
-    <p style="font-size:13px; color:#666; line-height:1.6; margin:0 0 20px;">
-      Enter the Gmail address of the person whose Google Drive you want to connect.
+    <p style="font-size:13px; color:#666; line-height:1.6; margin:0 0 16px;">
+      Enter the <strong>email address or username</strong> of the person whose Google Drive you want to connect.
       They will receive a connection request on their account page.
     </p>
-    <label class="detail-label">Gmail / Google Email</label>
+
+    <!-- Search input -->
+    <label class="detail-label">Email or Username</label>
     <div class="email-input-wrap">
-      <input type="email" id="connect-email-input" class="email-input-field"
-             placeholder="example@gmail.com" oninput="validateConnectEmail(this)">
+      <input type="text" id="connect-email-input" class="email-input-field"
+             placeholder="name@gmail.com or display name"
+             oninput="handleUserSearch(this.value)">
       <span class="email-valid-icon" id="email-valid-icon"></span>
     </div>
     <div class="email-error-msg" id="connect-email-error"></div>
-    <button class="btn btn-blue" style="font-size:15px; padding:14px; margin-top:6px;" onclick="sendDriveRequest()">
+
+    <!-- Search results — user cards from Firestore -->
+    <div id="user-search-results"></div>
+
+    <!-- Selected user summary -->
+    <div id="selected-user-summary" style="display:none; background:#e8f5e9; border:2px solid var(--green); border-radius:12px; padding:14px; margin-bottom:14px;">
+      <div style="font-size:12px; color:#2e7d32; font-weight:bold; margin-bottom:8px;">✅ Selected user</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img id="selected-user-photo" style="width:36px; height:36px; border-radius:50%; border:2px solid #ddd;" src="">
+        <div>
+          <div id="selected-user-name" style="font-weight:600; font-size:14px;"></div>
+          <div id="selected-user-email" style="font-size:12px; color:#555;"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-blue" style="font-size:15px; padding:14px;" onclick="sendDriveRequest()" id="send-request-btn" disabled>
       📨 Send Connection Request
     </button>
+
     <div style="margin-top:28px;">
-      <div class="detail-label" style="margin-bottom:10px;">📋 All existing emails</div>
+      <div class="detail-label" style="margin-bottom:10px;">📋 All connected & pending emails</div>
       <div id="aep-existing-list"><div style="color:#ccc; font-size:13px; text-align:center; padding:16px;">Loading…</div></div>
     </div>
   </div>
@@ -829,22 +680,21 @@
   <div class="dfv-inner">
     <div class="dfv-header">
       <span style="font-weight:bold;">🗑️ Deleted Files — Private View</span>
-      <button onclick="document.getElementById('deleted-file-viewer-modal').classList.remove('show')"
-              style="background:none;border:none;color:white;font-size:22px;cursor:pointer;">✕</button>
+      <button onclick="document.getElementById('deleted-file-viewer-modal').classList.remove('show')" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">✕</button>
     </div>
     <div style="padding:16px;" id="dfv-content">Loading…</div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     FIREBASE + MAIN MODULE JS
-════════════════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+     FIREBASE MODULE JS
+════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
                               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot,
-           deleteDoc, arrayUnion, updateDoc, getDocs, query, where }
+           deleteDoc, arrayUnion, updateDoc, getDocs, query, where, orderBy }
                               from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -861,9 +711,7 @@
   const db       = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  /* ── expose db+auth for plain JS ── */
-  window._db   = db;
-  window._auth = auth;
+  window._db = db; window._auth = auth;
 
   let rates = { dayVal: 600, nightVal: 500, bothVal: 800, daysinamonth: 30 };
   let wifiCache = { ssid: '', pass: '', ssid2: '', pass2: '' };
@@ -872,538 +720,258 @@
   const fmtDate  = (d) => d.toLocaleDateString('en-GB');
   const processingSignals = new Set();
 
-  /* ════════════════════════
-     PHASE 2 — GITHUB CONFIG
-     ════════════════════════
-     Store these tokens in Firestore at: settings/githubTokens
-     Fields: uploadToken, migrationToken, oauthToken
-     Firestore rules must deny client read of this collection
-     EXCEPT for admin UIDs.
-  */
-
-  // GitHub repo settings — edit these to match your repo
+  /* ═══════════════════════════════
+     GITHUB CONFIG
+     Store in Firestore: settings/githubTokens
+     { uploadToken, migrationToken, oauthToken }
+     Firestore rules: deny client read EXCEPT admin UIDs
+  ═══════════════════════════════ */
   const GITHUB_OWNER = 'Vishnu-Hack39965';
   const GITHUB_REPO  = 'library-drive-backend'; // create this repo
-  // Workflow filenames
   const WF_UPLOAD    = 'mint-upload-url.yml';
   const WF_MIGRATE   = 'migrate-drives.yml';
   const WF_OAUTH     = 'exchange-oauth-token.yml';
 
-  // ── Trigger a GitHub workflow via API ──
+  // Google OAuth client ID — replace with yours from Google Cloud Console
+  const GOOGLE_CLIENT_ID = '988319651464-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com';
+
   const triggerGithubWorkflow = async (workflowFile, inputs, tokenField) => {
     const tokenSnap = await getDoc(doc(db, 'settings', 'githubTokens'));
-    if (!tokenSnap.exists()) throw new Error('GitHub tokens not configured in Firestore.');
+    if (!tokenSnap.exists()) throw new Error('GitHub tokens not configured in Firestore at settings/githubTokens');
     const token = tokenSnap.data()[tokenField];
-    if (!token) throw new Error(`Token field "${tokenField}" not found.`);
-
+    if (!token) throw new Error(`Token "${tokenField}" missing`);
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${workflowFile}/dispatches`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ref: 'main', inputs })
-      }
+      { method:'POST', headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'}, body: JSON.stringify({ ref:'main', inputs }) }
     );
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`GitHub API error ${res.status}: ${err}`);
-    }
+    if (!res.ok) { const e = await res.text(); throw new Error(`GitHub ${res.status}: ${e}`); }
     return true;
   };
 
-  /* ════════════════════════
+  /* ═══════════════════════════════
      SMART STORAGE MANAGER
-     — picks which Drive email to use for uploads
-     — 10 GB per drive limit
-     — fills gaps left by deleted files
-  ════════════════════════ */
-
+  ═══════════════════════════════ */
   const MAX_GB = 10;
 
-  /**
-   * findTargetDrive(type)
-   * type: 'online' | 'deleted'
-   * Returns the driveEmail doc with usedGB < 10, lowest order first.
-   * If a drive had files deleted (usedGB dropped), it fills that space first.
-   */
   window.findTargetDrive = async (type = 'online') => {
     const snap = await getDocs(collection(db, 'driveEmails'));
     const drives = [];
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.status === 'connected' && data.type === type) {
-        drives.push({ id: d.id, ...data });
-      }
-    });
-    drives.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-    for (const drive of drives) {
-      if ((drive.usedGB || 0) < MAX_GB) {
-        return drive;
-      }
-    }
-    return null; // All drives full
+    snap.forEach(d => { const data = d.data(); if(data.status === 'connected' && data.type === type) drives.push({id:d.id,...data}); });
+    drives.sort((a,b) => (a.order||0)-(b.order||0));
+    for (const drive of drives) { if((drive.usedGB||0) < MAX_GB) return drive; }
+    return null;
   };
 
-  /**
-   * After a successful upload, update usedGB for that drive.
-   */
   const updateDriveUsage = async (driveId, addedBytes) => {
-    const addedGB = addedBytes / (1024 * 1024 * 1024);
-    const snap = await getDoc(doc(db, 'driveEmails', driveId));
+    const addedGB = addedBytes / (1024*1024*1024);
+    const snap = await getDoc(doc(db,'driveEmails',driveId));
     if (!snap.exists()) return;
     const current = snap.data().usedGB || 0;
-    await updateDoc(doc(db, 'driveEmails', driveId), {
-      usedGB: Math.round((current + addedGB) * 1000) / 1000
-    });
+    await updateDoc(doc(db,'driveEmails',driveId), { usedGB: Math.round((current+addedGB)*1000)/1000 });
   };
 
-  /**
-   * After a file is deleted from a drive, reduce usedGB.
-   */
   window.decrementDriveUsage = async (driveId, removedBytes) => {
-    const removedGB = removedBytes / (1024 * 1024 * 1024);
-    const snap = await getDoc(doc(db, 'driveEmails', driveId));
+    const removedGB = removedBytes / (1024*1024*1024);
+    const snap = await getDoc(doc(db,'driveEmails',driveId));
     if (!snap.exists()) return;
     const current = snap.data().usedGB || 0;
-    const newUsed = Math.max(0, current - removedGB);
-    await updateDoc(doc(db, 'driveEmails', driveId), {
-      usedGB: Math.round(newUsed * 1000) / 1000
-    });
+    await updateDoc(doc(db,'driveEmails',driveId), { usedGB: Math.max(0, Math.round((current-removedGB)*1000)/1000) });
   };
 
-  /* ════════════════════════
+  /* ═══════════════════════════════
      PHASE 2 — GALLERY UPLOAD
-     Workflow 1: GitHub mints resumable URL → browser uploads directly to Drive
-  ════════════════════════ */
-
+     GitHub WF1 → resumable URL → browser uploads directly to Drive
+  ═══════════════════════════════ */
   let pendingGalleryFiles = [];
 
   window.startGalleryUpload = async () => {
     if (!pendingGalleryFiles.length) return;
-
-    // Find target drive
     const targetDrive = await window.findTargetDrive('online');
     if (!targetDrive) {
       alert('⚠️ All connected drives are full (10 GB each). Please add more drives in Drive Manager.');
       return;
     }
-
     const statusArea = document.getElementById('upload-status-area');
     const statusText = document.getElementById('upload-status-text');
     const progressBar = document.getElementById('upload-progress-bar');
     const startBtn = document.getElementById('start-upload-btn');
-    statusArea.style.display = 'block';
-    startBtn.disabled = true;
-
+    statusArea.style.display = 'block'; startBtn.disabled = true;
     let uploadedCount = 0;
-
     for (const file of pendingGalleryFiles) {
       try {
-        // Step 1: Trigger GitHub Workflow 1 to get a resumable upload URL
         statusText.innerText = `📡 Requesting upload URL for: ${file.name}…`;
         progressBar.style.width = '10%';
-
-        // We send file metadata to the workflow; the workflow responds by writing
-        // the resumable URL to Firestore at pendingUploads/{jobId}
         const jobId = `upload_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-
-        await triggerGithubWorkflow(WF_UPLOAD, {
-          job_id: jobId,
-          file_name: file.name,
-          mime_type: file.type || 'application/octet-stream',
-          file_size: String(file.size),
-          drive_email: targetDrive.email,
-          make_public: 'true'
-        }, 'uploadToken');
-
+        await triggerGithubWorkflow(WF_UPLOAD, { job_id:jobId, file_name:file.name, mime_type:file.type||'application/octet-stream', file_size:String(file.size), drive_email:targetDrive.email, make_public:'true' }, 'uploadToken');
         statusText.innerText = `⏳ Waiting for Drive upload URL… (${file.name})`;
         progressBar.style.width = '25%';
-
-        // Step 2: Poll Firestore for the resumable URL (workflow writes it back)
         const resumableUrl = await pollForUploadUrl(jobId);
         if (!resumableUrl) throw new Error('Timed out waiting for upload URL from GitHub workflow.');
-
         statusText.innerText = `📤 Uploading ${file.name} directly to Drive…`;
         progressBar.style.width = '40%';
-
-        // Step 3: Upload file bytes DIRECTLY to Google Drive (browser → Drive, no GitHub bytes)
-        const uploadedFileId = await uploadToDriveResumable(resumableUrl, file, (pct) => {
-          progressBar.style.width = `${40 + Math.floor(pct * 0.5)}%`;
-        });
-
-        statusText.innerText = `🔗 Making file public and saving URL… (${file.name})`;
+        const uploadedFileId = await uploadToDriveResumable(resumableUrl, file, (pct) => { progressBar.style.width = `${40 + Math.floor(pct*0.5)}%`; });
+        statusText.innerText = `🔗 Saving URL… (${file.name})`;
         progressBar.style.width = '92%';
-
-        // Step 4: Get public URL and save to Firestore galleryFiles
-        // The workflow also writes the Drive file ID to Firestore; we build the public URL
         const publicUrl = `https://drive.google.com/uc?export=view&id=${uploadedFileId}`;
         const thumbnailUrl = `https://drive.google.com/thumbnail?id=${uploadedFileId}&sz=w400`;
-
-        await setDoc(doc(collection(db, 'galleryFiles')), {
-          name: file.name,
-          mimeType: file.type,
-          size: file.size,
-          driveFileId: uploadedFileId,
-          driveEmail: targetDrive.email,
-          driveId: targetDrive.id,
-          url: publicUrl,
-          thumbnailUrl: thumbnailUrl,
-          isPublic: true,
-          uploadedAt: Date.now(),
-          uploadedBy: auth.currentUser?.email || 'admin'
-        });
-
-        // Update drive usage
+        await setDoc(doc(collection(db,'galleryFiles')), { name:file.name, mimeType:file.type, size:file.size, driveFileId:uploadedFileId, driveEmail:targetDrive.email, driveId:targetDrive.id, url:publicUrl, thumbnailUrl, isPublic:true, uploadedAt:Date.now(), uploadedBy:auth.currentUser?.email||'admin' });
         await updateDriveUsage(targetDrive.id, file.size);
-
-        // Clean up job doc
-        await deleteDoc(doc(db, 'pendingUploads', jobId)).catch(() => {});
-
+        await deleteDoc(doc(db,'pendingUploads',jobId)).catch(()=>{});
         uploadedCount++;
-        progressBar.style.width = `${Math.floor((uploadedCount / pendingGalleryFiles.length) * 100)}%`;
-
-      } catch (err) {
-        console.error('Upload error for', file.name, err);
-        alert(`❌ Upload failed for "${file.name}": ${err.message}`);
-      }
+        progressBar.style.width = `${Math.floor((uploadedCount/pendingGalleryFiles.length)*100)}%`;
+      } catch (err) { console.error('Upload error for',file.name,err); alert(`❌ Upload failed for "${file.name}": ${err.message}`); }
     }
-
-    pendingGalleryFiles = [];
-    renderPendingFiles();
+    pendingGalleryFiles = []; renderPendingFiles();
     statusText.innerText = `✅ ${uploadedCount} file(s) uploaded successfully!`;
-    progressBar.style.width = '100%';
-    progressBar.style.background = 'var(--green)';
+    progressBar.style.width = '100%'; progressBar.style.background = 'var(--green)';
     startBtn.disabled = false;
-    setTimeout(() => {
-      statusArea.style.display = 'none';
-      progressBar.style.width = '0%';
-      progressBar.style.background = 'var(--primary)';
-    }, 4000);
+    setTimeout(() => { statusArea.style.display='none'; progressBar.style.width='0%'; progressBar.style.background='var(--primary)'; }, 4000);
   };
 
-  /**
-   * Poll Firestore for the upload URL written by the GitHub workflow.
-   * The workflow writes: pendingUploads/{jobId} = { resumableUrl, driveFileId }
-   */
-  const pollForUploadUrl = (jobId, timeoutMs = 60000) => {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-      const interval = setInterval(async () => {
-        if (Date.now() - start > timeoutMs) {
-          clearInterval(interval);
-          resolve(null);
-          return;
-        }
-        try {
-          const snap = await getDoc(doc(db, 'pendingUploads', jobId));
-          if (snap.exists() && snap.data().resumableUrl) {
-            clearInterval(interval);
-            resolve(snap.data().resumableUrl);
-          }
-        } catch (e) { /* keep polling */ }
-      }, 2000);
+  const pollForUploadUrl = (jobId, timeoutMs=60000) => new Promise((resolve) => {
+    const start = Date.now();
+    const iv = setInterval(async () => {
+      if (Date.now()-start > timeoutMs) { clearInterval(iv); resolve(null); return; }
+      try { const snap = await getDoc(doc(db,'pendingUploads',jobId)); if(snap.exists()&&snap.data().resumableUrl){clearInterval(iv);resolve(snap.data().resumableUrl);} } catch {}
+    }, 2000);
+  });
+
+  const uploadToDriveResumable = (resumableUrl, file, onProgress) => new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', resumableUrl);
+    xhr.setRequestHeader('Content-Type', file.type||'application/octet-stream');
+    xhr.upload.addEventListener('progress', e => { if(e.lengthComputable) onProgress(e.loaded/e.total); });
+    xhr.addEventListener('load', () => {
+      if (xhr.status>=200&&xhr.status<300) { try { const r=JSON.parse(xhr.responseText); resolve(r.id||r.name||'unknown-id'); } catch { resolve('unknown-id'); } }
+      else reject(new Error(`Drive upload failed: ${xhr.status}`));
     });
-  };
+    xhr.addEventListener('error', () => reject(new Error('Network error during Drive upload.')));
+    xhr.send(file);
+  });
 
-  /**
-   * Upload file directly to Google Drive using a resumable upload URL.
-   * onProgress(0..1) callback for UI.
-   * Returns the Drive file ID on success.
-   */
-  const uploadToDriveResumable = (resumableUrl, file, onProgress) => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', resumableUrl);
-      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) onProgress(e.loaded / e.total);
-      });
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const resp = JSON.parse(xhr.responseText);
-            resolve(resp.id || resp.name || 'unknown-id');
-          } catch {
-            resolve('unknown-id');
-          }
-        } else {
-          reject(new Error(`Drive upload failed: ${xhr.status} ${xhr.statusText}`));
-        }
-      });
-
-      xhr.addEventListener('error', () => reject(new Error('Network error during Drive upload.')));
-      xhr.send(file);
-    });
-  };
-
-  /* ════════════════════════
+  /* ═══════════════════════════════
      PHASE 2 — OAUTH CONNECT FLOW
-     User accepts drive connection → Google OAuth → auth code → GitHub WF 3 → refresh token saved
-  ════════════════════════ */
-
-  // Google OAuth client ID (same as your Firebase project's web client)
-  // Get from Google Cloud Console → APIs & Services → Credentials → Web Client
-  const GOOGLE_CLIENT_ID = '988319651464-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com'; // REPLACE THIS
-
-  /**
-   * Called when user clicks "Connect to Rakshapal Singh Servers".
-   * Opens Google OAuth consent screen requesting offline access (for refresh_token).
-   */
+  ═══════════════════════════════ */
   window.initiateOAuthConnect = () => {
     if (!auth.currentUser) return alert('Please log in first.');
-
-    // Request offline access — this gives us a refresh_token after code exchange
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: window.location.origin + '/?oauth_callback=1',
       response_type: 'code',
-      scope: [
-        'https://www.googleapis.com/auth/drive.file',  // create/edit files this app created
-        'https://www.googleapis.com/auth/drive.metadata.readonly' // read file metadata
-      ].join(' '),
-      access_type: 'offline',   // request refresh_token
-      prompt: 'consent',         // force consent screen so refresh_token is always returned
-      state: auth.currentUser.uid  // pass user UID through OAuth flow
+      scope: ['https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/drive.metadata.readonly'].join(' '),
+      access_type: 'offline',
+      prompt: 'consent',
+      state: auth.currentUser.uid
     });
-
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   };
 
-  /**
-   * Handle OAuth callback.
-   * URL will contain ?oauth_callback=1&code=XXX&state=UID
-   * We send the code to GitHub Workflow 3 (via Firestore signal, not direct call)
-   * to avoid exposing the client secret in frontend code.
-   */
   const handleOAuthCallback = async () => {
     const params = new URLSearchParams(window.location.search);
     if (!params.get('oauth_callback')) return;
-
-    const code  = params.get('code');
-    const state = params.get('state'); // user UID
-    const error = params.get('error');
-
-    window.history.replaceState({}, '', window.location.pathname);
-
-    if (error || !code) {
-      console.warn('OAuth denied or error:', error);
-      return;
-    }
-
+    const code=params.get('code'), state=params.get('state'), error=params.get('error');
+    window.history.replaceState({},'',window.location.pathname);
+    if (error||!code) { console.warn('OAuth denied/error:',error); return; }
     document.getElementById('oauth-loading').classList.add('show');
     document.getElementById('oauth-loading-msg').innerText = 'Exchanging token with server…';
-
     try {
-      // Write an auth_code signal to Firestore.
-      // GitHub Workflow 3 (triggered by a Firestore webhook or scheduled check) reads this,
-      // exchanges the code for tokens, saves the refresh_token to driveTokens/{email} (server-only),
-      // and deletes the signal.
-      // Alternatively, trigger the workflow directly:
-      const userEmail = (await getDoc(doc(db, 'users', state))).data()?.email || state;
-
-      await setDoc(doc(db, 'oauthCodeSignals', state), {
-        code,
-        userEmail,
-        userUid: state,
-        redirectUri: window.location.origin + '/?oauth_callback=1',
-        requestedAt: Date.now(),
-        status: 'pending'
-      });
-
-      // Trigger GitHub Workflow 3 to exchange code
-      await triggerGithubWorkflow(WF_OAUTH, {
-        signal_uid: state,
-        user_email: userEmail
-      }, 'oauthToken');
-
-      // Poll for success
+      const userEmail = (await getDoc(doc(db,'users',state))).data()?.email || state;
+      await setDoc(doc(db,'oauthCodeSignals',state), { code, userEmail, userUid:state, redirectUri:window.location.origin+'/?oauth_callback=1', requestedAt:Date.now(), status:'pending' });
+      await triggerGithubWorkflow(WF_OAUTH, { signal_uid:state, user_email:userEmail }, 'oauthToken');
       document.getElementById('oauth-loading-msg').innerText = 'Saving your connection…';
       const success = await pollForOAuthSuccess(state);
-
       document.getElementById('oauth-loading').classList.remove('show');
-
       if (success) {
-        // Mark drive email as connected in driveEmails collection
-        const snap = await getDocs(collection(db, 'driveEmails'));
-        snap.forEach(async d => {
-          if (d.data().email === userEmail && d.data().status === 'pending') {
-            await updateDoc(doc(db, 'driveEmails', d.id), { status: 'connected' });
-          }
-        });
-
-        // Update user's own record
-        await updateDoc(doc(db, 'users', state), {
-          driveConnected: true,
-          driveConnectedAt: Date.now()
-        });
-
-        // Update request status
-        const reqKey = userEmail.replace(/[.@]/g, '_');
-        await updateDoc(doc(db, 'driveConnectRequests', reqKey), { status: 'connected' }).catch(() => {});
-
-        // Refresh UI
-        await checkConnectButtonState(state, userEmail);
+        const snap = await getDocs(collection(db,'driveEmails'));
+        snap.forEach(async d => { if(d.data().email===userEmail&&d.data().status==='pending') await updateDoc(doc(db,'driveEmails',d.id),{status:'connected'}); });
+        await updateDoc(doc(db,'users',state), { driveConnected:true, driveConnectedAt:Date.now() });
+        const reqKey = userEmail.replace(/[.@]/g,'_');
+        await updateDoc(doc(db,'driveConnectRequests',reqKey), {status:'connected',connectedAt:Date.now()}).catch(()=>{});
       }
-    } catch (err) {
-      document.getElementById('oauth-loading').classList.remove('show');
-      console.error('OAuth callback error:', err);
-      alert('Connection error: ' + err.message);
-    }
+    } catch (err) { document.getElementById('oauth-loading').classList.remove('show'); console.error('OAuth callback error:',err); alert('Connection error: '+err.message); }
   };
 
-  const pollForOAuthSuccess = (uid, timeoutMs = 90000) => {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const interval = setInterval(async () => {
-        if (Date.now() - start > timeoutMs) { clearInterval(interval); resolve(false); return; }
-        try {
-          const snap = await getDoc(doc(db, 'oauthCodeSignals', uid));
-          if (snap.exists() && snap.data().status === 'success') {
-            clearInterval(interval);
-            await deleteDoc(doc(db, 'oauthCodeSignals', uid)).catch(() => {});
-            resolve(true);
-          } else if (snap.exists() && snap.data().status === 'error') {
-            clearInterval(interval);
-            resolve(false);
-          }
-        } catch { /* keep polling */ }
-      }, 2000);
+  const pollForOAuthSuccess = (uid, timeoutMs=90000) => new Promise((resolve) => {
+    const start = Date.now();
+    const iv = setInterval(async () => {
+      if (Date.now()-start>timeoutMs) { clearInterval(iv); resolve(false); return; }
+      try {
+        const snap = await getDoc(doc(db,'oauthCodeSignals',uid));
+        if (snap.exists()) {
+          if (snap.data().status==='success') { clearInterval(iv); await deleteDoc(doc(db,'oauthCodeSignals',uid)).catch(()=>{}); resolve(true); }
+          else if (snap.data().status==='error') { clearInterval(iv); resolve(false); }
+        }
+      } catch {}
+    }, 2000);
+  });
+
+  /* ── FIX: Real-time listener for connect button state ──
+     This is the main bug fix. Instead of one-time read, we use onSnapshot
+     so the button appears/disappears the moment Firestore changes. */
+  let _connectRequestUnsub = null;
+
+  const watchConnectButtonState = (email) => {
+    if (_connectRequestUnsub) { _connectRequestUnsub(); _connectRequestUnsub = null; }
+    const reqKey = email.replace(/[.@]/g,'_');
+    _connectRequestUnsub = onSnapshot(doc(db,'driveConnectRequests',reqKey), (snap) => {
+      const wrapEl      = document.getElementById('connect-server-btn-wrap');
+      const connectedEl = document.getElementById('connect-server-connected');
+      if (!snap.exists()) { wrapEl.classList.remove('show'); connectedEl.classList.remove('show'); return; }
+      const reqData = snap.data();
+      if (reqData.status==='connected') {
+        wrapEl.classList.remove('show'); connectedEl.classList.add('show');
+        const note = document.getElementById('connect-expire-note');
+        if (note) note.innerText = reqData.connectedAt ? `Connected on ${new Date(reqData.connectedAt).toLocaleDateString('en-GB')}` : '';
+      } else if (reqData.status==='pending') {
+        wrapEl.classList.add('show'); connectedEl.classList.remove('show');
+      } else {
+        // cancelled by admin
+        wrapEl.classList.remove('show'); connectedEl.classList.remove('show');
+      }
     });
   };
 
-  /**
-   * Check if the current user has a pending connection request from admin.
-   * Shows or hides the "Connect to Rakshapal Singh Servers" button accordingly.
-   */
-  const checkConnectButtonState = async (uid, email) => {
-    const reqKey = email.replace(/[.@]/g, '_');
-    const snap = await getDoc(doc(db, 'driveConnectRequests', reqKey)).catch(() => null);
-
-    const wrapEl     = document.getElementById('connect-server-btn-wrap');
-    const connectedEl = document.getElementById('connect-server-connected');
-
-    if (!snap || !snap.exists()) {
-      wrapEl.classList.remove('show');
-      connectedEl.classList.remove('show');
-      return;
-    }
-
-    const reqData = snap.data();
-
-    if (reqData.status === 'connected') {
-      wrapEl.classList.remove('show');
-      connectedEl.classList.add('show');
-      const noteEl = document.getElementById('connect-expire-note');
-      if (noteEl) noteEl.innerText = reqData.connectedAt ? `Connected on ${new Date(reqData.connectedAt).toLocaleDateString('en-GB')}` : '';
-    } else if (reqData.status === 'pending') {
-      wrapEl.classList.add('show');
-      connectedEl.classList.remove('show');
-    } else {
-      // Cancelled by admin — hide both
-      wrapEl.classList.remove('show');
-      connectedEl.classList.remove('show');
-    }
-  };
-
-  /* ════════════════════════
-     PHASE 2 — DELETED FILE BROWSER (admin)
-     Uses stored access token (not refresh token) to list files in private deleted drives
-  ════════════════════════ */
-
+  /* ═══════════════════════════════
+     PHASE 2 — DELETED FILE BROWSER
+  ═══════════════════════════════ */
   window.browseDeletedDrive = async (driveEmail) => {
     const user = auth.currentUser;
     if (!user) return;
-    const isAdmin = user.email === 'c.commando822@gmail.com' || user.email === 'vishnu.406.39965@gmail.com';
+    const isAdmin = user.email==='c.commando822@gmail.com'||user.email==='vishnu.406.39965@gmail.com';
     if (!isAdmin) return alert('Admin access only.');
-
-    const modal = document.getElementById('deleted-file-viewer-modal');
+    const modal   = document.getElementById('deleted-file-viewer-modal');
     const content = document.getElementById('dfv-content');
     content.innerHTML = '<div style="text-align:center;padding:30px;"><div class="loading-spinner" style="margin:0 auto 10px;"></div><div>Loading deleted files…</div></div>';
     modal.classList.add('show');
-
     try {
-      // Read access token from Firestore (admin-only collection)
-      const tokenKey = driveEmail.replace(/[.@]/g, '_');
-      const tokenSnap = await getDoc(doc(db, 'driveTokens', tokenKey));
-      if (!tokenSnap.exists() || !tokenSnap.data().accessToken) {
-        content.innerHTML = '<div style="padding:20px;color:#e74c3c;">❌ No access token found for this drive. The user may not have connected yet.</div>';
-        return;
-      }
-
+      const tokenKey = driveEmail.replace(/[.@]/g,'_');
+      const tokenSnap = await getDoc(doc(db,'driveTokens',tokenKey));
+      if (!tokenSnap.exists()||!tokenSnap.data().accessToken) { content.innerHTML='<div style="padding:20px;color:var(--red);">❌ No access token found for this drive. User may not have connected yet.</div>'; return; }
       const accessToken = tokenSnap.data().accessToken;
-
-      // List files in the library folder of this drive
-      const folderId = tokenSnap.data().libraryFolderId || 'root';
-      const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,size,modifiedTime,webViewLink)&pageSize=50`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-
-      if (res.status === 401) {
-        // Access token expired — trigger a refresh via workflow
-        content.innerHTML = `<div style="padding:20px;color:#f1c40f;">⚠️ Access token expired. Refreshing…<br><small>This happens automatically. Please wait a moment and re-open.</small></div>`;
-        await triggerGithubWorkflow(WF_OAUTH, { signal_uid: 'refresh_' + tokenKey, user_email: driveEmail }, 'oauthToken');
-        return;
-      }
-
-      const data = await res.json();
-      const files = data.files || [];
-
-      if (!files.length) {
-        content.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">No deleted files found in this drive.</div>';
-        return;
-      }
-
-      content.innerHTML = `
-        <div style="font-size:12px;color:#888;padding:8px 0 14px;">Showing ${files.length} file(s) in deleted storage — private access.</div>
-        ${files.map(f => `
-          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee;">
-            <span style="font-size:20px;">${f.mimeType?.startsWith('image/') ? '🖼️' : f.mimeType?.includes('pdf') ? '📄' : '🎬'}</span>
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div>
-              <div style="font-size:11px;color:#888;">${formatFileSize(f.size)} · ${new Date(f.modifiedTime).toLocaleDateString('en-GB')}</div>
-            </div>
-            <a href="${f.webViewLink}" target="_blank"
-               style="background:var(--primary);color:white;padding:6px 12px;border-radius:8px;font-size:12px;text-decoration:none;font-weight:bold;">
-              View
-            </a>
-          </div>`).join('')}`;
-    } catch (err) {
-      content.innerHTML = `<div style="padding:20px;color:#e74c3c;">❌ Error: ${err.message}</div>`;
-    }
+      const folderId = tokenSnap.data().libraryFolderId||'root';
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,size,modifiedTime,webViewLink)&pageSize=50`, { headers:{Authorization:`Bearer ${accessToken}`} });
+      if (res.status===401) { content.innerHTML=`<div style="padding:20px;color:var(--yellow);">⚠️ Access token expired. Refreshing…<br><small>Triggered automatic refresh. Re-open in a moment.</small></div>`; await triggerGithubWorkflow(WF_OAUTH,{signal_uid:'refresh_'+tokenKey,user_email:driveEmail},'oauthToken'); return; }
+      const data = await res.json(); const files = data.files||[];
+      if (!files.length) { content.innerHTML='<div style="padding:20px;color:#aaa;text-align:center;">No deleted files found in this drive.</div>'; return; }
+      content.innerHTML=`<div style="font-size:12px;color:#888;padding:8px 0 14px;">Showing ${files.length} file(s) — private access.</div>`+files.map(f=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee;"><span style="font-size:20px;">${f.mimeType?.startsWith('image/')?'🖼️':f.mimeType?.includes('pdf')?'📄':'🎬'}</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div><div style="font-size:11px;color:#888;">${formatFileSize(f.size)} · ${new Date(f.modifiedTime).toLocaleDateString('en-GB')}</div></div><a href="${f.webViewLink}" target="_blank" style="background:var(--primary);color:white;padding:6px 12px;border-radius:8px;font-size:12px;text-decoration:none;font-weight:bold;">View</a></div>`).join('');
+    } catch (err) { content.innerHTML=`<div style="padding:20px;color:var(--red);">❌ Error: ${err.message}</div>`; }
   };
+  const formatFileSize = (bytes) => { if(!bytes)return'Unknown';const b=parseInt(bytes);if(b>1073741824)return(b/1073741824).toFixed(2)+' GB';if(b>1048576)return(b/1048576).toFixed(1)+' MB';return(b/1024).toFixed(0)+' KB'; };
 
-  const formatFileSize = (bytes) => {
-    if (!bytes) return 'Unknown size';
-    const b = parseInt(bytes);
-    if (b > 1024*1024*1024) return (b/1024/1024/1024).toFixed(2) + ' GB';
-    if (b > 1024*1024) return (b/1024/1024).toFixed(1) + ' MB';
-    return (b/1024).toFixed(0) + ' KB';
-  };
-
-  /* ════════════════════════
-     DRM FLOW (unchanged from Phase 1)
-  ════════════════════════ */
+  /* ═══════════════════════════════
+     DRM FLOW
+  ═══════════════════════════════ */
   const CALLBACK_BASE = "https://rakshapal-singh-library-ded2e.web.app/";
-
   const _showHolding = (state) => {
     const spinner=document.getElementById('holding-spinner'),retryBox=document.getElementById('holding-retry-box'),installBox=document.getElementById('holding-install-box'),icon=document.getElementById('holding-icon'),title=document.getElementById('holding-title'),msg=document.getElementById('holding-msg');
     spinner.style.display='block';retryBox.style.display='none';installBox.style.display='none';
-    if(state==='verifying'){icon.innerText='🔐';title.innerText='Verifying Your Account';msg.innerText='Opening the Library App to verify your Account.';}
+    if(state==='verifying'){icon.innerText='🔐';title.innerText='Verifying Your Account';msg.innerText='Opening the Library App to verify your Account. Please wait…';}
     else if(state==='no_app'){spinner.style.display='none';icon.innerText='📱';title.innerText='Library App Not Updated';msg.innerText='Please install the new version to continue.';installBox.style.display='block';}
     else if(state==='failed'){spinner.style.display='none';icon.innerText='❌';title.innerText='Could not Verify';msg.innerText='You can go ahead with no problem.';installBox.style.display='block';}
     else if(state==='mismatch'){spinner.style.display='none';icon.innerText='⛔';title.innerText='Account Active on Another Device';msg.innerText='This account is already logged in on a different phone.';document.getElementById('holding-retry-msg').innerText='First logout from the other device, then tap Retry here.';retryBox.style.display='block';}
     document.getElementById('holding-screen').classList.add('show');
   };
   const _hideHolding = () => document.getElementById('holding-screen').classList.remove('show');
-
   const runDrmFlow = async (user,db,drmId,drmError) => {
     const uSnap=await getDoc(doc(db,"users",user.uid));
     const storedDrmId=uSnap.exists()?(uSnap.data().mediaDrmId||''):'';
@@ -1412,59 +980,38 @@
     if(storedDrmId===drmId){_hideHolding();return true;}
     _showHolding('mismatch');return false;
   };
-
   let _drmTimeoutId=null;
-  const fireDrmDeepLink=()=>{
-    _showHolding('verifying');
-    if(_drmTimeoutId){clearTimeout(_drmTimeoutId);_drmTimeoutId=null;}
-    const callbackUrl=`${CALLBACK_BASE}?drm_callback=1`;
-    window.location.href=`mylibraryapp://getdeviceid?callback=${encodeURIComponent(callbackUrl)}`;
-    _drmTimeoutId=setTimeout(()=>{_drmTimeoutId=null;_showHolding('no_app');},10000);
-  };
+  const fireDrmDeepLink=()=>{_showHolding('verifying');if(_drmTimeoutId){clearTimeout(_drmTimeoutId);_drmTimeoutId=null;}const cbUrl=`${CALLBACK_BASE}?drm_callback=1`;window.location.href=`mylibraryapp://getdeviceid?callback=${encodeURIComponent(cbUrl)}`;_drmTimeoutId=setTimeout(()=>{_drmTimeoutId=null;_showHolding('no_app');},10000);};
+  window.startVerification=()=>{document.getElementById('verifyPanel').classList.add('hidden');fireDrmDeepLink();};
+  window.retryDrmVerification=()=>{if(!auth.currentUser)return;fireDrmDeepLink();};
+  window.bypassVerification=()=>{if(!auth.currentUser)return alert("No user signed in.");document.getElementById('verifyPanel').classList.add('hidden');renderDashboard(auth.currentUser);};
 
-  window.startVerification   = () => { document.getElementById('verifyPanel').classList.add('hidden'); fireDrmDeepLink(); };
-  window.retryDrmVerification = () => { if(!auth.currentUser)return; fireDrmDeepLink(); };
-  window.bypassVerification  = () => { if(!auth.currentUser)return alert("No user signed in."); document.getElementById('verifyPanel').classList.add('hidden'); renderDashboard(auth.currentUser); };
-
-  const refreshPriceLabels = () => {
-    const sel=document.getElementById('p-shift');
-    if(sel){sel.options[0].text=`Day Shift (₹${rates.dayVal})`;sel.options[0].value=String(rates.dayVal);sel.options[1].text=`Night Shift (₹${rates.nightVal})`;sel.options[1].value=String(rates.nightVal);sel.options[2].text=`Both Shifts (₹${rates.bothVal})`;sel.options[2].value=String(rates.bothVal);}
-    const dEl=document.getElementById('p-days');if(dEl)dEl.value=rates.daysinamonth;
-    const rd=document.getElementById('rate-day');if(rd){rd.value=rates.dayVal;document.getElementById('rate-night').value=rates.nightVal;document.getElementById('rate-both').value=rates.bothVal;document.getElementById('rate-dim').value=rates.daysinamonth;}
-  };
+  const refreshPriceLabels=()=>{const sel=document.getElementById('p-shift');if(sel){sel.options[0].text=`Day Shift (₹${rates.dayVal})`;sel.options[0].value=String(rates.dayVal);sel.options[1].text=`Night Shift (₹${rates.nightVal})`;sel.options[1].value=String(rates.nightVal);sel.options[2].text=`Both Shifts (₹${rates.bothVal})`;sel.options[2].value=String(rates.bothVal);}const dEl=document.getElementById('p-days');if(dEl)dEl.value=rates.daysinamonth;const rd=document.getElementById('rate-day');if(rd){rd.value=rates.dayVal;document.getElementById('rate-night').value=rates.nightVal;document.getElementById('rate-both').value=rates.bothVal;document.getElementById('rate-dim').value=rates.daysinamonth;}};
   const applyRatesData=(data)=>{if(!data)return;if(data.dayVal!=null)rates.dayVal=Number(data.dayVal);if(data.nightVal!=null)rates.nightVal=Number(data.nightVal);if(data.bothVal!=null)rates.bothVal=Number(data.bothVal);if(data.daysinamonth!=null)rates.daysinamonth=Number(data.daysinamonth);refreshPriceLabels();};
-
-  window.formatTime=(decimalDays)=>{if(decimalDays==null)return"00:00:00:00";const sign=decimalDays<0?"-":"",ts=Math.floor(Math.abs(decimalDays)*86400);return`${sign}${String(Math.floor(ts/86400)).padStart(2,'0')}:${String(Math.floor((ts%86400)/3600)).padStart(2,'0')}:${String(Math.floor((ts%3600)/60)).padStart(2,'0')}:${String(ts%60).padStart(2,'0')}`;};
+  window.formatTime=(d)=>{if(d==null)return"00:00:00:00";const sign=d<0?"-":"",ts=Math.floor(Math.abs(d)*86400);return`${sign}${String(Math.floor(ts/86400)).padStart(2,'0')}:${String(Math.floor((ts%86400)/3600)).padStart(2,'0')}:${String(Math.floor((ts%3600)/60)).padStart(2,'0')}:${String(ts%60).padStart(2,'0')}`;};
   window.getRealSurvival=(u)=>{if(!u||!u.joinDateISO)return u?(u.totalPaidDays||0):0;return(u.totalPaidDays||0)-((new Date()-new Date(u.joinDateISO))/86400000);};
   const lastValidDate=(srv)=>{if(srv<=0)return null;return fmtDate(new Date(Date.now()+srv*86400000));};
   const validityRange=(fromStamp)=>{let from;try{const[dp,tp]=fromStamp.split(', ');const[dd,mm,yyyy]=dp.split('/');from=new Date(`${yyyy}-${mm}-${dd}T${tp}`);if(isNaN(from.getTime()))from=new Date();}catch{from=new Date();}return`${fmtDate(from)}  ⟶  ${fmtDate(new Date(from.getTime()+rates.daysinamonth*86400000))}`;};
   const parseStamp=(s)=>{try{const[dp,tp]=(s||'').split(', ');const[dd,mm,yyyy]=dp.split('/');return new Date(`${yyyy}-${mm}-${dd}T${tp}`).getTime();}catch{return 0;}};
   const updateUserValidTill=()=>{const el=document.getElementById('user-last-date');if(!el)return;if(!currentUserData.joinDateISO){el.style.display='none';return;}const srv=window.getRealSurvival(currentUserData);el.innerText=srv>0?`📅 Valid until: ${lastValidDate(srv)}`:'⛔ Membership expired';el.style.display='block';};
-
-  const checkAndShowSeatPopup=(userData)=>{const popup=document.getElementById('seat-popup');if(userData.seatPending&&userData.seatNo){const seatNo=userData.seatNo;document.getElementById('seat-popup-body').innerHTML=`<p style="font-size:14px;line-height:1.7;color:#333;margin:0 0 12px;">Please check if the condition of <strong style="color:var(--primary);font-size:16px;">Seat No. ${seatNo}</strong> is in good condition.</p><div style="background:#fff3cd;border-radius:10px;padding:14px;margin-top:6px;border-left:4px solid var(--yellow);"><strong>⚠️ Warning:</strong> If you click <em>Agree</em>, you are solely responsible for any damage to Seat No. <strong>${seatNo}</strong>.</div>`;popup.style.display='flex';}else{popup.style.display='none';}};
+  const checkAndShowSeatPopup=(userData)=>{const popup=document.getElementById('seat-popup');if(userData.seatPending&&userData.seatNo){const seatNo=userData.seatNo;document.getElementById('seat-popup-body').innerHTML=`<p style="font-size:14px;line-height:1.7;color:#333;margin:0 0 12px;">Please check the condition of <strong style="color:var(--primary);font-size:16px;">Seat No. ${seatNo}</strong> (chair and light) is in good condition.</p><p style="font-size:14px;line-height:1.7;color:#333;margin:0 0 12px;">If not, contact manager <strong>Vijay Pal Singh</strong> or call <a href="tel:7500159996" style="color:var(--primary);font-weight:bold;text-decoration:none;">📞 7500159996</a>.</p><div style="background:#fff3cd;border-radius:10px;padding:14px;margin-top:6px;border-left:4px solid var(--yellow);"><strong>⚠️ Warning:</strong> By clicking Agree, you accept responsibility for any damage to Seat No. <strong>${seatNo}</strong>.</div>`;popup.style.display='flex';}else{popup.style.display='none';}};
   window.agreeSeat=async()=>{if(!auth.currentUser)return;await updateDoc(doc(db,"users",auth.currentUser.uid),{seatPending:false});document.getElementById('seat-popup').style.display='none';};
-
-  window.renderLogs=(history)=>{let out="";(history||[]).slice().reverse().forEach(h=>{if(typeof h==="string"){out+=`<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`;return;}if(h.status==="Pending")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">⏳ PENDING\nRequested : ${h.reqT}\nNAME   : ${currentUserData.name}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n</pre>`;if(h.status==="OTP_Verified")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">🔐 OTP VERIFIED\nRequested : ${h.reqT}\n</pre>`;if(h.status==="Verified")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">✅ VERIFIED\nRequested : ${h.reqT}\nVerified : ${h.actionT}\nValidity : ${validityRange(h.actionT)}\n</pre>`;if(h.status==="Rejected")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">❌ REJECTED\nRequested : ${h.reqT}\n</pre>`;});return out||"No payment history.";};
-
+  window.renderLogs=(history)=>{let out="";(history||[]).slice().reverse().forEach(h=>{if(typeof h==="string"){out+=`<div style="padding:6px 0;border-bottom:1px solid #eee;">${h}</div>`;return;}if(h.status==="Pending")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">⏳ PENDING\nRequested : ${h.reqT}\nNAME   : ${currentUserData.name}\nSHIFT  : ${h.shift}\nDAYS   : ${h.days}\nAMOUNT : ₹${h.amt}\n</pre>`;if(h.status==="OTP_Verified")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">🔐 OTP VERIFIED\nRequested : ${h.reqT}\nOTP at : ${h.otpT}\n</pre>`;if(h.status==="Verified")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">✅ VERIFIED\nRequested : ${h.reqT}\nVerified : ${h.actionT}\nValidity : ${validityRange(h.actionT)}\n</pre>`;if(h.status==="Rejected")out+=`<pre style="font-family:monospace;margin:0;white-space:pre-wrap;">❌ REJECTED\nRequested : ${h.reqT}\n</pre>`;});return out||"No payment history.";};
   const clearAllPaymentErrors=()=>{['phone','uid','screenshot','dues','otp'].forEach(s=>{const b=document.getElementById(`payment-${s}-error-box`);if(b)b.classList.add('hidden');});};
 
-  /* ══ AUTH STATE ══ */
-  onAuthStateChanged(auth,async(user)=>{
-    if(user){
-      // Handle OAuth callback first
-      const params=new URLSearchParams(window.location.search);
-
-      if(params.get('oauth_callback')){
-        await handleOAuthCallback();
-        return;
-      }
-
-      const incomingDrmId=params.get('drm_id'),incomingDrmError=params.get('drm_error');
-      if(incomingDrmId||incomingDrmError){
+  /* ═══════════════════════════════
+     AUTH STATE
+  ═══════════════════════════════ */
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('oauth_callback')) { await handleOAuthCallback(); return; }
+      const incomingDrmId=params.get('drm_id'), incomingDrmError=params.get('drm_error');
+      if (incomingDrmId||incomingDrmError) {
         window.history.replaceState({},'',window.location.pathname);
         const uRef=doc(db,"users",user.uid);
         await updateDoc(uRef,{isOnline:true,email:user.email}).catch(async()=>{await setDoc(uRef,{name:user.displayName,email:user.email,photo:user.photoURL,isOnline:true,totalPaidDays:0,history:[],mediaDrmId:''});});
-        try{const rs=await getDoc(doc(db,"settings","rates"));if(rs.exists())applyRatesData(rs.data());}catch(e){}
+        try{const rs=await getDoc(doc(db,"settings","rates"));if(rs.exists())applyRatesData(rs.data());}catch{}
         const verified=await runDrmFlow(user,db,incomingDrmId,incomingDrmError);
         if(verified)renderDashboard(user);
         return;
@@ -1476,11 +1023,12 @@
       ['verifyPanel','loadingPanel','profilePanel'].forEach(id=>document.getElementById(id).classList.add('hidden'));
       document.getElementById('tab-man').classList.add('hidden');
       document.getElementById('seat-popup').style.display='none';
+      if (_connectRequestUnsub) { _connectRequestUnsub(); _connectRequestUnsub=null; }
       _hideHolding();
     }
   });
 
-  const renderDashboard=(user)=>{
+  const renderDashboard = (user) => {
     document.getElementById('verifyPanel').classList.add('hidden');
     document.getElementById('loadingPanel').classList.remove('hidden');
     Promise.all([getDoc(doc(db,"settings","wifi")),getDoc(doc(db,"settings","wifi2")),getDoc(doc(db,"settings","rates"))]).then(([w,w2,rs])=>{
@@ -1489,13 +1037,13 @@
       if(rs.exists())applyRatesData(rs.data());
     }).catch(e=>console.warn("Settings load error:",e.message));
 
-    const uRef=doc(db,"users",user.uid);
-    onSnapshot(uRef,async(snap)=>{
-      if(!snap.exists())return;
-      currentUserData=snap.data();
+    const uRef = doc(db,"users",user.uid);
+    onSnapshot(uRef, (snap) => {
+      if (!snap.exists()) return;
+      currentUserData = snap.data();
       document.getElementById('loginPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.remove('hidden');
-      document.getElementById('u-img').src=currentUserData.photo||user.photoURL;
+      document.getElementById('u-img').src = currentUserData.photo||user.photoURL;
       const seatEl=document.getElementById('p-seat'),seatRow=document.getElementById('seat-row');
       if(currentUserData.seatNo){if(seatEl)seatEl.value=currentUserData.seatNo;if(seatRow)seatRow.style.display='flex';}else{if(seatRow)seatRow.style.display='none';}
       ['name','father','phone','address'].forEach(k=>{const el=document.getElementById('p-'+k);if(el)el.value=currentUserData[k]||"";});
@@ -1504,34 +1052,15 @@
       document.getElementById('status-days').style.color=srv>=0?"var(--green)":"var(--red)";
       updateUserValidTill();
       checkAndShowSeatPopup(currentUserData);
-
-      if(currentUserData.joinDateISO){
-        document.getElementById('join-trigger-box').classList.add('hidden');
-        document.getElementById('active-tools').classList.remove('hidden');
-        document.getElementById('wifi-connect-trigger').classList.remove('hidden');
-        document.getElementById('wifi2-connect-trigger').classList.remove('hidden');
-        document.getElementById('status-joined').innerText="JOINED: "+currentUserData.joinDate;
-        window.calcTotal();
-      } else {
-        document.getElementById('join-trigger-box').classList.remove('hidden');
-        document.getElementById('active-tools').classList.add('hidden');
-        document.getElementById('wifi-connect-trigger').classList.add('hidden');
-        document.getElementById('wifi2-connect-trigger').classList.add('hidden');
-        document.getElementById('status-joined').innerText="NOT JOINED";
-      }
+      if(currentUserData.joinDateISO){document.getElementById('join-trigger-box').classList.add('hidden');document.getElementById('active-tools').classList.remove('hidden');document.getElementById('wifi-connect-trigger').classList.remove('hidden');document.getElementById('wifi2-connect-trigger').classList.remove('hidden');document.getElementById('status-joined').innerText="JOINED: "+currentUserData.joinDate;window.calcTotal();}
+      else{document.getElementById('join-trigger-box').classList.remove('hidden');document.getElementById('active-tools').classList.add('hidden');document.getElementById('wifi-connect-trigger').classList.add('hidden');document.getElementById('wifi2-connect-trigger').classList.add('hidden');document.getElementById('status-joined').innerText="NOT JOINED";}
       document.getElementById('user-pay-log').innerHTML=window.renderLogs(currentUserData.history);
 
-      // PHASE 2: Check connect button state for this user
-      await checkConnectButtonState(user.uid, user.email);
+      // ── PHASE 2 FIX: real-time watch for connect button ──
+      watchConnectButtonState(user.email);
 
       const isAdmin=user.email==="c.commando822@gmail.com"||user.email==="vishnu.406.39965@gmail.com";
-      if(isAdmin){
-        document.getElementById('tab-man').classList.remove('hidden');
-        document.getElementById('gallery-upload-fab').classList.add('show');
-        document.getElementById('drawer-data-structure').style.display='flex';
-        document.getElementById('tdm-drive-manager').style.display='flex';
-        window.loadAdmin();
-      }
+      if(isAdmin){document.getElementById('tab-man').classList.remove('hidden');document.getElementById('gallery-upload-fab').classList.add('show');document.getElementById('drawer-data-structure').style.display='flex';document.getElementById('tdm-drive-manager').style.display='flex';window.loadAdmin();}
       document.getElementById('loadingPanel').classList.add('hidden');
       document.getElementById('profilePanel').classList.remove('hidden');
     });
@@ -1539,36 +1068,175 @@
 
   setInterval(()=>{
     if(currentUserData.joinDateISO){const srv=window.getRealSurvival(currentUserData);document.getElementById('status-days').innerText=window.formatTime(srv);document.getElementById('status-days').style.color=srv>=0?"var(--green)":"var(--red)";updateUserValidTill();}
-    document.querySelectorAll('.admin-live-srv').forEach(el=>{const iso=el.dataset.iso;if(iso&&iso!=="null"){const srv=parseFloat(el.dataset.paid)-((new Date()-new Date(iso))/86400000);el.innerText=window.formatTime(srv);}});
+    document.querySelectorAll('.admin-live-srv').forEach(el=>{const iso=el.dataset.iso;if(iso&&iso!=="null"){const srv=parseFloat(el.dataset.paid)-((new Date()-new Date(iso))/86400000);el.innerText=window.formatTime(srv);const ldEl=el.closest('.admin-srv-wrap')?.querySelector('.admin-last-date');if(ldEl)ldEl.innerText=srv>0?`📅 Until: ${lastValidDate(srv)}`:'⛔ Expired';}});
     document.querySelectorAll('.sig-timer').forEach(async el=>{const rem=Math.max(0,Math.floor((parseInt(el.dataset.expiry)-Date.now())/1000));if(rem<=0){el.innerText="Expired";await deleteDoc(doc(db,"signals",el.dataset.sid)).catch(()=>{});}else el.innerText=rem+"s";});
     if(window._aeUserData){window._aeCurrentSrv=window.getRealSurvival(window._aeUserData);const liveEl=document.getElementById('ae-live-current');if(liveEl)liveEl.innerText=window.formatTime(window._aeCurrentSrv);window.updateAlarmDiff&&window.updateAlarmDiff();}
   },1000);
 
   window.login=()=>signInWithPopup(auth,provider);
   window.logout=async()=>{if(auth.currentUser){await updateDoc(doc(db,"users",auth.currentUser.uid),{isOnline:false,mediaDrmId:''}).catch(()=>{});window.location.href='mylibraryapp://forgetwifi';await new Promise(r=>setTimeout(r,600));}signOut(auth).then(()=>location.reload());};
-  window.saveProfile=async()=>{const n=document.getElementById('p-name').value.trim(),f=document.getElementById('p-father').value.trim(),a=document.getElementById('p-address').value.trim(),p=document.getElementById('p-phone').value.trim();window.calcTotal();if(n.length<6||f.length<6||a.length<6)return alert("Min 6 chars for Name, Father & Address");if(!/^\d{10}$/.test(p))return alert("Phone must be 10 digits!");await updateDoc(doc(db,"users",auth.currentUser.uid),{name:n,father:f,phone:p,address:a,history:arrayUnion(`Name:${currentUserData.name}→${n}`)});alert("Profile Saved.");return true;};
+  window.saveProfile=async()=>{const n=document.getElementById('p-name').value.trim(),f=document.getElementById('p-father').value.trim(),a=document.getElementById('p-address').value.trim(),p=document.getElementById('p-phone').value.trim();window.calcTotal();if(n.length<6||f.length<6||a.length<6)return alert("Min 6 chars for Name, Father & Address");if(!/^\d{10}$/.test(p))return alert("Phone must be 10 digits!");await updateDoc(doc(db,"users",auth.currentUser.uid),{name:n,father:f,phone:p,address:a,history:arrayUnion(`Name:${currentUserData.name}→${n}`,`Father:${currentUserData.father}→${f}`,`Phone:${currentUserData.phone}→${p}`,`Addr:${currentUserData.address}→${a}`)});alert("Profile Saved.");return true;};
   window.checkStepOne=async()=>{if(!await window.saveProfile())return;const n=document.getElementById('p-name').value.trim(),p=document.getElementById('p-phone').value.trim();const otp=Math.floor(100000+Math.random()*900000);await setDoc(doc(db,"signals","otp_"+auth.currentUser.uid),{type:'ADMISSION',otp,uid:auth.currentUser.uid,name:n,phone:p,timestamp:getStamp(),expiresAt:Date.now()+120000});window.currentJoinOtp=otp;document.getElementById('step1').classList.remove('step-active');document.getElementById('step2').classList.add('step-active');};
   window.verifyJoin=async()=>{if(document.getElementById('join-otp').value==window.currentJoinOtp){const now=new Date();await updateDoc(doc(db,"users",auth.currentUser.uid),{joinDate:now.toLocaleDateString('en-GB'),joinDateISO:now.toISOString(),history:arrayUnion(`Joined Library on ${getStamp()}`)});await deleteDoc(doc(db,"signals","otp_"+auth.currentUser.uid));location.reload();}else alert("Invalid OTP");};
   window.checkLeaveFees=()=>{const srv=window.getRealSurvival(currentUserData);if(srv<0){document.getElementById('leave-error-box').classList.remove('hidden');document.getElementById('leave-error-msg').innerText=`Dues: Pay ${Math.abs(Math.floor(srv))} days first.`;return;}const otp=Math.floor(100000+Math.random()*900000);setDoc(doc(db,"signals","leave_"+auth.currentUser.uid),{type:'EXIT',otp,uid:auth.currentUser.uid,name:currentUserData.name,phone:currentUserData.phone,timestamp:getStamp(),expiresAt:Date.now()+120000});window.currentLeaveOtp=otp;document.getElementById('lstep1').classList.remove('step-active');document.getElementById('lstep2').classList.add('step-active');};
   window.verifyLeave=async()=>{if(document.getElementById('leave-otp').value==window.currentLeaveOtp){const lb=window.getRealSurvival(currentUserData);await updateDoc(doc(db,"users",auth.currentUser.uid),{totalPaidDays:lb,joinDateISO:null,history:arrayUnion(`Left Library on ${getStamp()}`)});window.location.href=`mylibraryapp://forgetwifi`;await deleteDoc(doc(db,"signals","leave_"+auth.currentUser.uid));setTimeout(()=>location.reload(),1000);}else alert("Invalid OTP");};
   window.calcTotal=()=>{const mi=document.getElementById('p-days'),sh=document.getElementById('p-shift'),ph=document.getElementById('p-phone').value.trim();if(!mi||!sh)return;const dim=rates.daysinamonth;if(Number(mi.value)<dim)mi.value=dim;if(Number(mi.value)>dim)mi.value=dim;if(!ph)return;const total=Number(sh.value)+((Number(ph.slice(-2))||0)/100);window.totalpaymenttodo=total;const se=document.getElementById('pay-summary');if(se)se.innerHTML=`Total: <span style="font-size:22px;color:var(--primary);">₹${total.toFixed(2)}</span>`;const today=new Date(),end=new Date(today.getTime()+dim*86400000);const vf=document.getElementById('validity-from'),vt=document.getElementById('validity-to'),vs=document.getElementById('validity-strip');if(vf)vf.innerText=fmtDate(today);if(vt)vt.innerText=fmtDate(end);if(vs)vs.style.display='flex';};
   window.doPayment=()=>{const m=parseInt(document.getElementById('p-days').value)||0,amt=window.totalpaymenttodo||0;window.calculatedPaymentAmt=amt;window.calculatedPaymentDays=m;const ok=confirm("Payment Action:\n\n👉 OK — Open UPI App to pay now.\n👉 CANCEL — Already paid, verify receipt.");clearAllPaymentErrors();document.getElementById('pstep1').style.display='block';document.getElementById('pstep2').style.display='none';document.getElementById('pay-modal').style.display='block';if(ok)window.location.href=`upi://pay?pa=7500159996@ptsbi&pn=Library&am=${amt}&cu=INR`;};
-  window.checkpaymentinfo=async()=>{try{clearAllPaymentErrors();const ph=document.getElementById('payment-phone').value.trim(),uid2=document.getElementById('payment-uid').value.trim(),ssi=document.getElementById('payment-screenshot');let e=false;if(!/^[6-9]\d{9}$/.test(ph)){document.getElementById('payment-phone-error-msg').innerText="Valid 10-digit phone required.";document.getElementById('payment-phone-error-box').classList.remove('hidden');e=true;}if(!/^\d{12}$/.test(uid2)){document.getElementById('payment-uid-error-msg').innerText="Exact 12-digit UID required.";document.getElementById('payment-uid-error-box').classList.remove('hidden');e=true;}if(!ssi.files?.length){document.getElementById('payment-screenshot-error-msg').innerText="Attach a screenshot.";document.getElementById('payment-screenshot-error-box').classList.remove('hidden');e=true;}if(e)return;const hs=await getDoc(doc(db,"payment_history",uid2));if(hs.exists()){document.getElementById('payment-uid-error-msg').innerText="UID already used.";document.getElementById('payment-uid-error-box').classList.remove('hidden');return;}const file=ssi.files[0],payId=Date.now();const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e2=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const sc=Math.min(1,800/img.width);c.width=img.width*sc;c.height=img.height*sc;c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.6));};img.onerror=rej;img.src=e2.target.result;};r.onerror=rej;r.readAsDataURL(file);});const amt=window.calculatedPaymentAmt||window.totalpaymenttodo||0,d=rates.daysinamonth;const shEl=document.getElementById('p-shift'),shName=shEl.options[shEl.selectedIndex]?.text||"Default";window.currentPayId=payId;window.currentShiftName=shName;const otp=Math.floor(100000+Math.random()*900000);window.generatedPaymentOtp=otp;await setDoc(doc(db,"signals",`pay_${auth.currentUser.uid}_${payId}`),{type:'PAYMENT',otp,uid:auth.currentUser.uid,name:currentUserData.name,phone:currentUserData.phone,providedPhone:ph,providedUID:uid2,screenshot:b64,id:payId,reqT:getStamp(),shift:shName,days:d,amt,status:'Pending'});await updateDoc(doc(db,"users",auth.currentUser.uid),{history:arrayUnion({id:payId,reqT:getStamp(),shift:shName,days:d,amt,status:'Pending'})});document.getElementById('pstep1').style.display='none';document.getElementById('pstep2').style.display='block';}catch(err){console.error(err);alert("Error: "+err.message);}};
-  window.verifyPayment=async()=>{try{clearAllPaymentErrors();const typed=document.getElementById('Payment-otp').value.trim(),eb=document.getElementById('payment-otp-error-box'),em=document.getElementById('payment-otp-error-msg');if(!window.generatedPaymentOtp){eb.classList.remove('hidden');em.innerText="Session expired.";return;}if(typed!==window.generatedPaymentOtp.toString()){eb.classList.remove('hidden');em.innerText="Invalid OTP.";return;}const uid2=document.getElementById('payment-uid').value.trim();const hs=await getDoc(doc(db,"payment_history",uid2));if(hs.exists()){eb.classList.remove('hidden');em.innerText="Duplicate UID.";return;}const payId=window.currentPayId,sigId=`pay_${auth.currentUser.uid}_${payId}`;await updateDoc(doc(db,"signals",sigId),{status:'OTP_Verified'});const uRef=doc(db,"users",auth.currentUser.uid),uSnap=await getDoc(uRef);if(uSnap.exists()){const nh=uSnap.data().history.map(h=>h.id!==payId?h:{...h,status:'OTP_Verified',otpT:getStamp()});await updateDoc(uRef,{history:nh});}document.getElementById('pay-modal').style.display='none';alert("✅ OTP verified! Waiting for admin.");}catch(err){console.error(err);alert("OTP error: "+err.message);}};
+  window.checkpaymentinfo=async()=>{try{clearAllPaymentErrors();const ph=document.getElementById('payment-phone').value.trim(),uid2=document.getElementById('payment-uid').value.trim(),ssi=document.getElementById('payment-screenshot');let e=false;if(!/^[6-9]\d{9}$/.test(ph)){document.getElementById('payment-phone-error-msg').innerText="Valid 10-digit phone required.";document.getElementById('payment-phone-error-box').classList.remove('hidden');e=true;}if(!/^\d{12}$/.test(uid2)){document.getElementById('payment-uid-error-msg').innerText="Exact 12-digit UID required.";document.getElementById('payment-uid-error-box').classList.remove('hidden');e=true;}if(!ssi.files?.length){document.getElementById('payment-screenshot-error-msg').innerText="Attach a screenshot.";document.getElementById('payment-screenshot-error-box').classList.remove('hidden');e=true;}if(e)return;const hs=await getDoc(doc(db,"payment_history",uid2));if(hs.exists()){document.getElementById('payment-uid-error-msg').innerText="UID already used. Double-spend blocked.";document.getElementById('payment-uid-error-box').classList.remove('hidden');return;}const file=ssi.files[0],payId=Date.now();const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e2=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const sc=Math.min(1,800/img.width);c.width=img.width*sc;c.height=img.height*sc;c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.6));};img.onerror=rej;img.src=e2.target.result;};r.onerror=rej;r.readAsDataURL(file);});const amt=window.calculatedPaymentAmt||window.totalpaymenttodo||0,d=rates.daysinamonth;const shEl=document.getElementById('p-shift'),shName=shEl.options[shEl.selectedIndex]?.text||"Default";window.currentPayId=payId;window.currentShiftName=shName;const otp=Math.floor(100000+Math.random()*900000);window.generatedPaymentOtp=otp;await setDoc(doc(db,"signals",`pay_${auth.currentUser.uid}_${payId}`),{type:'PAYMENT',otp,uid:auth.currentUser.uid,name:currentUserData.name,phone:currentUserData.phone,providedPhone:ph,providedUID:uid2,screenshot:b64,id:payId,reqT:getStamp(),shift:shName,days:d,amt,status:'Pending'});await updateDoc(doc(db,"users",auth.currentUser.uid),{history:arrayUnion({id:payId,reqT:getStamp(),shift:shName,days:d,amt,status:'Pending'})});document.getElementById('pstep1').style.display='none';document.getElementById('pstep2').style.display='block';}catch(err){console.error(err);alert("Error: "+err.message);}};
+  window.verifyPayment=async()=>{try{clearAllPaymentErrors();const typed=document.getElementById('Payment-otp').value.trim(),eb=document.getElementById('payment-otp-error-box'),em=document.getElementById('payment-otp-error-msg');if(!window.generatedPaymentOtp){eb.classList.remove('hidden');em.innerText="Session expired. Cancel and retry.";return;}if(typed!==window.generatedPaymentOtp.toString()){eb.classList.remove('hidden');em.innerText="Invalid OTP. Try again.";return;}const uid2=document.getElementById('payment-uid').value.trim();const hs=await getDoc(doc(db,"payment_history",uid2));if(hs.exists()){eb.classList.remove('hidden');em.innerText="Duplicate UID. Blocked.";return;}const payId=window.currentPayId,sigId=`pay_${auth.currentUser.uid}_${payId}`;await updateDoc(doc(db,"signals",sigId),{status:'OTP_Verified'});const uRef=doc(db,"users",auth.currentUser.uid),uSnap=await getDoc(uRef);if(uSnap.exists()){const nh=uSnap.data().history.map(h=>h.id!==payId?h:{...h,status:'OTP_Verified',otpT:getStamp()});await updateDoc(uRef,{history:nh});}document.getElementById('pay-modal').style.display='none';alert("✅ OTP verified! Waiting for admin confirmation.");}catch(err){console.error(err);alert("OTP error: "+err.message);}};
   window.closePaymentWizard=()=>{clearAllPaymentErrors();document.getElementById('pay-modal').style.display='none';};
   window.toggleSigScreenshot=(btn,secId)=>{const s=document.getElementById(secId),open=s.classList.toggle('open');btn.innerText=open?'📷 Hide Screenshot':'📷 Show Screenshot';};
   window.togglePhScreenshot=(btn,secId)=>{const s=document.getElementById(secId),open=s.classList.toggle('open');btn.innerText=open?'🖼 Hide Screenshot':'🖼 Show Screenshot';};
-  window.saveRates=async()=>{const nD=Number(document.getElementById('rate-day').value),nN=Number(document.getElementById('rate-night').value),nB=Number(document.getElementById('rate-both').value),nM=Number(document.getElementById('rate-dim').value);if(!nD||!nN||!nB||!nM)return alert("All fields must be valid.");const changes=[];if(nD!==rates.dayVal)changes.push(`Day: ₹${rates.dayVal}→₹${nD}`);if(nN!==rates.nightVal)changes.push(`Night: ₹${rates.nightVal}→₹${nN}`);if(nB!==rates.bothVal)changes.push(`Both: ₹${rates.bothVal}→₹${nB}`);if(nM!==rates.daysinamonth)changes.push(`Days: ${rates.daysinamonth}→${nM}`);if(!changes.length)return alert("No changes.");if(!confirm(`⚠️ Confirm:\n${changes.join('\n')}`))return;rates.dayVal=nD;rates.nightVal=nN;rates.bothVal=nB;rates.daysinamonth=nM;refreshPriceLabels();window.calcTotal();await setDoc(doc(db,"settings","rates"),{dayVal:nD,nightVal:nN,bothVal:nB,daysinamonth:nM});alert("✅ Rates saved.");};
-  window.connectToWifi=async(key='wifi')=>{if(!auth.currentUser)return alert("Please log in first.");if(window.getRealSurvival(currentUserData)<-1)return alert("Please pay your fees!");const{ssid,pass,ssid2,pass2}=wifiCache;const primary=key==='wifi2'?{ssid:ssid2,pass:pass2}:{ssid,pass};if(!primary.ssid||!primary.pass)return alert("Wi-Fi details incomplete.");const survivalDays=window.getRealSurvival(currentUserData);const name=encodeURIComponent(currentUserData.name||''),father=encodeURIComponent(currentUserData.father||''),phone=encodeURIComponent(currentUserData.phone||''),address=encodeURIComponent(currentUserData.address||'');window.location.href=`mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}&usersurvivaltime=${encodeURIComponent(String(survivalDays))}&name=${name}&father=${father}&phone=${phone}&address=${address}`;setTimeout(()=>{if(document.visibilityState==='visible'){document.getElementById('wifi-modal-ssid').innerText="Please download the App first";document.getElementById('wifi-modal-pass').innerText="You cannot connect without the App";document.getElementById('wifi-modal-label').innerText=key==='wifi2'?'Network 2':'Network 1';document.getElementById('wifi-info-modal').style.display='flex';}},1500);};
-  window.saveWifiSettings=async(key='wifi')=>{const ssid=document.getElementById(`${key}-ssid`).value.trim(),pass=document.getElementById(`${key}-pass`).value.trim();if(!ssid||!pass)return alert("Both fields required.");await setDoc(doc(db,"settings",key),{ssid,pass});if(key==='wifi2'){wifiCache.ssid2=ssid;wifiCache.pass2=pass;}else{wifiCache.ssid=ssid;wifiCache.pass=pass;}alert(`Wi-Fi ${key==='wifi2'?'2':'1'} saved.`);};
-  window.handlePay=async(sid,uid,stat,days,amt,reqT,shift,payId,providedUID,providedPhone)=>{processingSignals.add(sid);try{const sigSnap=await getDoc(doc(db,"signals",sid));const screenshot=sigSnap.exists()?(sigSnap.data().screenshot||''):'';const ref=doc(db,"users",uid),snap=await getDoc(ref);if(!snap.exists())return;const u=snap.data(),prev=u.totalPaidDays||0,newBal=stat==='OK'?prev+days:prev;if(stat==='OK'){const hRef=doc(db,"payment_history",String(providedUID)),hSnap=await getDoc(hRef);if(hSnap.exists()){alert("⛔ FRAUD: UID in payment_history.");await deleteDoc(doc(db,"signals",sid));return;}await setDoc(hRef,{uid,providedUID:String(providedUID),providedPhone:String(providedPhone),screenshot,shift,days,amt,reqT,actionT:getStamp(),finalNet:newBal});}const nh=(u.history||[]).map(h=>{if(typeof h!=='object'||h.id!==payId)return h;return{...h,status:stat==='OK'?'Verified':'Rejected',actionT:getStamp(),finalNet:newBal};});await updateDoc(ref,{totalPaidDays:newBal,history:nh});await deleteDoc(doc(db,"signals",sid));}catch(e){console.error(e);}finally{processingSignals.delete(sid);}};
+  window.saveRates=async()=>{const nD=Number(document.getElementById('rate-day').value),nN=Number(document.getElementById('rate-night').value),nB=Number(document.getElementById('rate-both').value),nM=Number(document.getElementById('rate-dim').value);if(!nD||!nN||!nB||!nM)return alert("All fields must be valid positive numbers.");const changes=[];if(nD!==rates.dayVal)changes.push(`☀️ Day: ₹${rates.dayVal}→₹${nD}`);if(nN!==rates.nightVal)changes.push(`🌙 Night: ₹${rates.nightVal}→₹${nN}`);if(nB!==rates.bothVal)changes.push(`🌓 Both: ₹${rates.bothVal}→₹${nB}`);if(nM!==rates.daysinamonth)changes.push(`📅 Days: ${rates.daysinamonth}→${nM}`);if(!changes.length)return alert("No changes detected.");if(!confirm(`⚠️ Confirm Rate Update:\n\n${changes.join('\n')}\n\nApply?`))return;rates.dayVal=nD;rates.nightVal=nN;rates.bothVal=nB;rates.daysinamonth=nM;refreshPriceLabels();window.calcTotal();await setDoc(doc(db,"settings","rates"),{dayVal:nD,nightVal:nN,bothVal:nB,daysinamonth:nM});alert("✅ Rates saved.");};
+  window.connectToWifi=async(key='wifi')=>{if(!auth.currentUser)return alert("Please log in first.");if(window.getRealSurvival(currentUserData)<-1)return alert("Please pay your fees to access Wi-Fi!");const{ssid,pass,ssid2,pass2}=wifiCache;const primary=key==='wifi2'?{ssid:ssid2,pass:pass2}:{ssid,pass};if(!primary.ssid||!primary.pass)return alert("Wi-Fi details are incomplete. Ask admin to fill them.");const survivalDays=window.getRealSurvival(currentUserData);const name=encodeURIComponent(currentUserData.name||''),father=encodeURIComponent(currentUserData.father||''),phone=encodeURIComponent(currentUserData.phone||''),address=encodeURIComponent(currentUserData.address||'');window.location.href=`mylibraryapp://wifi?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&ssid2=${encodeURIComponent(ssid2)}&pass2=${encodeURIComponent(pass2)}&usersurvivaltime=${encodeURIComponent(String(survivalDays))}&name=${name}&father=${father}&phone=${phone}&address=${address}`;setTimeout(()=>{if(document.visibilityState==='visible'){document.getElementById('wifi-modal-ssid').innerText="Please download the App first";document.getElementById('wifi-modal-pass').innerText="You cannot connect without the App";document.getElementById('wifi-modal-label').innerText=key==='wifi2'?'Network 2':'Network 1';document.getElementById('wifi-info-modal').style.display='flex';}},1500);};
+  window.saveWifiSettings=async(key='wifi')=>{const ssid=document.getElementById(`${key}-ssid`).value.trim(),pass=document.getElementById(`${key}-pass`).value.trim();if(!ssid||!pass)return alert("Both SSID and password are required.");await setDoc(doc(db,"settings",key),{ssid,pass});if(key==='wifi2'){wifiCache.ssid2=ssid;wifiCache.pass2=pass;}else{wifiCache.ssid=ssid;wifiCache.pass=pass;}alert(`Wi-Fi ${key==='wifi2'?'2':'1'} settings saved.`);const btnId=key==='wifi2'?'wifi2-connect-btn':'wifi1-connect-btn';const btn=document.getElementById(btnId);if(btn)btn.innerText=`🛜 Connect to ${ssid}`;};
+  window.handlePay=async(sid,uid,stat,days,amt,reqT,shift,payId,providedUID,providedPhone)=>{processingSignals.add(sid);try{const sigSnap=await getDoc(doc(db,"signals",sid));const screenshot=sigSnap.exists()?(sigSnap.data().screenshot||''):'';const ref=doc(db,"users",uid),snap=await getDoc(ref);if(!snap.exists())return;const u=snap.data(),prev=u.totalPaidDays||0,newBal=stat==='OK'?prev+days:prev;if(stat==='OK'){const hRef=doc(db,"payment_history",String(providedUID)),hSnap=await getDoc(hRef);if(hSnap.exists()){alert("⛔ FRAUD: UID already in payment_history.");await deleteDoc(doc(db,"signals",sid));return;}await setDoc(hRef,{uid,providedUID:String(providedUID),providedPhone:String(providedPhone),screenshot,shift,days,amt,reqT,actionT:getStamp(),finalNet:newBal});}const nh=(u.history||[]).map(h=>{if(typeof h!=='object'||h.id!==payId)return h;return{...h,status:stat==='OK'?'Verified':'Rejected',actionT:getStamp(),finalNet:newBal};});await updateDoc(ref,{totalPaidDays:newBal,history:nh});await deleteDoc(doc(db,"signals",sid));}catch(e){console.error(e);alert("handlePay error: "+e.message);}finally{processingSignals.delete(sid);}};
 
-  /* ══ ADMIN ══ */
-  let adminLoaded=false;
-  window.loadAdmin=()=>{
-    if(adminLoaded)return;
-    adminLoaded=true;
+  /* ═══════════════════════════════
+     USER SEARCH — FIX for Add Email
+     Searches Firestore users collection by email OR name (case-insensitive prefix)
+  ═══════════════════════════════ */
+  let _searchTimeout = null;
+  let _selectedUserForDrive = null;
 
+  window.handleUserSearch = async (value) => {
+    const v = value.trim().toLowerCase();
+    const iconEl = document.getElementById('email-valid-icon');
+    const errEl  = document.getElementById('connect-email-error');
+    const resultsEl = document.getElementById('user-search-results');
+    const summaryEl = document.getElementById('selected-user-summary');
+    const btn = document.getElementById('send-request-btn');
+
+    // Reset selection when typing
+    _selectedUserForDrive = null;
+    summaryEl.style.display = 'none';
+    btn.disabled = true;
+    iconEl.innerText = '';
+    errEl.classList.remove('show');
+
+    if (!v || v.length < 2) { resultsEl.innerHTML = ''; return; }
+
+    resultsEl.innerHTML = '<div style="padding:10px; color:#aaa; font-size:13px;">🔍 Searching…</div>';
+
+    if (_searchTimeout) clearTimeout(_searchTimeout);
+    _searchTimeout = setTimeout(async () => {
+      try {
+        const snap = await getDocs(collection(db, 'users'));
+        const matches = [];
+        snap.forEach(d => {
+          const u = d.data();
+          const email = (u.email||'').toLowerCase();
+          const name  = (u.name||'').toLowerCase();
+          // Match by email prefix OR name contains search term
+          if (email.startsWith(v) || email === v || name.includes(v)) {
+            matches.push({ uid: d.id, ...u });
+          }
+        });
+
+        if (!matches.length) {
+          resultsEl.innerHTML = '<div style="padding:10px; color:var(--red); font-size:13px;">❌ No user found with that email or name.</div>';
+          errEl.innerText = 'No matching user found in Firestore.';
+          errEl.classList.add('show');
+          iconEl.innerText = '❌';
+          return;
+        }
+
+        resultsEl.innerHTML = matches.slice(0, 5).map(u => `
+          <div class="user-search-card" onclick="selectUserForDrive('${u.uid}','${(u.name||'').replace(/'/g,"&#39;")}','${(u.email||'')}','${u.photo||''}')">
+            <img class="user-search-avatar" src="${u.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'?')+'&background=1976d2&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=?&background=ccc&color=fff'">
+            <div class="user-search-info">
+              <div class="user-search-name">${u.name||'(no name)'}</div>
+              <div class="user-search-email">${u.email||''}</div>
+            </div>
+            <span class="user-search-tick" style="display:none;">✅</span>
+          </div>`).join('');
+
+      } catch (err) {
+        resultsEl.innerHTML = `<div style="padding:10px; color:var(--red); font-size:13px;">⚠️ Search error: ${err.message}</div>`;
+      }
+    }, 400);
+  };
+
+  window.selectUserForDrive = (uid, name, email, photo) => {
+    _selectedUserForDrive = { uid, name, email, photo };
+    // Highlight selected card
+    document.querySelectorAll('.user-search-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('.user-search-tick').style.display = 'none';
+    });
+    // Find and highlight the clicked one
+    document.querySelectorAll('.user-search-card').forEach(c => {
+      if (c.innerText.includes(email)) {
+        c.classList.add('selected');
+        c.querySelector('.user-search-tick').style.display = '';
+      }
+    });
+    // Show summary
+    document.getElementById('selected-user-photo').src = photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1976d2&color=fff`;
+    document.getElementById('selected-user-name').innerText = name;
+    document.getElementById('selected-user-email').innerText = email;
+    document.getElementById('selected-user-summary').style.display = 'block';
+    document.getElementById('email-valid-icon').innerText = '✅';
+    document.getElementById('connect-email-error').classList.remove('show');
+    document.getElementById('send-request-btn').disabled = false;
+  };
+
+  /* ── FIXED sendDriveRequest ──
+     After saving, the watchConnectButtonState listener on that user's account
+     will automatically show the connect button in real time. */
+  window.sendDriveRequest = async () => {
+    if (!_selectedUserForDrive) {
+      document.getElementById('connect-email-error').innerText = '⚠️ Please search and select a user first.';
+      document.getElementById('connect-email-error').classList.add('show');
+      return;
+    }
+    const { uid, name, email } = _selectedUserForDrive;
+    const errEl = document.getElementById('connect-email-error');
+    const btn   = document.getElementById('send-request-btn');
+    btn.disabled = true; btn.innerText = '⏳ Sending…';
+
+    try {
+      // Check if already exists in driveEmails
+      const snap = await getDocs(collection(db,'driveEmails'));
+      let alreadyExists = false;
+      snap.forEach(d => { if(d.data().email===email) alreadyExists=true; });
+      if (alreadyExists) {
+        errEl.innerText = `⚠️ ${email} is already in the system.`;
+        errEl.classList.add('show');
+        btn.disabled = false; btn.innerText = '📨 Send Connection Request';
+        return;
+      }
+
+      const newOrder = snap.size;
+      // Save to driveEmails (admin list)
+      await setDoc(doc(collection(db,'driveEmails')), { email, type:'online', status:'pending', order:newOrder, usedGB:0, requestedAt:getStamp(), userUid:uid, userName:name });
+      // Save to driveConnectRequests so user sees the button — this is the key doc
+      const reqKey = email.replace(/[.@]/g,'_');
+      await setDoc(doc(db,'driveConnectRequests',reqKey), { email, userUid:uid, userName:name, requestedBy:'admin', requestedAt:getStamp(), status:'pending' });
+
+      btn.innerText = '✅ Request Sent!';
+      document.getElementById('connect-email-input').value = '';
+      document.getElementById('user-search-results').innerHTML = '';
+      document.getElementById('selected-user-summary').style.display = 'none';
+      document.getElementById('email-valid-icon').innerText = '';
+      _selectedUserForDrive = null;
+
+      setTimeout(() => { btn.disabled = false; btn.innerText = '📨 Send Connection Request'; }, 3000);
+
+    } catch (err) {
+      console.error('sendDriveRequest error:', err);
+      errEl.innerText = '❌ Error: ' + err.message;
+      errEl.classList.add('show');
+      btn.disabled = false; btn.innerText = '📨 Send Connection Request';
+    }
+  };
+
+  /* ═══════════════════════════════
+     ADMIN
+  ═══════════════════════════════ */
+  let adminLoaded = false;
+  window.loadAdmin = () => {
+    if (adminLoaded) return; adminLoaded = true;
     onSnapshot(collection(db,"signals"),s=>{
       const joinLeave=[],otpV=[],pending=[];
       s.forEach(d=>{if(processingSignals.has(d.id))return;const sig={...d.data(),_id:d.id};if(sig.type!=='PAYMENT')joinLeave.push(sig);else if(sig.status==='OTP_Verified')otpV.push(sig);else pending.push(sig);});
@@ -1576,66 +1244,50 @@
       sortNewest(joinLeave);sortNewest(otpV);sortNewest(pending);
       let h='';
       if(joinLeave.length){h+=`<div class="sig-section-hdr" style="background:#1a1a1a;color:var(--yellow);">📡 Join / Leave Signals (${joinLeave.length})</div>`;joinLeave.forEach(sig=>{h+=`<div class="card" style="background:#1a1a1a;color:white;border-left:4px solid var(--yellow);margin-bottom:12px;"><span class="sig-timer" data-sid="${sig._id}" data-expiry="${sig.expiresAt}">--s</span>📡 <b>${sig.type}</b><br>${sig.name}<br><span style="color:var(--green);font-size:12px;">📞 ${sig.phone}</span><br><span style="color:#888;font-size:10px;">${sig.timestamp}</span><br>OTP: <span style="color:var(--yellow);font-size:18px;font-weight:bold;">${sig.otp}</span><button class="btn btn-outline" style="margin-top:10px;padding:8px;" onclick="window.clearSignal('${sig._id}')">CLEAR</button></div>`;});}
-      if(otpV.length){h+=`<div class="sig-section-hdr" style="background:#003333;color:#00e5ff;">🔐 OTP Verified (${otpV.length})</div>`;otpV.forEach(sig=>{h+=buildPayCard(sig,true);});}
-      if(pending.length){h+=`<div class="sig-section-hdr" style="background:#1a1100;color:var(--yellow);">⏳ Pending (${pending.length})</div>`;pending.forEach(sig=>{h+=buildPayCard(sig,false);});}
+      if(otpV.length){h+=`<div class="sig-section-hdr" style="background:#003333;color:#00e5ff;">🔐 OTP Verified — Awaiting Approval (${otpV.length})</div>`;otpV.forEach(sig=>{h+=buildPayCard(sig,true);});}
+      if(pending.length){h+=`<div class="sig-section-hdr" style="background:#1a1100;color:var(--yellow);">⏳ Pending — Awaiting User OTP (${pending.length})</div>`;pending.forEach(sig=>{h+=buildPayCard(sig,false);});}
       document.getElementById('admin-otp-list').innerHTML=h||"<p style='color:#aaa;text-align:center;padding:20px;'>No active signals.</p>";
     });
-
     onSnapshot(collection(db,"users"),s=>{
       const g={onJ_ok:"",onJ_exp:"",offJ_ok:"",offJ_exp:"",onNL:"",offNL:""};
       s.forEach(d=>{const u=d.data(),srv=window.getRealSurvival(u),isJ=!!u.joinDateISO,isO=!!u.isOnline;
         const cHtml=isJ?`<div class="admin-srv-wrap" style="text-align:right;"><span class="admin-live-srv" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'};font-weight:bold;font-family:monospace;display:block;">${window.formatTime(srv)}</span><div class="admin-last-date" style="font-size:11px;color:${srv>0?'#2e7d32':'var(--red)'};font-weight:bold;">${srv>0?`📅 Until: ${lastValidDate(srv)}`:'⛔ Expired'}</div></div>`:`<span style="color:#666;font-weight:bold;font-family:monospace;">${window.formatTime(srv)} (Static)</span>`;
-        const seatBadge=u.seatNo?`<span style="font-size:11px;background:#e3f0fd;color:var(--primary);padding:2px 7px;border-radius:10px;font-weight:bold;">🪑 ${u.seatNo}</span>`:'';
-        const card=`<div class="player-card" onclick="window.openUser('${d.id}')"><div class="player-header"><div class="player-info"><img src="${u.photo||''}" class="player-photo"><div><div style="font-weight:bold;font-size:14px;">${u.name} ${seatBadge}</div><div class="status-badge" style="background:${isO?'#e8f5e9':'#ffebee'};color:${isO?'green':'red'};">${isO?'● Online':'○ Offline'}</div></div></div>${cHtml}</div><div class="player-details"><span>📞 ${u.phone||'N/A'}</span><span>📧 ${u.email||'N/A'}</span></div></div>`;
+        const seatBadge=u.seatNo?`<span style="font-size:11px;background:#e3f0fd;color:var(--primary);padding:2px 7px;border-radius:10px;font-weight:bold;">🪑 Seat ${u.seatNo}</span>`:'';
+        const driveTag=u.driveConnected?`<span style="font-size:10px;background:#e8f5e9;color:#2e7d32;padding:2px 6px;border-radius:8px;margin-left:4px;font-weight:bold;">🗄️ Drive</span>`:'';
+        const card=`<div class="player-card" onclick="window.openUser('${d.id}')"><div class="player-header"><div class="player-info"><img src="${u.photo||''}" class="player-photo"><div><div style="font-weight:bold;font-size:14px;">${u.name} ${seatBadge}${driveTag}</div><div class="status-badge" style="background:${isO?'#e8f5e9':'#ffebee'};color:${isO?'green':'red'};">${isO?'● Online':'○ Offline'}</div></div></div>${cHtml}</div><div class="player-details"><span>📞 ${u.phone||'N/A'}</span><span>📧 ${u.email||'N/A'}</span></div></div>`;
         if(isJ&&isO){srv>=0?g.onJ_ok+=card:g.onJ_exp+=card;}else if(isJ&&!isO){srv>=0?g.offJ_ok+=card:g.offJ_exp+=card;}else if(isO&&!isJ)g.onNL+=card;else g.offNL+=card;
       });
       document.getElementById('admin-survival-list').innerHTML=`<div class="detail-label">🟢 Online & Joined (Active)</div>${g.onJ_ok}<div class="detail-label">🔴 Online & Joined (Expired)</div>${g.onJ_exp}<div class="detail-label">🟢 Offline & Joined (Active)</div>${g.offJ_ok}<div class="detail-label">🔴 Offline & Joined (Expired)</div>${g.offJ_exp}<div class="detail-label">🔵 Online (Not Joined)</div>${g.onNL}<div class="detail-label">⚫ Offline (Not Joined)</div>${g.offNL}`;
     });
-
     onSnapshot(collection(db,"payment_history"),async snap=>{
       const records=[],fetches=[];
       snap.forEach(d=>{const r={id:d.id,...d.data()};records.push(r);if(r.uid)fetches.push(getDoc(doc(db,"users",r.uid)).then(us=>{if(us.exists()){const u=us.data();r._name=u.name||'—';r._phone=u.phone||'—';r._photo=u.photo||'';r._father=u.father||'—';r._addr=u.address||'—';}}).catch(()=>{}));});
       await Promise.all(fetches);
       records.sort((a,b)=>parseStamp(b.actionT)-parseStamp(a.actionT));
-      if(!records.length){document.getElementById('admin-pay-history-list').innerHTML=`<p style="color:#aaa;text-align:center;padding:20px;">No verified payments.</p>`;return;}
+      if(!records.length){document.getElementById('admin-pay-history-list').innerHTML=`<p style="color:#aaa;text-align:center;padding:20px;">No verified payments yet.</p>`;return;}
       let html="";
-      records.forEach((r,i)=>{
-        const cId=`ph-body-${i}`,chId=`ph-chev-${i}`,ssId=`ph-ss-${i}`;
-        const vr=validityRange(r.actionT||getStamp());
-        const ssContent=r.screenshot?`<div id="${ssId}" class="ph-ss-section"><img src="${r.screenshot}" style="width:100%;border-radius:8px;" onclick="document.getElementById('ss-viewer').src=this.src;document.getElementById('ss-modal').style.display='flex';"></div>`:`<div id="${ssId}" class="ph-ss-section"><p style="color:#888;font-size:12px;margin:0;">No screenshot.</p></div>`;
-        html+=`<div class="ph-card"><div class="ph-header" onclick="document.getElementById('${cId}').classList.toggle('open');document.getElementById('${chId}').classList.toggle('open');"><div style="display:flex;align-items:center;gap:10px;">${r._photo?`<img src="${r._photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #eee;">`:''}
-          <div><div style="font-weight:bold;font-size:13px;">₹${r.amt} — ${r.shift}</div><div style="font-size:11px;color:#555;font-weight:600;">${r._name||'—'} | 📞 ${r.providedPhone||'—'}</div><div style="font-size:10px;color:#888;">✅ ${r.actionT||'—'}</div></div></div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="ph-badge">Verified</span><span class="ph-chevron" id="${chId}">▼</span></div></div>
-          <div class="ph-body" id="${cId}"><table style="width:100%;border-collapse:collapse;font-size:12px;">
-            <tr><td style="padding:4px 0;color:#888;width:45%;">💳 UPI UID</td><td style="padding:4px 0;font-weight:bold;">${r.providedUID}</td></tr>
-            <tr><td style="padding:4px 0;color:#888;">📅 Days Added</td><td style="padding:4px 0;font-weight:bold;color:var(--primary);">${r.days} days</td></tr>
-            <tr><td style="padding:4px 0;color:#888;">💰 Amount</td><td style="padding:4px 0;font-weight:bold;">₹${r.amt}</td></tr>
-            <tr><td style="padding:6px 0;color:#888;">🗓 Validity</td><td style="padding:6px 0;"><span style="background:#e8f5e9;color:#2e7d32;font-weight:bold;padding:3px 8px;border-radius:6px;font-size:12px;">${vr}</span></td></tr>
-          </table><button onclick="window.togglePhScreenshot(this,'${ssId}')" style="margin-top:10px;background:#f0f4ff;border:1px solid var(--primary);color:var(--primary);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;width:100%;">🖼 Show Screenshot</button>${ssContent}</div></div>`;
-      });
+      records.forEach((r,i)=>{const cId=`ph-body-${i}`,chId=`ph-chev-${i}`,ssId=`ph-ss-${i}`;const vr=validityRange(r.actionT||getStamp());const ssContent=r.screenshot?`<div id="${ssId}" class="ph-ss-section"><img src="${r.screenshot}" style="width:100%;border-radius:8px;" onclick="document.getElementById('ss-viewer').src=this.src;document.getElementById('ss-modal').style.display='flex';"></div>`:`<div id="${ssId}" class="ph-ss-section"><p style="color:#888;font-size:12px;margin:0;">No screenshot stored.</p></div>`;html+=`<div class="ph-card"><div class="ph-header" onclick="document.getElementById('${cId}').classList.toggle('open');document.getElementById('${chId}').classList.toggle('open');"><div style="display:flex;align-items:center;gap:10px;">${r._photo?`<img src="${r._photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #eee;">`:'<span style="font-size:28px;">👤</span>'}<div><div style="font-weight:bold;font-size:13px;">₹${r.amt} — ${r.shift}</div><div style="font-size:11px;color:#555;font-weight:600;">${r._name||'—'} | 📞 ${r.providedPhone||'—'}</div><div style="font-size:10px;color:#888;">✅ ${r.actionT||'—'}</div></div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="ph-badge">Verified</span><span class="ph-chevron" id="${chId}">▼</span></div></div><div class="ph-body" id="${cId}"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed #ddd;">${r._photo?`<img src="${r._photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);">`:'<span style="font-size:36px;">👤</span>'}<div><div style="font-weight:bold;font-size:14px;">${r._name||'—'}</div><div style="font-size:12px;color:#555;">Father: ${r._father||'—'}</div><div style="font-size:12px;color:#555;">Address: ${r._addr||'—'}</div></div></div><table style="width:100%;border-collapse:collapse;font-size:12px;"><tr><td style="padding:4px 0;color:#888;width:45%;">💳 UPI Txn UID</td><td style="padding:4px 0;font-weight:bold;">${r.providedUID}</td></tr><tr><td style="padding:4px 0;color:#888;">📞 Pay Phone</td><td style="padding:4px 0;">${r.providedPhone}</td></tr><tr><td style="padding:4px 0;color:#888;">🏷 Shift</td><td style="padding:4px 0;">${r.shift}</td></tr><tr><td style="padding:4px 0;color:#888;">📅 Days Added</td><td style="padding:4px 0;font-weight:bold;color:var(--primary);">${r.days} days</td></tr><tr><td style="padding:4px 0;color:#888;">💰 Amount</td><td style="padding:4px 0;font-weight:bold;">₹${r.amt}</td></tr><tr><td style="padding:4px 0;color:#888;">✅ Verified</td><td style="padding:4px 0;">${r.actionT}</td></tr><tr><td style="padding:4px 0;color:#888;">📊 Final Balance</td><td style="padding:4px 0;">${Math.floor(r.finalNet)} days</td></tr><tr><td style="padding:6px 0;color:#888;">🗓 Validity</td><td style="padding:6px 0;"><span style="background:#e8f5e9;color:#2e7d32;font-weight:bold;padding:3px 8px;border-radius:6px;font-size:12px;">${vr}</span></td></tr></table><button onclick="window.togglePhScreenshot(this,'${ssId}')" style="margin-top:10px;background:#f0f4ff;border:1px solid var(--primary);color:var(--primary);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;width:100%;">🖼 Show Screenshot</button>${ssContent}</div></div>`;});
       document.getElementById('admin-pay-history-list').innerHTML=html;
     });
-
     window.loadDriveEmailsFromFirestore();
   };
 
-  const buildPayCard=(sig,isOtpV)=>{const sc=isOtpV?'#00e5ff':'#f1c40f',sl=isOtpV?'🔐 OTP_VERIFIED':'⏳ PENDING',vd=isOtpV?'':'disabled',vo=isOtpV?'1':'0.4',ssId=`ss-${sig._id}`;const ssCont=sig.screenshot?`<img src="${sig.screenshot}" style="width:100%;max-width:400px;border-radius:8px;margin-top:8px;border:1px solid #333;cursor:zoom-in;display:block;" onclick="document.getElementById('ss-viewer').src=this.src;document.getElementById('ss-modal').style.display='flex';">`:`<span style="color:#888;font-size:11px;display:block;padding:8px 0;">No screenshot</span>`;return`<div style="white-space:pre-wrap;font-family:monospace;background:#000;color:#0f0;border:1px solid #333;font-size:12px;border-radius:12px 12px 0 0;padding:12px;">[PAYMENT]\nSTATUS : <span style="color:${sc};font-weight:bold;">${sl}</span>\nNAME  : ${sig.name}\nPHONE : ${sig.phone}\nSHIFT : ${sig.shift}\nAMT   : ₹${sig.amt}\nOTP   : <span style="color:var(--yellow);font-size:18px;font-weight:bold;">${sig.otp}</span>\n</div><div style="background:#111;border:1px solid #333;border-top:none;padding:6px 10px;"><button onclick="window.toggleSigScreenshot(this,'${ssId}')" style="background:none;border:1px solid #555;color:#0f0;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:monospace;">📷 Screenshot</button></div><div id="${ssId}" class="sig-ss-section">${ssCont}</div><div style="display:flex;gap:10px;background:#111;padding:10px;border:1px solid #333;border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px;"><button class="btn btn-green" ${vd} style="opacity:${vo};margin-top:0;" onclick="window.handlePay('${sig._id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">VERIFY</button><button class="btn btn-outline" style="margin-top:0;" onclick="window.handlePay('${sig._id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">REJECT</button></div>`;};
+  const buildPayCard=(sig,isOtpV)=>{const sc=isOtpV?'#00e5ff':'#f1c40f',sl=isOtpV?'🔐 OTP_VERIFIED':'⏳ PENDING',vd=isOtpV?'':'disabled',vo=isOtpV?'1':'0.4',ssId=`ss-${sig._id}`;const ssCont=sig.screenshot?`<img src="${sig.screenshot}" style="width:100%;max-width:400px;border-radius:8px;margin-top:8px;border:1px solid #333;cursor:zoom-in;display:block;" onclick="document.getElementById('ss-viewer').src=this.src;document.getElementById('ss-modal').style.display='flex';">`:`<span style="color:#888;font-size:11px;display:block;padding:8px 0;">No screenshot</span>`;return`<div style="white-space:pre-wrap;font-family:monospace;background:#000;color:#0f0;border:1px solid #333;font-size:12px;border-radius:12px 12px 0 0;padding:12px;">[PAYMENT SIGNAL]\nSTATUS : <span style="color:${sc};font-weight:bold;">${sl}</span>\n--------------------------\nNAME     : ${sig.name}\nPHONE    : ${sig.phone}\nPAY PHONE: ${sig.providedPhone||'N/A'}\nPAY UID  : ${sig.providedUID||'N/A'}\nSHIFT    : ${sig.shift}\nDAYS     : ${sig.days}\nAMOUNT   : ₹${sig.amt} (${sig.reqT})\n--------------------------\nOTP      : <span style="color:var(--yellow);font-size:18px;font-weight:bold;letter-spacing:3px;">${sig.otp}</span>\n--------------------------\n</div><div style="background:#111;border:1px solid #333;border-top:none;padding:6px 10px;"><button onclick="window.toggleSigScreenshot(this,'${ssId}')" style="background:none;border:1px solid #555;color:#0f0;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:monospace;">📷 Show Screenshot</button></div><div id="${ssId}" class="sig-ss-section">${ssCont}</div><div style="display:flex;gap:10px;background:#111;padding:10px;border:1px solid #333;border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px;"><button class="btn btn-green" ${vd} style="opacity:${vo};margin-top:0;" onclick="window.handlePay('${sig._id}','${sig.uid}','OK',${sig.days},${sig.amt},'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">VERIFY</button><button class="btn btn-outline" style="margin-top:0;" onclick="window.handlePay('${sig._id}','${sig.uid}','REJ',0,0,'${sig.reqT}','${sig.shift}',${sig.id},'${sig.providedUID}','${sig.providedPhone}')">REJECT</button></div>`;};
 
-  window.openUser=async(uid)=>{const snap=await getDoc(doc(db,"users",uid));if(!snap.exists())return;const u=snap.data(),srv=window.getRealSurvival(u);window._aeUserData=u;window._aeCurrentSrv=srv;const abs=Math.max(0,srv),ts=Math.floor(abs*86400);const eD=Math.floor(ts/86400),eH=Math.floor((ts%86400)/3600),eM=Math.floor((ts%3600)/60),eS=ts%60;document.getElementById('folder-content').innerHTML=`<div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;"><div class="admin-live-srv live-srv-display" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'};">${window.formatTime(srv)}</div></div><div class="card"><p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p><p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p></div><div class="card"><label class="detail-label">🪑 Seat Number</label><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="adm-seat-no" placeholder="Enter seat number" value="${u.seatNo||''}" min="1" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:16px;"><button class="btn btn-blue" style="width:auto;margin-top:0;padding:12px 18px;" onclick="window.adminSetSeat('${uid}',${u.seatNo||'null'})">Set Seat</button></div></div><div class="card"><label class="detail-label">⏱ Set Survival Time</label><div class="alarm-editor"><div class="alarm-unit"><label>Days</label><div class="alarm-spin"><button onclick="alarmStep('ae-d',1);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-d" type="number" min="0" value="${eD}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-d',-1);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Hrs ±</label><div class="pm-toggle" id="ae-pm" data-val="+"><button id="ae-pm-plus" class="active" onclick="window.setPM('+')">+</button><button id="ae-pm-minus" onclick="window.setPM('-')">−</button></div><div class="alarm-spin"><button onclick="alarmStep('ae-h',1,23);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-h" type="number" min="0" max="23" value="${eH}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-h',-1,23);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Mins</label><div class="alarm-spin"><button onclick="alarmStep('ae-m',1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-m" type="number" min="0" max="59" value="${eM}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-m',-1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Secs</label><div class="alarm-spin"><button onclick="alarmStep('ae-s',1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-s" type="number" min="0" max="59" value="${eS}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-s',-1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div></div><div id="ae-diff" class="ae-diff-box" style="background:#f0f4ff;margin-top:14px;"><div style="font-size:10px;color:#888;margin-bottom:4px;">NEW TIME</div><div class="ae-diff-new">${window.formatTime(abs)}</div></div><button class="btn btn-blue" style="margin-top:12px;" onclick="window.applyAlarmEdit('${uid}')">✅ Apply</button></div><div class="card"><label class="detail-label">➕ Manual Day Adjustment</label><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="adm-manual-days" placeholder="+30 or −5" step="1" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:16px;"><button class="btn btn-blue" style="width:auto;margin-top:0;padding:12px 18px;" onclick="window.adminEditDays('${uid}')">Apply</button></div></div><div class="card"><div class="log-container" onclick="this.classList.toggle('expanded')">${window.renderLogs(u.history)}</div></div><button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>`;
-    document.getElementById('owner-folder-view').classList.add('show');
-    window.updateAlarmDiff&&window.updateAlarmDiff();
-  };
+  window.openUser=async(uid)=>{const snap=await getDoc(doc(db,"users",uid));if(!snap.exists())return;const u=snap.data(),srv=window.getRealSurvival(u);window._aeUserData=u;window._aeCurrentSrv=srv;const abs=Math.max(0,srv),ts=Math.floor(abs*86400);const eD=Math.floor(ts/86400),eH=Math.floor((ts%86400)/3600),eM=Math.floor((ts%3600)/60),eS=ts%60;const rawDrm=u.mediaDrmId||'';let drmDisplay,drmStyle;if(!rawDrm){drmDisplay='— Not verified yet —';drmStyle='color:#aaa;font-style:italic;font-size:13px;';}else if(rawDrm==='failed'){drmDisplay='❌ Extraction Failed';drmStyle='color:var(--red);font-weight:bold;font-size:13px;';}else{drmDisplay=rawDrm;drmStyle='color:#333;font-size:11px;word-break:break-all;font-family:monospace;';}const seatStatus=u.seatNo?`<div style="font-size:12px;margin-top:8px;background:#f0f4ff;padding:8px;border-radius:8px;">Current: <b>Seat No. ${u.seatNo}</b> | Status: ${u.seatPending?'⏳ Awaiting student confirmation':'✅ Confirmed by student'}</div>`:`<div style="font-size:12px;color:#aaa;margin-top:8px;">No seat assigned yet.</div>`;const driveStatus=u.driveConnected?`<div style="background:#e8f5e9;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:#2e7d32;font-weight:bold;">✅ Drive Connected — ${u.driveConnectedAt?new Date(u.driveConnectedAt).toLocaleDateString('en-GB'):''}</div>`:`<div style="background:#fff3cd;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:#856404;">⏳ Drive not connected yet</div>`;document.getElementById('folder-content').innerHTML=`<div class="card" style="text-align:center;"><img src="${u.photo||''}" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;"><div class="admin-live-srv live-srv-display" data-iso="${u.joinDateISO}" data-paid="${u.totalPaidDays}" style="color:${srv>=0?'var(--green)':'var(--red)'};">${window.formatTime(srv)}</div></div><div class="card"><p><b>Name:</b> ${u.name}</p><p><b>Father:</b> ${u.father||'-'}</p><p><b>Mobile:</b> ${u.phone||'-'}</p><p><b>Email:</b> ${u.email||'-'}</p><p><b>Address:</b> ${u.address||'-'}</p><div style="padding-top:12px;border-top:1px solid #eee;margin-top:4px;"><div class="detail-label" style="margin-bottom:6px;">🔐 MediaDRM Device ID</div><div style="${drmStyle}">${drmDisplay}</div></div>${driveStatus}</div><div class="card"><label class="detail-label">🪑 Seat Number (Admin Only)</label><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="adm-seat-no" placeholder="Enter seat number" value="${u.seatNo||''}" min="1" step="1" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:16px;font-weight:bold;text-align:center;"><button class="btn btn-blue" style="width:auto;margin-top:0;padding:12px 18px;" onclick="window.adminSetSeat('${uid}',${u.seatNo||'null'})">Set Seat</button></div>${seatStatus}</div><div class="card"><label class="detail-label">⏱ Set Survival Time</label><p style="font-size:12px;color:#888;margin:4px 0 10px;">Current time pre-filled. Hours column has +/− toggle.</p><div style="text-align:center;background:#f0f4ff;border-radius:8px;padding:8px;margin-bottom:14px;"><div style="font-size:10px;color:#888;font-weight:bold;text-transform:uppercase;margin-bottom:3px;">Current Live Survival</div><div id="ae-live-current" style="font-family:monospace;font-size:20px;font-weight:900;color:var(--primary);letter-spacing:1px;">${window.formatTime(srv)}</div></div><div class="alarm-editor"><div class="alarm-unit"><label>Days</label><div class="alarm-spin"><button onclick="alarmStep('ae-d',1);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-d" type="number" min="0" value="${eD}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-d',-1);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Hrs ±</label><div class="pm-toggle" id="ae-pm" data-val="+"><button id="ae-pm-plus" class="active" onclick="window.setPM('+')">+</button><button id="ae-pm-minus" onclick="window.setPM('-')">−</button></div><div class="alarm-spin"><button onclick="alarmStep('ae-h',1,23);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-h" type="number" min="0" max="23" value="${eH}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-h',-1,23);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Mins</label><div class="alarm-spin"><button onclick="alarmStep('ae-m',1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-m" type="number" min="0" max="59" value="${eM}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-m',-1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div><div class="alarm-sep">:</div><div class="alarm-unit"><label>Secs</label><div class="alarm-spin"><button onclick="alarmStep('ae-s',1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▲</button><input id="ae-s" type="number" min="0" max="59" value="${eS}" oninput="window.updateAlarmDiff&&window.updateAlarmDiff()"><button onclick="alarmStep('ae-s',-1,59);window.updateAlarmDiff&&window.updateAlarmDiff()">▼</button></div></div></div><div id="ae-diff" class="ae-diff-box" style="background:#f0f4ff;margin-top:14px;"><div style="font-size:10px;color:#888;font-weight:bold;text-transform:uppercase;margin-bottom:4px;">New Time to be Set</div><div class="ae-diff-new">${window.formatTime(abs)}</div><div class="ae-diff-delta" style="color:#888;">± 0 change vs current</div></div><button class="btn btn-blue" style="margin-top:12px;" onclick="window.applyAlarmEdit('${uid}')">✅ Apply New Survival Time</button></div><div class="card"><label class="detail-label">➕ Manual Day Adjustment (integers only)</label><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="adm-manual-days" placeholder="+30 or −5" step="1" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:16px;font-weight:bold;text-align:center;"><button class="btn btn-blue" style="width:auto;margin-top:0;padding:12px 18px;" onclick="window.adminEditDays('${uid}')">Apply</button></div></div><div class="card"><div class="log-container" onclick="this.classList.toggle('expanded')">${window.renderLogs(u.history)}</div></div><button class="btn btn-outline" onclick="window.adminForceLeave('${uid}')">FORCE EXIT</button>`;document.getElementById('owner-folder-view').classList.add('show');window.updateAlarmDiff&&window.updateAlarmDiff();};
 
-  window.adminSetSeat=async(uid,oldSeat)=>{const input=document.getElementById('adm-seat-no'),newSeatStr=input.value.trim(),newSeat=parseInt(newSeatStr);if(!newSeatStr||isNaN(newSeat)||newSeat<=0)return alert("Valid seat number required.");if(!confirm(`Assign Seat No. ${newSeat}?`))return;await updateDoc(doc(db,"users",uid),{seatNo:newSeat,seatPending:true,history:arrayUnion(`Admin assigned Seat ${newSeat} at ${getStamp()}`)});alert(`✅ Seat ${newSeat} assigned.`);window.openUser(uid);};
+  window.adminSetSeat=async(uid,oldSeat)=>{const input=document.getElementById('adm-seat-no'),newSeatStr=input.value.trim(),newSeat=parseInt(newSeatStr);if(!newSeatStr||isNaN(newSeat)||newSeat<=0||!Number.isInteger(newSeat))return alert("Please enter a valid positive integer seat number.");const fromStr=(oldSeat&&oldSeat!=='null')?`Seat ${oldSeat}`:'(none)';if(!confirm(`⚠️ Confirm Seat Assignment:\n\n${fromStr} → Seat ${newSeat}\n\nStudent will see a seat condition popup until they confirm.\nContinue?`))return;await updateDoc(doc(db,"users",uid),{seatNo:newSeat,seatPending:true,history:arrayUnion(`Admin assigned Seat No. ${newSeat} at ${getStamp()}`)});alert(`✅ Seat No. ${newSeat} assigned.`);window.openUser(uid);};
   window.alarmStep=(id,dir,max=Infinity)=>{const el=document.getElementById(id);let v=parseInt(el.value)+dir;if(v<0)v=max===Infinity?0:max;if(v>max)v=0;el.value=v;};
   window.setPM=(val)=>{const el=document.getElementById('ae-pm');if(!el)return;el.dataset.val=val;document.getElementById('ae-pm-plus').classList.toggle('active',val==='+');document.getElementById('ae-pm-minus').classList.toggle('active',val==='-');window.updateAlarmDiff&&window.updateAlarmDiff();};
-  window.updateAlarmDiff=()=>{const diffEl=document.getElementById('ae-diff');if(!diffEl)return;const d=parseInt(document.getElementById('ae-d')?.value)||0,h=parseInt(document.getElementById('ae-h')?.value)||0,m=parseInt(document.getElementById('ae-m')?.value)||0,s=parseInt(document.getElementById('ae-s')?.value)||0;const pm=document.getElementById('ae-pm')?.dataset.val||'+';const newSrv=Math.max(0,d+(pm==='+'?1:-1)*h/24+m/1440+s/86400),cur=window._aeCurrentSrv||0,diff=newSrv-cur;const sign=diff>=0?'+':'-',color=diff>=0?'var(--green)':'var(--red)';diffEl.style.background=diff>=0?'#e8f5e9':'#ffebee';diffEl.innerHTML=`<div style="font-size:10px;color:#888;margin-bottom:4px;">NEW TIME</div><div class="ae-diff-new">${window.formatTime(newSrv)}</div><div class="ae-diff-delta" style="color:${color};">${sign}${window.formatTime(Math.abs(diff))}</div>`;};
-  window.applyAlarmEdit=async(uid)=>{const d=parseInt(document.getElementById('ae-d').value)||0,h=parseInt(document.getElementById('ae-h').value)||0,m=parseInt(document.getElementById('ae-m').value)||0,s=parseInt(document.getElementById('ae-s').value)||0;const pm=document.getElementById('ae-pm').dataset.val||'+';const newDec=Math.max(0,d+(pm==='+'?1:-1)*h/24+m/1440+s/86400),oldSrv=window._aeCurrentSrv||0;if(!confirm(`Change survival from ${window.formatTime(oldSrv)} to ${window.formatTime(newDec)}?`))return;const uSnap=await getDoc(doc(db,"users",uid));if(!uSnap.exists())return;const u=uSnap.data();let newTotal;if(u.joinDateISO){const el=(new Date()-new Date(u.joinDateISO))/86400000;newTotal=newDec+el;}else newTotal=newDec;await updateDoc(doc(db,"users",uid),{totalPaidDays:newTotal,history:arrayUnion(`Admin set survival: ${window.formatTime(oldSrv)} → ${window.formatTime(newDec)} at ${getStamp()}`)});window._aeUserData=null;alert("✅ Updated.");location.reload();};
-  window.adminEditDays=async(uid)=>{const raw=document.getElementById('adm-manual-days').value.trim(),val=parseInt(raw);if(isNaN(val))return alert("Whole integer only.");const curSrv=window._aeCurrentSrv||0,newSrv=curSrv+val;if(!confirm(`Adjust by ${val>0?'+':''}${val} days?`))return;const uSnap=await getDoc(doc(db,"users",uid));if(!uSnap.exists())return;const u=uSnap.data();let newTotal;if(u.joinDateISO){const el=(new Date()-new Date(u.joinDateISO))/86400000;newTotal=newSrv+el;}else newTotal=newSrv;await updateDoc(doc(db,"users",uid),{totalPaidDays:newTotal,history:arrayUnion(`Admin adjusted ${val>0?'+':''}${val} days at ${getStamp()}`)});alert(`✅ Adjusted.`);window.openUser(uid);};
-  window.adminForceLeave=async(uid)=>{if(confirm("Force stop this member?")){const snap=await getDoc(doc(db,"users",uid));await updateDoc(doc(db,"users",uid),{totalPaidDays:window.getRealSurvival(snap.data()),joinDateISO:null,history:arrayUnion(`Force Exit by Admin at ${getStamp()}`)});document.getElementById('owner-folder-view').classList.remove('show');}};
+  window.updateAlarmDiff=()=>{const diffEl=document.getElementById('ae-diff');if(!diffEl)return;const d=parseInt(document.getElementById('ae-d')?.value)||0,h=parseInt(document.getElementById('ae-h')?.value)||0,m=parseInt(document.getElementById('ae-m')?.value)||0,s=parseInt(document.getElementById('ae-s')?.value)||0;const pm=document.getElementById('ae-pm')?.dataset.val||'+';const newSrv=Math.max(0,d+(pm==='+'?1:-1)*h/24+m/1440+s/86400),cur=window._aeCurrentSrv||0,diff=newSrv-cur;const sign=diff>=0?'+':'-',color=diff>=0?'var(--green)':'var(--red)';diffEl.style.background=diff>=0?'#e8f5e9':'#ffebee';diffEl.innerHTML=`<div style="font-size:10px;color:#888;font-weight:bold;text-transform:uppercase;margin-bottom:4px;">New Time to be Set</div><div class="ae-diff-new">${window.formatTime(newSrv)}</div><div class="ae-diff-delta" style="color:${color};">${sign}${window.formatTime(Math.abs(diff))} vs current</div>`;};
+  window.applyAlarmEdit=async(uid)=>{const d=parseInt(document.getElementById('ae-d').value)||0,h=parseInt(document.getElementById('ae-h').value)||0,m=parseInt(document.getElementById('ae-m').value)||0,s=parseInt(document.getElementById('ae-s').value)||0;const pm=document.getElementById('ae-pm').dataset.val||'+';const newDec=Math.max(0,d+(pm==='+'?1:-1)*h/24+m/1440+s/86400),oldSrv=window._aeCurrentSrv||0;const oldFmt=window.formatTime(oldSrv),newFmt=window.formatTime(newDec);if(!confirm(`⚠️ Confirm Survival Time Change:\n\nFROM: ${oldFmt}\nTO:   ${newFmt}\n\nThis overwrites remaining time. Continue?`))return;const uSnap=await getDoc(doc(db,"users",uid));if(!uSnap.exists())return;const u=uSnap.data();let newTotal;if(u.joinDateISO){const el=(new Date()-new Date(u.joinDateISO))/86400000;newTotal=newDec+el;}else newTotal=newDec;await updateDoc(doc(db,"users",uid),{totalPaidDays:newTotal,history:arrayUnion(`Admin set survival: ${oldFmt} → ${newFmt} at ${getStamp()}`)});window._aeUserData=null;alert("✅ Survival time updated. Reloading...");location.reload();};
+  window.adminEditDays=async(uid)=>{const raw=document.getElementById('adm-manual-days').value.trim(),val=parseInt(raw);if(isNaN(val)||!Number.isInteger(Number(raw))||String(val)!==raw.replace(/^\+/,''))return alert("Whole integer only (e.g. 30 or -5).");const curSrv=window._aeCurrentSrv||0,newSrv=curSrv+val;if(!confirm(`⚠️ Day Adjustment:\n\n${val>0?'+':''}${val} days\nFROM: ${window.formatTime(curSrv)}\nTO:   ${window.formatTime(newSrv)}\n\nContinue?`))return;const uSnap=await getDoc(doc(db,"users",uid));if(!uSnap.exists())return;const u=uSnap.data();let newTotal;if(u.joinDateISO){const el=(new Date()-new Date(u.joinDateISO))/86400000;newTotal=newSrv+el;}else newTotal=newSrv;await updateDoc(doc(db,"users",uid),{totalPaidDays:newTotal,history:arrayUnion(`Admin adjusted ${val>0?'+':''}${val} days → ${window.formatTime(newSrv)} at ${getStamp()}`)});alert(`✅ Adjusted by ${val>0?'+':''}${val} days.`);window.openUser(uid);};
+  window.adminForceLeave=async(uid)=>{if(confirm("Force stop this member's session?")){const snap=await getDoc(doc(db,"users",uid));await updateDoc(doc(db,"users",uid),{totalPaidDays:window.getRealSurvival(snap.data()),joinDateISO:null,history:arrayUnion(`Force Exit by Admin at ${getStamp()}`)});document.getElementById('owner-folder-view').classList.remove('show');}};
   window.clearSignal=async(sid)=>{await deleteDoc(doc(db,"signals",sid)).catch(()=>{});};
 
-  /* ══ DRIVE EMAILS ══ */
+  /* ═══════════════════════════════
+     DRIVE EMAILS
+  ═══════════════════════════════ */
   let _driveEmailsCache={online:[],deleted:[],pending:[]};
   window.loadDriveEmailsFromFirestore=()=>{
     onSnapshot(collection(db,"driveEmails"),snap=>{
@@ -1653,47 +1305,37 @@
     const onlineListEl=document.getElementById('online-emails-list');
     const deletedListEl=document.getElementById('deleted-emails-list');
     if(onlineListEl)onlineListEl.innerHTML=online.length?online.map((e,i)=>buildEmailRow(e,i,'online')).join(''):'<div class="dm-empty">No online storage emails added yet.</div>';
-    if(deletedListEl){
-      const deletedHTML=deleted.length?deleted.map((e,i)=>buildEmailRow(e,i,'deleted')).join(''):'<div class="dm-empty">No deleted-file emails added yet.</div>';
-      deletedListEl.innerHTML=deletedHTML;
-      // Render deleted drive browser buttons
-      const ddList=document.getElementById('deleted-drives-list');
-      if(ddList)ddList.innerHTML=deleted.filter(e=>e.status==='connected').map(e=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:white;border-radius:10px;margin-bottom:8px;border:1px solid #eee;">
-          <span style="font-size:20px;">🗑️</span>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${e.email}</div><div style="font-size:11px;color:#888;">${e.usedGB||0} GB used</div></div>
-          <button onclick="window.browseDeletedDrive('${e.email}')" style="background:var(--red);color:white;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;">Browse 🔐</button>
-        </div>`).join('')||'<div class="dm-empty">No connected deleted drives.</div>';
-    }
+    if(deletedListEl){deletedListEl.innerHTML=deleted.length?deleted.map((e,i)=>buildEmailRow(e,i,'deleted')).join(''):'<div class="dm-empty">No deleted-file emails added yet.</div>';const ddList=document.getElementById('deleted-drives-list');if(ddList)ddList.innerHTML=deleted.filter(e=>e.status==='connected').map(e=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:white;border-radius:10px;margin-bottom:8px;border:1px solid #eee;"><span style="font-size:20px;">🗑️</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">${e.email}</div><div style="font-size:11px;color:#888;">${e.usedGB||0} GB used</div></div><button onclick="window.browseDeletedDrive('${e.email}')" style="background:var(--red);color:white;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;">Browse 🔐</button></div>`).join('')||'<div class="dm-empty">No connected deleted drives.</div>';}
     const allowedListEl=document.getElementById('dm-allowed-list');
     const pendingListEl=document.getElementById('dm-pending-list');
     const allAllowed=[...online,...deleted];
-    if(allowedListEl)allowedListEl.innerHTML=allAllowed.length?allAllowed.map(e=>buildDMEmailRow(e)).join(''):'<div class="dm-empty">No drives connected yet.</div>';
+    if(allowedListEl)allowedListEl.innerHTML=allAllowed.length?allAllowed.map(e=>buildDMEmailRow(e)).join(''):'<div class="dm-empty">No drives connected yet. Tap "Add Drive" below.</div>';
     if(pendingListEl)pendingListEl.innerHTML=pending.length?pending.map(e=>buildDMPendingRow(e)).join(''):'<div class="dm-empty">No pending requests.</div>';
     const aepEl=document.getElementById('aep-existing-list');
-    if(aepEl){const all=[...online,...deleted,...pending];aepEl.innerHTML=all.length?all.map(e=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span style="font-size:18px;">${e.type==='deleted'?'🗑️':'📂'}</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.email}</div><div style="font-size:11px;color:#888;margin-top:2px;">${e.status==='pending'?'⏳ Pending':e.status==='connected'?'✅ Connected':e.type==='deleted'?'🗑️ Deleted':'📂 Online'} · ${e.usedGB||0} GB used</div></div><button onclick="removeEmailFromFirestore('${e.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:4px;">✕</button></div>`).join(''):'<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">No emails added yet.</div>';}
+    if(aepEl){const all=[...online,...deleted,...pending];aepEl.innerHTML=all.length?all.map(e=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span style="font-size:18px;">${e.type==='deleted'?'🗑️':'📂'}</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.email}</div><div style="font-size:11px;color:#888;margin-top:2px;">${e.status==='pending'?'⏳ Pending':e.status==='connected'?'✅ Connected':e.type==='deleted'?'🗑️ Deleted files':'📂 Online files'} · ${e.usedGB||0} GB used${e.userName?' · '+e.userName:''}</div></div><button onclick="removeEmailFromFirestore('${e.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:4px;">✕</button></div>`).join(''):'<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">No emails added yet.</div>';}
   };
 
-  const buildEmailRow=(e,i,currentTab)=>{const usedPct=Math.min(100,((e.usedGB||0)/10)*100);const barColor=usedPct>85?'var(--red)':usedPct>60?'var(--yellow)':'var(--primary)';const statusDot=e.status==='connected'?'<span style="color:var(--green);font-size:10px;font-weight:bold;margin-left:4px;">✅ Connected</span>':e.status==='pending'?'<span style="color:var(--yellow);font-size:10px;font-weight:bold;margin-left:4px;">⏳ Pending</span>':'';return`<div class="email-row" style="position:relative;"><div class="email-row-main"><span class="email-drag-handle" title="Drag to reorder">⠿</span><div class="email-avatar">📧</div><div class="email-info"><div class="email-addr">${e.email} ${statusDot}</div><div class="email-usage-bar-wrap"><div class="email-usage-bar" style="width:${usedPct}%;background:${barColor};"></div></div><div class="email-usage-text">${e.usedGB||0} GB / 10 GB · Priority #${i+1}</div></div><div class="email-actions"><button class="email-action-btn email-btn-tick" title="Set as active" onclick="setEmailActive('${e.id}')">✅</button><button class="email-action-btn email-btn-move" title="Move section" onclick="promptMoveEmail('${e.id}','${currentTab}','${e.email}',${e.usedGB||0})">⇄</button><button class="email-action-btn email-btn-cross" title="Remove" onclick="removeEmailFromFirestore('${e.id}')">✕</button></div></div></div>`;};
-  const buildDMEmailRow=(e)=>{const usedPct=Math.min(100,((e.usedGB||0)/10)*100);const barColor=usedPct>85?'var(--red)':usedPct>60?'var(--yellow)':'var(--primary)';const statusLabel=e.status==='connected'?'✅ Connected':'⏳ Pending acceptance';return`<div class="email-row"><div class="email-row-main"><div class="email-avatar">${e.type==='deleted'?'🗑️':'📂'}</div><div class="email-info"><div class="email-addr">${e.email}</div><div class="email-usage-bar-wrap"><div class="email-usage-bar" style="width:${usedPct}%;background:${barColor};"></div></div><div class="email-usage-text">${e.usedGB||0} GB / 10 GB · ${statusLabel}</div></div><div class="email-actions"><button class="email-action-btn email-btn-cross" title="Remove" onclick="removeEmailFromFirestore('${e.id}')">✕</button></div></div></div>`;};
-  const buildDMPendingRow=(e)=>`<div class="email-row"><div class="email-row-main"><div class="email-avatar">⏳</div><div class="email-info"><div class="email-addr">${e.email}</div><div class="email-usage-text">Awaiting user to click "Connect to Rakshapal Singh Servers"</div></div><div class="email-actions"><button class="email-action-btn email-btn-cross" title="Cancel" onclick="removeEmailFromFirestore('${e.id}')">✕</button></div></div></div>`;
+  const buildEmailRow=(e,i,currentTab)=>{const usedPct=Math.min(100,((e.usedGB||0)/10)*100);const barColor=usedPct>85?'var(--red)':usedPct>60?'var(--yellow)':'var(--primary)';const statusDot=e.status==='connected'?'<span style="color:var(--green);font-size:10px;font-weight:bold;margin-left:4px;">✅</span>':e.status==='pending'?'<span style="color:var(--yellow);font-size:10px;font-weight:bold;margin-left:4px;">⏳</span>':'';return`<div class="email-row"><div class="email-row-main"><span class="email-drag-handle" title="Drag to reorder">⠿</span><div class="email-avatar">📧</div><div class="email-info"><div class="email-addr">${e.email} ${statusDot}</div><div class="email-usage-bar-wrap"><div class="email-usage-bar" style="width:${usedPct}%;background:${barColor};"></div></div><div class="email-usage-text">${e.usedGB||0} GB / 10 GB · Priority #${i+1}${e.userName?' · '+e.userName:''}</div></div><div class="email-actions"><button class="email-action-btn email-btn-tick" title="Set as active storage target" onclick="setEmailActive('${e.id}')">✅</button><button class="email-action-btn email-btn-move" title="Move to other section" onclick="promptMoveEmail('${e.id}','${currentTab}','${e.email}',${e.usedGB||0})">⇄</button><button class="email-action-btn email-btn-cross" title="Remove email" onclick="removeEmailFromFirestore('${e.id}')">✕</button></div></div></div>`;};
+  const buildDMEmailRow=(e)=>{const usedPct=Math.min(100,((e.usedGB||0)/10)*100);const barColor=usedPct>85?'var(--red)':usedPct>60?'var(--yellow)':'var(--primary)';const statusLabel=e.status==='connected'?'✅ Connected':'⏳ Pending — user must click "Connect" button';return`<div class="email-row"><div class="email-row-main"><div class="email-avatar">${e.type==='deleted'?'🗑️':'📂'}</div><div class="email-info"><div class="email-addr">${e.email}${e.userName?` (${e.userName})`:''}</div><div class="email-usage-bar-wrap"><div class="email-usage-bar" style="width:${usedPct}%;background:${barColor};"></div></div><div class="email-usage-text">${e.usedGB||0} GB / 10 GB · ${statusLabel}</div></div><div class="email-actions"><button class="email-action-btn email-btn-cross" title="Remove" onclick="removeEmailFromFirestore('${e.id}')">✕</button></div></div></div>`;};
+  const buildDMPendingRow=(e)=>`<div class="email-row"><div class="email-row-main"><div class="email-avatar">⏳</div><div class="email-info"><div class="email-addr">${e.email}${e.userName?` (${e.userName})`:''}</div><div class="email-usage-text">Awaiting user to click "Connect to Rakshapal Singh Servers" on their Account page</div></div><div class="email-actions"><button class="email-action-btn email-btn-cross" title="Cancel request — button will disappear from user's account" onclick="cancelDriveRequest('${e.id}','${e.email}')">✕</button></div></div></div>`;
 
-  window.setEmailActive=async(id)=>{await updateDoc(doc(db,"driveEmails",id),{activeWrite:true});const snap=await getDocs(collection(db,"driveEmails"));snap.forEach(async d=>{if(d.id!==id)await updateDoc(doc(db,"driveEmails",d.id),{activeWrite:false}).catch(()=>{});});alert("✅ Active write target set.");};
-  window.removeEmailFromFirestore=async(id)=>{if(!confirm("Remove this email?"))return;await deleteDoc(doc(db,"driveEmails",id));};
+  window.setEmailActive=async(id)=>{await updateDoc(doc(db,"driveEmails",id),{activeWrite:true});const snap=await getDocs(collection(db,"driveEmails"));snap.forEach(async d=>{if(d.id!==id)await updateDoc(doc(db,"driveEmails",d.id),{activeWrite:false}).catch(()=>{});});alert("✅ This drive is now the active write target.");};
+  window.removeEmailFromFirestore=async(id)=>{if(!confirm("Remove this email from the system?\n\nNote: if it is pending, the user's 'Connect' button will disappear."))return;const snap=await getDoc(doc(db,"driveEmails",id));if(snap.exists()){const email=snap.data().email;const reqKey=email.replace(/[.@]/g,'_');await deleteDoc(doc(db,"driveConnectRequests",reqKey)).catch(()=>{});}await deleteDoc(doc(db,"driveEmails",id));};
+
+  // Cancel pending request: remove from driveConnectRequests → button disappears from user account instantly via onSnapshot
+  window.cancelDriveRequest=async(driveEmailDocId, email)=>{if(!confirm(`Cancel drive request for ${email}?\n\nThe "Connect" button will disappear from their account immediately.`))return;const reqKey=email.replace(/[.@]/g,'_');await deleteDoc(doc(db,"driveConnectRequests",reqKey)).catch(()=>{});await deleteDoc(doc(db,"driveEmails",driveEmailDocId)).catch(()=>{});};
 
   let _pendingMove=null;
-  window.promptMoveEmail=(id,fromTab,email,usedGB)=>{_pendingMove={id,fromTab};const toTab=fromTab==='online'?'deleted':'online';const timeEst=Math.max(1,Math.round(usedGB*2));document.getElementById('move-warn-body').innerHTML=`<p>Moving <strong>${email}</strong> from <strong>${fromTab==='online'?'Online Files':'Deleted Files'}</strong> to <strong>${toTab==='online'?'Online Files':'Deleted Files'}</strong>.</p><div style="background:#fff3cd;border-radius:8px;padding:10px 14px;margin:12px 0;border-left:4px solid var(--yellow);">📦 This email contains approximately <strong>${usedGB} GB</strong> of data.<br>⏱ Estimated move time: <strong>~${timeEst} minutes</strong></div><p style="font-size:12px;color:#888;">Files will be moved to another drive in the same section first. No data will be lost.</p>`;document.getElementById('move-warn-modal').classList.add('show');};
+  window.promptMoveEmail=(id,fromTab,email,usedGB)=>{_pendingMove={id,fromTab};const toTab=fromTab==='online'?'deleted':'online';const timeEst=Math.max(1,Math.round(usedGB*2));document.getElementById('move-warn-body').innerHTML=`<p>Moving <strong>${email}</strong> from <strong>${fromTab==='online'?'📂 Online Files':'🗑️ Deleted Files'}</strong> to <strong>${toTab==='online'?'📂 Online Files':'🗑️ Deleted Files'}</strong>.</p><div style="background:#fff3cd;border-radius:8px;padding:10px 14px;margin:12px 0;border-left:4px solid var(--yellow);">📦 This email contains approximately <strong>${usedGB} GB</strong> of data.<br>⏱ Estimated move time: <strong>~${timeEst} minutes</strong></div><p style="font-size:12px;color:#888;">Files will first move to another drive in the same section. No data will be lost.</p>`;document.getElementById('move-warn-modal').classList.add('show');};
   window.closeMoveWarn=()=>{document.getElementById('move-warn-modal').classList.remove('show');_pendingMove=null;};
-  window.confirmMoveEmail=async()=>{if(!_pendingMove)return;const{id,fromTab}=_pendingMove;const toTab=fromTab==='online'?'deleted':'online';const snap=await getDocs(collection(db,"driveEmails"));let newOrder=0;snap.forEach(d=>{if(d.data().type===toTab)newOrder=Math.max(newOrder,(d.data().order||0)+1);});await updateDoc(doc(db,"driveEmails",id),{type:toTab,order:newOrder});document.getElementById('move-warn-modal').classList.remove('show');_pendingMove=null;alert(`✅ Moved to ${toTab} section.`);};
+  window.confirmMoveEmail=async()=>{if(!_pendingMove)return;const{id,fromTab}=_pendingMove;const toTab=fromTab==='online'?'deleted':'online';const snap=await getDocs(collection(db,"driveEmails"));let newOrder=0;snap.forEach(d=>{if(d.data().type===toTab)newOrder=Math.max(newOrder,(d.data().order||0)+1);});await updateDoc(doc(db,"driveEmails",id),{type:toTab,order:newOrder});document.getElementById('move-warn-modal').classList.remove('show');_pendingMove=null;alert(`✅ Email moved to ${toTab} section. GitHub Workflow 2 can now migrate files.`);};
 
-  window.sendDriveRequest=async()=>{const email=document.getElementById('connect-email-input').value.trim().toLowerCase();const errEl=document.getElementById('connect-email-error');const iconEl=document.getElementById('email-valid-icon');if(!isValidEmail(email)){document.getElementById('connect-email-input').classList.add('error');errEl.innerText='⚠️ Please enter a valid email address.';errEl.classList.add('show');iconEl.innerText='❌';return;}const snap=await getDocs(collection(db,"driveEmails"));let alreadyExists=false;snap.forEach(d=>{if(d.data().email===email)alreadyExists=true;});if(alreadyExists){errEl.innerText='⚠️ This email is already in the system.';errEl.classList.add('show');iconEl.innerText='❌';return;}const snap2=await getDocs(collection(db,"driveEmails"));const newOrder=snap2.size;await setDoc(doc(collection(db,"driveEmails")),{email,type:'online',status:'pending',order:newOrder,usedGB:0,requestedAt:getStamp()});await setDoc(doc(db,"driveConnectRequests",email.replace(/[.@]/g,'_')),{email,requestedBy:'admin',requestedAt:getStamp(),status:'pending'});document.getElementById('connect-email-input').value='';iconEl.innerText='';errEl.classList.remove('show');alert(`✅ Connection request sent to ${email}.\nThey will see a "Connect to Rakshapal Singh Servers" button on their account.`);};
-
-  /* ══ GALLERY LOAD ══ */
+  /* ═══════════════════════════════
+     GALLERY
+  ═══════════════════════════════ */
   window.loadGallery=()=>{onSnapshot(collection(db,"galleryFiles"),snap=>{const items=[];snap.forEach(d=>items.push({id:d.id,...d.data()}));items.sort((a,b)=>(b.uploadedAt||0)-(a.uploadedAt||0));renderGalleryGrid(items);});};
   window.loadGallery();
-
-  const renderGalleryGrid=(items)=>{const grid=document.getElementById('gallery-grid');if(!items||!items.length){grid.innerHTML=`<div class="gallery-empty"><div class="gallery-empty-icon">🖼️</div><div>No media uploaded yet</div><div style="font-size:12px;margin-top:6px;color:#ccc;">Admin can add files using the + button</div></div>`;return;}grid.innerHTML=items.map(item=>{const isImg=item.mimeType?.startsWith('image/');const typeLabel=item.mimeType?.split('/')[1]?.toUpperCase()||'FILE';const thumb=isImg?`<img src="${item.thumbnailUrl||item.url||''}" alt="${item.name}" loading="lazy">`:`<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:40px;background:#f5f5f5;">${item.mimeType?.includes('pdf')?'📄':'🎬'}</div>`;return`<div class="gallery-item" onclick="openLightbox('${item.url||''}','${item.name||''}')"><div class="gallery-item-type">${typeLabel}</div>${thumb}<div class="gallery-item-name">${item.name||'Untitled'}</div></div>`;}).join('');};
-
+  const renderGalleryGrid=(items)=>{const grid=document.getElementById('gallery-grid');if(!items||!items.length){grid.innerHTML=`<div class="gallery-empty"><div class="gallery-empty-icon">🖼️</div><div>No media uploaded yet</div><div style="font-size:12px;margin-top:6px;color:#ccc;">Admin can add files using the + button</div></div>`;return;}grid.innerHTML=items.map(item=>{const isImg=item.mimeType?.startsWith('image/');const typeLabel=item.mimeType?.split('/')[1]?.toUpperCase()||'FILE';const thumb=isImg?`<img src="${item.thumbnailUrl||item.url||''}" alt="${item.name}" loading="lazy">`:`<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:40px;background:#f5f5f5;">${item.mimeType?.includes('pdf')?'📄':'🎬'}</div>`;return`<div class="gallery-item" onclick="openLightbox('${item.url||''}','${(item.name||'').replace(/'/g,"&#39;")}')"><div class="gallery-item-type">${typeLabel}</div>${thumb}<div class="gallery-item-name">${item.name||'Untitled'}</div></div>`;}).join('');};
   window.openLightbox=(url,name)=>{if(!url)return;document.getElementById('lightbox-img').src=url;document.getElementById('lightbox-caption').innerText=name;document.getElementById('gallery-lightbox').classList.add('show');};
   window.closeLightbox=()=>document.getElementById('gallery-lightbox').classList.remove('show');
   window.openGalleryUploadModal=()=>{document.getElementById('upload-selected-files').innerHTML='';document.getElementById('gallery-upload-modal').classList.add('show');};
@@ -1706,6 +1348,9 @@
   window.clearPendingUploads=()=>{pendingGalleryFiles=[];renderPendingFiles();};
   window.updateUserPhoto=(i)=>{if(i.files[0]){const r=new FileReader();r.onload=e=>updateDoc(doc(db,"users",auth.currentUser.uid),{photo:e.target.result});r.readAsDataURL(i.files[0]);}};
 
+  /* ═══════════════════════════════
+     SWITCH HELPERS
+  ═══════════════════════════════ */
   window.switchMain=(t)=>{document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(t).classList.add('active');document.querySelectorAll('#main-nav button').forEach(b=>b.classList.remove('active'));const tabMap={gallery:'tab-gal',account:'tab-acc',manage:'tab-man'};const tabEl=document.getElementById(tabMap[t]);if(tabEl)tabEl.classList.add('active');const fab=document.getElementById('gallery-upload-fab');if(fab)fab.style.display=(t==='gallery'&&fab.classList.contains('show'))?'flex':'none';};
   window.switchAdmin=(t)=>{['otp','user','wifi'].forEach(k=>{document.getElementById('am-pane-'+k).classList.toggle('hidden',k!==t);document.getElementById('am-'+k+'-btn').classList.toggle('active',k===t);});};
   window.switchDataManage=(t)=>{['wifi','pay','rates'].forEach(k=>{document.getElementById('dm-pane-'+k).classList.toggle('hidden',k!==t);document.getElementById('dm-'+k+'-btn').classList.toggle('active',k===t);});};
@@ -1718,10 +1363,8 @@
   refreshPriceLabels();
 </script>
 
-<!-- ══ PLAIN JS: hamburger, three-dot, pages, email validation ══ -->
+<!-- ══ PLAIN JS: hamburger, three-dot, pages ══ -->
 <script>
-  function isValidEmail(v){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)&&v.includes('.');}
-  window.validateConnectEmail=(input)=>{const val=input.value.trim();const errEl=document.getElementById('connect-email-error');const iconEl=document.getElementById('email-valid-icon');input.classList.remove('error','valid');if(!val){iconEl.innerText='';errEl.classList.remove('show');return;}if(isValidEmail(val)){input.classList.add('valid');iconEl.innerText='✅';errEl.classList.remove('show');}else{input.classList.add('error');iconEl.innerText='❌';errEl.innerText='⚠️ Enter a valid email (e.g. name@gmail.com)';errEl.classList.add('show');}};
   function toggleHamburger(){document.getElementById('hamburger-drawer').classList.toggle('open');document.getElementById('hamburger-overlay').classList.toggle('open');closeThreedot();}
   function closeHamburger(){document.getElementById('hamburger-drawer').classList.remove('open');document.getElementById('hamburger-overlay').classList.remove('open');}
   function toggleThreedot(){document.getElementById('threedot-menu').classList.toggle('open');closeHamburger();}
